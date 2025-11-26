@@ -130,7 +130,7 @@ class _ExportScreenState extends State<ExportScreen> {
             Text(
               'Export your transaction data as a CSV file.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -212,7 +212,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
             /// INFO CARD
             Card(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(

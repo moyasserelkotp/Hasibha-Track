@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import '../../domain/entities/analytics_data.dart';
 
 class AnalyticsDataModel extends AnalyticsData {

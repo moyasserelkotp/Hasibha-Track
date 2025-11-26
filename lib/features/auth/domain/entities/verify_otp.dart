@@ -5,7 +5,7 @@ class VerifyOtp extends Equatable {
   final String? message;
   final User? user;
   
-  VerifyOtp({
+  const VerifyOtp({
     required this.message,
     required this.user,
   });
@@ -21,7 +21,7 @@ class User extends Equatable {
   final String? email;
   final bool? isEmailVerified;
   
-  User({
+  const User({
     required this.email,
     required this.isEmailVerified,
   });

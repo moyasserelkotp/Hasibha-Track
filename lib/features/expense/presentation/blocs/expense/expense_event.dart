@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/expense.dart';
+import '../../../domain/entities/expense.dart';
 
 abstract class ExpenseEvent extends Equatable {
   const ExpenseEvent();

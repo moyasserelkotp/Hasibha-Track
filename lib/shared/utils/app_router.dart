@@ -6,8 +6,6 @@ import 'package:hasibha/features/auth/presentation/pages/reset_password_send_ema
 import 'package:hasibha/features/auth/presentation/pages/reset_password_verify_otp_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_finish_screen.dart';
 import 'package:hasibha/features/home/presentation/pages/home_screen_dashboard.dart';
-import 'package:hasibha/features/home/presentation/pages/add_transaction_screen.dart';
-import 'package:hasibha/features/home/presentation/pages/analytics_screen.dart';
 import 'package:hasibha/shared/pages/export_screen.dart';
 import 'package:hasibha/shared/pages/settings_screen.dart';
 import 'package:hasibha/features/onboarding/presentation/pages/onboarding_screen.dart';
@@ -16,6 +14,13 @@ import 'package:hasibha/shared/utils/routes.dart';
 
 import 'package:hasibha/features/auth/presentation/pages/change_password_screen.dart';
 import '../../features/auth/presentation/pages/login_screen.dart';
+import '../../features/debt/presentation/pages/create_debt_screen.dart';
+import '../../features/debt/presentation/pages/debt_detail_screen.dart';
+import '../../features/debt/domain/entities/debt.dart';
+import '../../features/ai_assistant/presentation/pages/ai_chat_screen.dart';
+import '../../features/ai_assistant/presentation/pages/insights_screen.dart';
+import '../../features/offers/presentation/pages/offers_screen.dart';
+import '../../features/expense/presentation/pages/add_expense_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -66,17 +71,34 @@ class AppRouter {
            return ResetPasswordFinishScreen(resetToken: resetToken);
         },
       ),
-      // New routes
       GoRoute(
         path: AppRoutes.addTransaction,
         builder: (context, state) {
-          final type = state.extra as String?; // 'expense' or 'income'
-          return AddTransactionScreen(type: type);
+          String? initialImagePath;
+          
+          if (state.extra is Map) {
+            final map = state.extra as Map;
+            initialImagePath = map['initialImagePath'] as String?;
+          }
+          
+          return AddExpenseScreen(
+            initialImagePath: initialImagePath,
+          );
         },
       ),
       GoRoute(
-        path: AppRoutes.analytics,
-        builder: (context, state) => const AnalyticsScreen(),
+        path: AppRoutes.createDebt,
+        builder: (context, state) {
+          final debt = state.extra as Debt?;
+          return CreateDebtScreen(debt: debt);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.debtDetail,
+        builder: (context, state) {
+          final debt = state.extra as Debt;
+          return DebtDetailScreen(debt: debt);
+        },
       ),
       GoRoute(
         path: AppRoutes.export,
@@ -89,6 +111,18 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.changePassword,
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.aiChat,
+        builder: (context, state) => const AiChatScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.insights,
+        builder: (context, state) => const InsightsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.offers,
+        builder: (context, state) => const OffersScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

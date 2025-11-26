@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_budgets_usecase.dart';
-import '../../domain/usecases/create_budget_usecase.dart';
-import '../../domain/usecases/update_budget_usecase.dart';
-import '../../domain/usecases/delete_budget_usecase.dart';
-import '../../domain/usecases/check_budget_limits_usecase.dart';
+import '../../../domain/usecases/get_budgets_usecase.dart';
+import '../../../domain/usecases/create_budget_usecase.dart';
+import '../../../domain/usecases/update_budget_usecase.dart';
+import '../../../domain/usecases/delete_budget_usecase.dart';
+import '../../../domain/usecases/check_budget_limits_usecase.dart';
+import '../../../domain/entities/budget.dart';
 import 'budget_event.dart';
 import 'budget_state.dart';
 

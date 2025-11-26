@@ -2,25 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/app_strings.dart';
 import '../../../../shared/utils/feature_flags.dart';
 import '../../../../shared/widgets/animations/animations.dart';
-
+// Staggered animations are part of animations.dart
+import '../../../../shared/widgets/empty/empty_state.dart';
+import '../../../../shared/widgets/error/error_view.dart';
+import '../../../../shared/widgets/navigation/app_drawer.dart';
+import '../../../../shared/widgets/snackbars/app_snackbar.dart';
 import '../../../../di/injection.dart' as di;
+import '../../../../shared/utils/routes.dart';
+
 import '../../../auth/presentation/blocs/auth/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth/auth_event.dart';
 import '../../../auth/presentation/blocs/auth/auth_state.dart';
+import '../../../expense/presentation/blocs/expense/expense_bloc.dart';
+import '../../../expense/presentation/widgets/voice_expense_dialog.dart';
 import '../cubit/home_cubit.dart';
-import '../../../../shared/utils/routes.dart';
 import '../cubit/home_state.dart';
 import '../widgets/financial_summary_card.dart';
 import '../widgets/quick_action_button.dart';
 import '../widgets/transaction_list_item.dart';
-import '../../../../shared/widgets/snackbars/app_snackbar.dart';
-import '../../../../shared/widgets/empty/empty_state.dart';
-import '../../../../shared/widgets/error/error_view.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -39,6 +44,7 @@ class HomeScreen extends StatelessWidget {
             }
           },
           child: Scaffold(
+        drawer: const AppDrawer(),
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -50,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                 AppStrings.welcomeBack,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -248,8 +254,14 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 12.w),
-                          // Empty space for symmetry
-                          Expanded(child: SizedBox()),
+                          Expanded(
+                            child: QuickActionButton(
+                              icon: Icons.account_balance_wallet,
+                              label: 'Debt Tracking',
+                              color: AppColors.warning,
+                              onTap: () => context.push(AppRoutes.debts),
+                            ),
+                          ),
                         ],
                       ),
                       SizedBox(height: 24.h),
@@ -369,5 +381,50 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showVoiceDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => BlocProvider(
+        create: (_) => di.sl<ExpenseBloc>(),
+        child: const VoiceExpenseDialog(),
+      ),
+    );
+    // Refresh dashboard if needed (VoiceExpenseDialog handles saving via BLoC)
+    if (context.mounted) {
+      context.read<HomeCubit>().refreshDashboard();
+    }
+  }
+
+  Future<void> _scanReceipt(BuildContext context) async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.camera);
+      
+      if (image != null && context.mounted) {
+        // Navigate to AddExpenseScreen with the image path
+        // We need to pass it as extra or query parameter
+        // Since we modified AddExpenseScreen to accept initialImagePath, 
+        // we need to update the route definition or pass it via extra
+        
+        // Assuming AppRoutes.addTransaction maps to AddExpenseScreen
+        // We can pass the image path in the extra object
+        await context.push(
+          AppRoutes.addTransaction, 
+          extra: {'initialImagePath': image.path},
+        );
+        
+        if (context.mounted) {
+          context.read<HomeCubit>().refreshDashboard();
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error scanning receipt: $e')),
+        );
+      }
+    }
   }
 }

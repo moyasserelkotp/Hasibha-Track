@@ -1,7 +1,7 @@
 import '../../../domain/entities/login.dart';
 
 class LoginModel extends Login {
-  LoginModel(
+  const LoginModel(
       {required super.refresh,
       required super.access,
       required super.userInfo});
@@ -26,7 +26,7 @@ class LoginModel extends Login {
 }
 
 class UserInfoModel extends UserInfo {
-  UserInfoModel(
+  const UserInfoModel(
       {required super.id,
       required super.username,
       required super.email,
@@ -75,7 +75,7 @@ class UserInfoModel extends UserInfo {
 }
 
 class ProfileModel extends Profile {
-  ProfileModel(
+  const ProfileModel(
       {required super.bio,
       required super.isPrivate,
       required super.verified,

@@ -8,12 +8,12 @@ class FadeInAnimation extends StatefulWidget {
   final Curve curve;
 
   const FadeInAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.delay = Duration.zero,
     this.curve = Curves.easeIn,
-  }) : super(key: key);
+  });
 
   @override
   State<FadeInAnimation> createState() => _FadeInAnimationState();
@@ -66,13 +66,13 @@ class SlideInAnimation extends StatefulWidget {
   final Offset begin;
 
   const SlideInAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.delay = Duration.zero,
     this.curve = Curves.easeOut,
     this.begin = const Offset(0, 0.5),
-  }) : super(key: key);
+  });
 
   @override
   State<SlideInAnimation> createState() => _SlideInAnimationState();
@@ -126,13 +126,13 @@ class ScaleInAnimation extends StatefulWidget {
   final double begin;
 
   const ScaleInAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.delay = Duration.zero,
     this.curve = Curves.elasticOut,
     this.begin = 0.0,
-  }) : super(key: key);
+  });
 
   @override
   State<ScaleInAnimation> createState() => _ScaleInAnimationState();
@@ -185,13 +185,13 @@ class FadeSlideAnimation extends StatefulWidget {
   final Offset slideBegin;
 
   const FadeSlideAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.delay = Duration.zero,
     this.curve = Curves.easeOut,
     this.slideBegin = const Offset(0, 0.3),
-  }) : super(key: key);
+  });
 
   @override
   State<FadeSlideAnimation> createState() => _FadeSlideAnimationState();
@@ -251,12 +251,12 @@ class StaggeredListAnimation extends StatelessWidget {
   final Duration duration;
 
   const StaggeredListAnimation({
-    Key? key,
+    super.key,
     required this.index,
     required this.child,
     this.delay = const Duration(milliseconds: 100),
     this.duration = const Duration(milliseconds: 400),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -278,12 +278,12 @@ class PulseAnimation extends StatefulWidget {
   final double maxScale;
 
   const PulseAnimation({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 1000),
     this.minScale = 0.95,
     this.maxScale = 1.05,
-  }) : super(key: key);
+  });
 
   @override
   State<PulseAnimation> createState() => _PulseAnimationState();
@@ -334,12 +334,12 @@ class ShimmerLoading extends StatefulWidget {
   final Color? highlightColor;
 
   const ShimmerLoading({
-    Key? key,
+    super.key,
     required this.child,
     this.duration = const Duration(milliseconds: 1500),
     this.baseColor,
     this.highlightColor,
-  }) : super(key: key);
+  });
 
   @override
   State<ShimmerLoading> createState() => _ShimmerLoadingState();
@@ -407,11 +407,11 @@ class RippleEffect extends StatefulWidget {
   final Color? rippleColor;
 
   const RippleEffect({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.rippleColor,
-  }) : super(key: key);
+  });
 
   @override
   State<RippleEffect> createState() => _RippleEffectState();

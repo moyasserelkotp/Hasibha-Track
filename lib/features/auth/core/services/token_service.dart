@@ -1,21 +1,3 @@
-import '../../data/datasources/local/auth_local_datasource.dart';
-import '../../data/models/auth_tokens_model.dart';
-import '../../domain/entities/auth_tokens.dart';
-
-/// Service for centralized token management
-class TokenService {
-  final AuthLocalDataSource localDataSource;
-
-  TokenService({required this.localDataSource});
-
-  /// Save authentication tokens
-  Future<void> saveTokens(AuthTokens tokens) async {
-    // Convert entity to model for storage
-    final tokensModel = AuthTokensModel(
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    );
-    await localDataSource.saveTokens(tokensModel);
   }
 
   /// Get access token
@@ -44,13 +26,55 @@ class TokenService {
     await localDataSource.clearTokens();
   }
 
-  /// Check if access token is expired (basic check)
-  /// Note: For proper JWT validation, use a JWT package
+  /// Check if access token is expired
+  /// Uses JWT decoding to validate actual token expiry
   bool isTokenExpired(String token) {
+    if (token.isEmpty) return true;
+    
     try {
-      // Basic check - you may want to use a JWT package for proper validation
-      if (token.isEmpty) return true;
-      return false;
+      // Note: dart_jsonwebtoken decode doesn't validate signature
+      // For production, consider verifying the signature if you have the secret
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+      
+      // Decode payload (middle part)
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final Map<String, dynamic> payloadMap = jsonDecode(decoded);
+      
+      if (!payloadMap.containsKey('exp')) return false; // No expiry = valid
+      
+      final exp = payloadMap['exp'] as int;
+      final expiryDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      
+      return DateTime.now().isAfter(expiryDate);
+    } catch (e) {
+      // If we can't decode, assume expired for safety
+      return true;
+    }
+  }
+  
+  /// Check if token will expire soon (within threshold)
+  /// Useful for proactive token refresh
+  bool isTokenExpiringSoon(String token, {Duration threshold = const Duration(minutes: 5)}) {
+    if (token.isEmpty) return true;
+    
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+      
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+      final Map<String, dynamic> payloadMap = jsonDecode(decoded);
+      
+      if (!payloadMap.containsKey('exp')) return false;
+      
+      final exp = payloadMap['exp'] as int;
+      final expiryDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      
+      return DateTime.now().isAfter(expiryDate.subtract(threshold));
     } catch (e) {
       return true;
     }

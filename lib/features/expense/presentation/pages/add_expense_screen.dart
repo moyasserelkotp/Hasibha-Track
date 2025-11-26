@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/const/colors.dart';
@@ -20,8 +19,13 @@ import '../widgets/multi_format_entry_buttons.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final String? expenseId;
+  final String? initialImagePath;
 
-  const AddExpenseScreen({super.key, this.expenseId});
+  const AddExpenseScreen({
+    super.key, 
+    this.expenseId,
+    this.initialImagePath,
+  });
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -36,9 +40,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   
   String? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
-  List<String> _tags = [];
+  final List<String> _tags = [];
   bool _isRecurring = false;
   String? _receiptImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialImagePath != null) {
+      // Defer the event to ensure context is ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ExpenseBloc>().add(
+          ImportExpenseFromImage(widget.initialImagePath!),
+        );
+      });
+    }
+  }
 
   @override
   void dispose() {

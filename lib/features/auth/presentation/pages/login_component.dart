@@ -59,7 +59,7 @@ class _LoginComponentState extends State<LoginComponent>
           end: Alignment.bottomRight,
           colors: [
             AppColors.background,
-            AppColors.primaryLight.withOpacity(0.05),
+            AppColors.primaryLight.withValues(alpha: 0.05),
           ],
         ),
       ),

@@ -1,5 +1,4 @@
 import '../../domain/entities/user.dart';
-import '../../domain/entities/user_profile.dart';
 import 'user_profile_model.dart';
 
 /// User model - handles API serialization

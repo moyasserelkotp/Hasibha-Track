@@ -18,7 +18,7 @@ class AuthDivider extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  AppColors.border.withOpacity(0.5),
+                  AppColors.border.withValues(alpha: 0.5),
                 ],
               ),
             ),
@@ -42,7 +42,7 @@ class AuthDivider extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.border.withOpacity(0.5),
+                  AppColors.border.withValues(alpha: 0.5),
                   Colors.transparent,
                 ],
               ),

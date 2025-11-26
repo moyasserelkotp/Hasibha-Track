@@ -77,7 +77,7 @@ class InlineError extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppDimensions.paddingMd),
       decoration: BoxDecoration(
-        color: AppColors.errorLight.withOpacity(0.1),
+        color: AppColors.errorLight.withValues(alpha: 0.1),
         border: Border.all(color: AppColors.error),
         borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
       ),

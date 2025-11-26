@@ -14,7 +14,7 @@ class AppCard extends StatelessWidget {
   final Border? border;
 
   const AppCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
@@ -23,7 +23,7 @@ class AppCard extends StatelessWidget {
     this.borderRadius,
     this.onTap,
     this.border,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class TransactionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const TransactionCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.category,
     required this.amount,
@@ -72,7 +72,7 @@ class TransactionCard extends StatelessWidget {
     required this.isIncome,
     this.icon,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class TransactionCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: (isIncome ? AppColors.success : AppColors.error)
-                  .withOpacity(0.1),
+                  .withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -168,13 +168,13 @@ class BudgetCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const BudgetCard({
-    Key? key,
+    super.key,
     required this.category,
     required this.spent,
     required this.limit,
     this.icon,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -248,14 +248,14 @@ class GoalCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const GoalCard({
-    Key? key,
+    super.key,
     required this.goalName,
     required this.currentAmount,
     required this.targetAmount,
     this.targetDate,
     this.icon,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +272,7 @@ class GoalCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: AppColors.primary, size: 24),

@@ -38,13 +38,13 @@ class PrimaryButton extends StatelessWidget {
           gradient: LinearGradient(
             colors: onPressed == null 
                 ? [AppColors.grey, AppColors.greyDark]
-                : [primaryColor, primaryColor.withOpacity(0.8)], // Use theme primary
+                : [primaryColor, primaryColor.withValues(alpha: 0.8)], // Use theme primary
           ),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           boxShadow: onPressed != null
               ? [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.3),
+                    color: primaryColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: Offset(0, 4),
                   ),

@@ -126,7 +126,7 @@ class _RegisterContentState extends State<_RegisterContent>
                 end: Alignment.bottomRight,
                 colors: [
                   AppColors.background,
-                  AppColors.primaryLight.withOpacity(0.05),
+                  AppColors.primaryLight.withValues(alpha: 0.05),
                 ],
               ),
             ),

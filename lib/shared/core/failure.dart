@@ -38,10 +38,9 @@ class ServerFailure extends Failure {
 /// Network failure (connectivity issues)
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    String message = 'No internet connection',
+    super.message = 'No internet connection',
     super.details,
   }) : super(
-          message: message,
           code: -1,
         );
 }
@@ -49,10 +48,9 @@ class NetworkFailure extends Failure {
 /// Cache failure (local storage errors)
 class CacheFailure extends Failure {
   const CacheFailure({
-    String message = 'Failed to access local storage',
+    super.message = 'Failed to access local storage',
     super.details,
   }) : super(
-          message: message,
           code: -2,
         );
 }
@@ -62,10 +60,9 @@ class ValidationFailure extends Failure {
   final Map<String, String> fieldErrors;
 
   const ValidationFailure({
-    String message = 'Validation failed',
+    super.message = 'Validation failed',
     required this.fieldErrors,
   }) : super(
-          message: message,
           code: -3,
           details: const {},
         );
@@ -83,9 +80,8 @@ class ValidationFailure extends Failure {
 /// Unauthorized failure (authentication required)
 class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure({
-    String message = 'Authentication required',
+    super.message = 'Authentication required',
   }) : super(
-          message: message,
           code: 401,
         );
 }
@@ -93,9 +89,8 @@ class UnauthorizedFailure extends Failure {
 /// Forbidden failure (insufficient permissions)
 class ForbiddenFailure extends Failure {
   const ForbiddenFailure({
-    String message = 'Insufficient permissions',
+    super.message = 'Insufficient permissions',
   }) : super(
-          message: message,
           code: 403,
         );
 }
@@ -105,10 +100,9 @@ class NotFoundFailure extends Failure {
   final String? resource;
 
   const NotFoundFailure({
-    String message = 'Resource not found',
+    super.message = 'Resource not found',
     this.resource,
   }) : super(
-          message: message,
           code: 404,
         );
 
@@ -119,9 +113,8 @@ class NotFoundFailure extends Failure {
 /// Timeout failure (request timeout)
 class TimeoutFailure extends Failure {
   const TimeoutFailure({
-    String message = 'Request timed out',
+    super.message = 'Request timed out',
   }) : super(
-          message: message,
           code: -4,
         );
 }
@@ -129,10 +122,9 @@ class TimeoutFailure extends Failure {
 /// Unknown failure (unexpected errors)
 class UnknownFailure extends Failure {
   const UnknownFailure({
-    String message = 'An unexpected error occurred',
+    super.message = 'An unexpected error occurred',
     super.details,
   }) : super(
-          message: message,
           code: -99,
         );
 }

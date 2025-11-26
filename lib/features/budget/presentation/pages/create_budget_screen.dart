@@ -350,7 +350,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
         decoration: BoxDecoration(
           border: Border.all(color: onTap == null ? AppColors.grey : AppColors.border),
           borderRadius: BorderRadius.circular(12.r),
-          color: onTap == null ? AppColors.grey.withOpacity(0.1) : null,
+          color: onTap == null ? AppColors.grey.withValues(alpha: 0.1) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

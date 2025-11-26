@@ -136,7 +136,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.black.withOpacity(0.15),
+                                      color: AppColors.black.withValues(alpha: 0.15),
                                       blurRadius: 18,
                                       offset: const Offset(0, 8),
                                     ),
@@ -179,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen>
                             AppStrings.appTagline,
                             style: TextStyle(
                               fontSize: 15,
-                              color: AppColors.white.withOpacity(0.7),
+                              color: AppColors.white.withValues(alpha: 0.7),
                               letterSpacing: 0.5,
                             ),
                           ),

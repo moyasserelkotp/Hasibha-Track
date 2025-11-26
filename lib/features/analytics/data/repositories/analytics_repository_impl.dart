@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/spending_analytics.dart';
 import '../../domain/repositories/analytics_repository.dart';
-import '../../../shared/core/failure.dart';
-import '../../../shared/core/exceptions.dart';
+import '../../../../shared/core/failure.dart';
+import '../../../../shared/core/error/exceptions.dart';
 import '../datasources/remote/analytics_remote_datasource.dart';
 
 class AnalyticsRepositoryImpl implements AnalyticsRepository {

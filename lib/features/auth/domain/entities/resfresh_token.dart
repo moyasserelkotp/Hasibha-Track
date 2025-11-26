@@ -6,7 +6,7 @@ class RefreshToken extends Equatable {
   final String? refresh;
 
 
-  RefreshToken({
+  const RefreshToken({
     required this.access,
     required this.refresh,
   });

@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
-import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/app_strings.dart';
 import '../../../../shared/style/app_styles.dart';
 import '../blocs/password/password_bloc.dart';
@@ -98,7 +97,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                     'Enter your current password and choose a new password.',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   

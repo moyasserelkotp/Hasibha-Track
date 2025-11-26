@@ -161,7 +161,7 @@ class _ExpenseListContent extends StatelessWidget {
   Widget _buildActiveFilters(BuildContext context, ExpenseLoaded state) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      color: AppColors.primary.withOpacity(0.1),
+      color: AppColors.primary.withValues(alpha: 0.1),
       child: Row(
         children: [
           Icon(Icons.filter_list, size: 20.sp, color: AppColors.primary),

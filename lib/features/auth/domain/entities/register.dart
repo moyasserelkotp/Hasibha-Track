@@ -8,7 +8,7 @@ class Register extends Equatable {
   final String? message;
   final Data? data;
   
-  Register({
+  const Register({
     required this.status,
     required this.message,
     required this.data,
@@ -36,7 +36,7 @@ class Data extends Equatable {
   final Tokens? tokens;
   
   
-  Data({
+  const Data({
     required this.id,
     required this.username,
     required this.email,
@@ -62,7 +62,7 @@ class Tokens extends Equatable {
   final String? refresh;
   final String? access;
   
-  Tokens({
+  const Tokens({
     required this.refresh,
     required this.access,
   });

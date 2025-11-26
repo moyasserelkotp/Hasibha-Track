@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_expenses_usecase.dart';
-import '../../domain/usecases/create_expense_usecase.dart';
-import '../../domain/usecases/update_expense_usecase.dart';
-import '../../domain/usecases/delete_expense_usecase.dart';
-import '../../domain/usecases/import_expense_from_image_usecase.dart';
+import '../../../domain/usecases/get_expenses_usecase.dart';
+import '../../../domain/usecases/create_expense_usecase.dart';
+import '../../../domain/usecases/update_expense_usecase.dart';
+import '../../../domain/usecases/delete_expense_usecase.dart';
+import '../../../domain/usecases/import_expense_from_image_usecase.dart';
+import '../../../../shared/services/budget_expense_sync_service.dart';
 import 'expense_event.dart';
 import 'expense_state.dart';
 
@@ -13,6 +14,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   final UpdateExpenseUseCase updateExpenseUseCase;
   final DeleteExpenseUseCase deleteExpenseUseCase;
   final ImportExpenseFromImageUseCase importExpenseFromImageUseCase;
+  final BudgetExpenseSyncService budgetSyncService;
 
   ExpenseBloc({
     required this.getExpensesUseCase,
@@ -20,6 +22,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     required this.updateExpenseUseCase,
     required this.deleteExpenseUseCase,
     required this.importExpenseFromImageUseCase,
+    required this.budgetSyncService,
   }) : super(const ExpenseInitial()) {
     on<LoadExpenses>(_onLoadExpenses);
     on<RefreshExpenses>(_onRefreshExpenses);
@@ -99,6 +102,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (expense) async {
+        // Sync with budget
+        await budgetSyncService.onExpenseCreated(expense);
+        
         // Reload expenses to show the new one
         add(const RefreshExpenses());
       },
@@ -116,6 +122,10 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (expense) async {
+        // Sync with budget (pass old expense for comparison if needed)
+        // For now, just sync the new category
+        await budgetSyncService.onExpenseCreated(expense);
+        
         // Reload expenses to show the update
         add(const RefreshExpenses());
       },
@@ -133,6 +143,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (_) async {
+        // Note: We can't sync budget here without knowing the deleted expense's category
+        // The backend should handle this
+        
         // Reload expenses after deletion
         add(const RefreshExpenses());
       },

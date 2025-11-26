@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/expense.dart';
+import '../../../domain/entities/expense.dart';
 
 abstract class ExpenseState extends Equatable {
   const ExpenseState();

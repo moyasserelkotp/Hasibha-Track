@@ -5,7 +5,7 @@ class Login extends Equatable {
   final String? access;
   final UserInfo? userInfo;
 
-  Login({
+  const Login({
     required this.refresh,
     required this.access,
     required this.userInfo,
@@ -31,7 +31,7 @@ class UserInfo extends Equatable {
   final int? following;
   final int? totalLikes;
 
-  UserInfo({
+  const UserInfo({
     required this.id,
     required this.username,
     required this.email,
@@ -67,7 +67,7 @@ class Profile extends Equatable {
   final bool? isBusiness;
   final bool? isSuspended;
 
-  Profile({
+  const Profile({
     required this.bio,
     required this.isPrivate,
     required this.verified,

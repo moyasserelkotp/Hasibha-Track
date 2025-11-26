@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import '../../../../shared/core/failure.dart';
 import '../entities/auth_result.dart';
 import '../entities/auth_tokens.dart';
-import '../entities/user.dart';
 
 /// Authentication repository interface
 /// Defines all authentication-related operations

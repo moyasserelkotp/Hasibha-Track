@@ -84,7 +84,7 @@ class TrendBarChart extends StatelessWidget {
             horizontalInterval: 1000,
             getDrawingHorizontalLine: (value) {
               return FlLine(
-                color: isDark ? AppColors.borderDark.withOpacity(0.3) : AppColors.border.withOpacity(0.3),
+                color: isDark ? AppColors.borderDark.withValues(alpha: 0.3) : AppColors.border.withValues(alpha: 0.3),
                 strokeWidth: 1,
               );
             },

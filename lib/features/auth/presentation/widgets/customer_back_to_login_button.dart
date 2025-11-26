@@ -8,7 +8,7 @@ import '../../../../shared/style/app_styles.dart';
 
 
 class BackToLogin extends StatelessWidget {
-  const BackToLogin({Key? key}) : super(key: key);
+  const BackToLogin({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -10,12 +10,12 @@ class LoadingOverlay extends StatelessWidget {
   final Color? backgroundColor;
 
   const LoadingOverlay({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
     this.message,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class LoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: backgroundColor ?? AppColors.black.withOpacity(0.54),
+            color: backgroundColor ?? AppColors.black.withValues(alpha: 0.54),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -54,10 +54,10 @@ class SimpleLoadingOverlay extends StatelessWidget {
   final Widget child;
 
   const SimpleLoadingOverlay({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class SimpleLoadingOverlay extends StatelessWidget {
         child,
         if (isLoading)
           Container(
-            color: AppColors.black.withOpacity(0.26),
+            color: AppColors.black.withValues(alpha: 0.26),
             child: const Center(
               child: CircularProgressIndicator(),
             ),

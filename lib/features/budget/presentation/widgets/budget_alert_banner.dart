@@ -24,8 +24,8 @@ class BudgetAlertBanner extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: isExceeded
-            ? Colors.red.withOpacity(0.1)
-            : Colors.orange.withOpacity(0.1),
+            ? Colors.red.withValues(alpha: 0.1)
+            : Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: isExceeded ? Colors.red : Colors.orange,

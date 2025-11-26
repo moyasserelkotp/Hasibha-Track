@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../../domain/entities/spending_analytics.dart';
-import '../../../../shared/core/api/api_constants.dart';
-import '../../../../shared/core/exceptions.dart';
+import '../../../../../shared/core/api/api_constants.dart';
+import '../../../../../shared/core/error/exceptions.dart';
 import '../../models/analytics_models.dart';
 
 abstract class AnalyticsRemoteDataSource {

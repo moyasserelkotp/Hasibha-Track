@@ -1,11 +1,10 @@
 import 'package:dartz/dartz.dart';
 import '../../domain/entities/budget.dart';
 import '../../domain/repositories/budget_repository.dart';
-import '../../../shared/core/failure.dart';
-import '../../../shared/core/exceptions.dart';
+import '../../../../shared/core/failure.dart';
+import '../../../../shared/core/error/exceptions.dart';
 import '../datasources/remote/budget_remote_datasource.dart';
 import '../datasources/local/budget_local_datasource.dart';
-import '../models/budget_model.dart';
 import '../dtos/budget_dto.dart';
 
 class BudgetRepositoryImpl implements BudgetRepository {
@@ -30,8 +29,26 @@ class BudgetRepositoryImpl implements BudgetRepository {
 
       await localDataSource.cacheBudgets(budgets);
       return Right(budgets.map((m) => m.toEntity()).toList());
+    } on NetworkException catch (_) {
+      // Network error - try cache
+      try {
+        final cachedBudgets = await localDataSource.getCachedBudgets();
+        if (cachedBudgets.isNotEmpty) {
+          return Right(cachedBudgets.map((m) => m.toEntity()).toList());
+        }
+      } catch (_) {}
+      return const Left(NetworkFailure());
+    } on TimeoutException catch (_) {
+      // Timeout - try cache
+      try {
+        final cachedBudgets = await localDataSource.getCachedBudgets();
+        if (cachedBudgets.isNotEmpty) {
+          return Right(cachedBudgets.map((m) => m.toEntity()).toList());
+        }
+      } catch (_) {}
+      return Left(ServerFailure(message: 'Request timed out'));
     } on ServerException catch (e) {
-      // Fallback to cache
+      // API error - try cache
       try {
         final cachedBudgets = await localDataSource.getCachedBudgets();
         if (cachedBudgets.isNotEmpty) {
@@ -40,6 +57,8 @@ class BudgetRepositoryImpl implements BudgetRepository {
       } catch (_) {}
       
       return Left(ServerFailure(message: e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

@@ -64,7 +64,7 @@ class DiskCache {
     await _ensureInitialized();
 
     final expiresAt = DateTime.now().add(ttl);
-    final entry = CacheEntry(value, expiresAt);
+
 
     final json = {
       'value': toJson(value),

@@ -113,7 +113,7 @@ class SpendingTrendChart extends StatelessWidget {
             dotData: const FlDotData(show: false),
             belowBarData: BarAreaData(
               show: true,
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -134,7 +134,7 @@ class SpendingTrendChart extends StatelessWidget {
                       TextSpan(
                         text: '\$${flSpot.y.toStringAsFixed(2)}',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontWeight: FontWeight.normal,
                         ),
                       ),

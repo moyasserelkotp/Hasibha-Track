@@ -4,7 +4,6 @@ import '../../../../shared/core/failure.dart';
 import '../../../../shared/models/pagination.dart';
 import '../../../../shared/services/logger_service.dart';
 import '../../domain/entities/transaction.dart';
-import '../../domain/repositories/home_repository.dart';
 import '../datasources/local/home_local_data_source.dart';
 import '../models/transaction_model.dart';
 

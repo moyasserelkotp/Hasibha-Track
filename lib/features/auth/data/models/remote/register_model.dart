@@ -1,7 +1,7 @@
 import '../../../domain/entities/register.dart';
 
 class RegisterModel extends Register {
-  RegisterModel(
+  const RegisterModel(
       {required super.status,
       required super.message,
       required super.data});
@@ -18,7 +18,7 @@ class RegisterModel extends Register {
 }
 
 class DataModel extends Data {
-  DataModel(
+  const DataModel(
       {required super.id,
       required super.username,
       required super.email,
@@ -53,7 +53,7 @@ class DataModel extends Data {
 }
 
 class TokensModel extends Tokens {
-  TokensModel({required super.refresh, required super.access});
+  const TokensModel({required super.refresh, required super.access});
 
   factory TokensModel.fromJson(Map<String, dynamic> json) {
     return TokensModel(

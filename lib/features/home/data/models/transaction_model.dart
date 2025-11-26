@@ -5,27 +5,35 @@ part 'transaction_model.g.dart';
 
 @HiveType(typeId: 0)
 class TransactionModel extends Transaction {
+  @override
   @HiveField(0)
   final String id;
 
+  @override
   @HiveField(1)
   final String title;
 
+  @override
   @HiveField(2)
   final double amount;
 
+  @override
   @HiveField(3)
   final String category;
 
+  @override
   @HiveField(4)
   final String type;
 
+  @override
   @HiveField(5)
   final DateTime date;
 
+  @override
   @HiveField(6)
   final String? description;
 
+  @override
   @HiveField(7)
   final String? icon;
 

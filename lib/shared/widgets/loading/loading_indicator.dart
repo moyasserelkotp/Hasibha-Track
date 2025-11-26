@@ -40,7 +40,7 @@ class FullScreenLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.black.withOpacity(0.5),
+      color: AppColors.black.withValues(alpha: 0.5),
       child: Center(
         child: Card(
           margin: EdgeInsets.all(32),

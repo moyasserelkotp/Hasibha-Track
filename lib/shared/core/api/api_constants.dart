@@ -41,20 +41,25 @@ class ApiConstants {
   // Budget Endpoints
   static const String budgets = '/budgets';
   static const String budgetById = '/budgets/{id}';
-  static const String monthlyBudget = '/budgets/monthly';
+  static const String budgetByCategory = '/budgets/category/{categoryId}';
+  static const String budgetExceeded = '/budgets/exceeded';
+  static const String budgetApproaching = '/budgets/approaching';
 
   // Category Endpoints
   static const String categories = '/categories';
   static const String categoryById = '/categories/{id}';
 
-  // Budget Endpoints
-  static const String budgets = '/budgets';
-  static const String budgetById = '/budgets/{id}';
-  static const String budgetByCategory = '/budgets/category/{categoryId}';
-  static const String budgetExceeded = '/budgets/exceeded';
-  static const String budgetApproaching = '/budgets/approaching';
+  // Analytics Endpoints
+  static const String analyticsSpending = '/analytics/spending';
+  static const String analyticsCategories = '/analytics/categories';
+  static const String analyticsMonthly = '/analytics/monthly';
+  static const String analyticsTrend = '/analytics/trend';
 
-  // Goals Endpoints
+  // Savings Goals Endpoints
+  static const String savingsGoals = '/savings-goals';
+  static const String savingsGoalById = '/savings-goals/{id}';
+  static const String savingsGoalAddFunds = '/savings-goals/{id}/add-funds';
+  static const String savingsGoalWithdraw = '/savings-goals/{id}/withdraw';
   static const String goals = '/goals';
   static const String goalById = '/goals/{id}';
 
@@ -62,6 +67,12 @@ class ApiConstants {
   static const String sharedBudgets = '/shared-budgets';
   static const String sharedBudgetById = '/shared-budgets/{id}';
   static const String sharedBudgetMembers = '/shared-budgets/{id}/members';
+
+  // Debt Endpoints
+  static const String debts = '/debts';
+  static const String debtById = '/debts/{id}';
+  static const String debtPayments = '/debts/{id}/payments';
+  static const String debtSummary = '/debts/summary';
 
   // HTTP Headers
   static const String contentType = 'Content-Type';

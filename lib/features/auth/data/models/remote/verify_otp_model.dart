@@ -1,7 +1,7 @@
 import '../../../domain/entities/verify_otp.dart';
 
 class VerifyOtpModel extends VerifyOtp {
-  VerifyOtpModel({required super.message, required super.user});
+  const VerifyOtpModel({required super.message, required super.user});
 
 factory VerifyOtpModel.fromJson(Map<String, dynamic> json){
   return VerifyOtpModel(
@@ -13,7 +13,7 @@ factory VerifyOtpModel.fromJson(Map<String, dynamic> json){
 
 
 class  UserModel extends User {
-  UserModel({required super.email, required super.isEmailVerified});
+  const UserModel({required super.email, required super.isEmailVerified});
 
 factory UserModel.fromJson(Map<String, dynamic> json){
   return UserModel(

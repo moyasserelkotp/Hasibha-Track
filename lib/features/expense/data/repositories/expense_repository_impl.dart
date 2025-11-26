@@ -2,13 +2,13 @@ import 'package:dartz/dartz.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_category.dart';
 import '../../domain/repositories/expense_repository.dart';
-import '../../../shared/core/failure.dart';
-import '../../../shared/core/exceptions.dart';
+import '../../../../shared/core/failure.dart';
+import '../../../../shared/core/error/exceptions.dart';
 import '../datasources/remote/expense_remote_datasource.dart';
 import '../datasources/local/expense_local_datasource.dart';
 import '../models/expense_model.dart';
 import '../dtos/expense_dto.dart';
-import '../../../shared/services/ocr_service.dart';
+import '../../../../shared/services/ocr_service.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
   final ExpenseRemoteDataSource remoteDataSource;
@@ -45,8 +45,26 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       await localDataSource.cacheExpenses(expenses);
 
       return Right(expenses.map((model) => model.toEntity()).toList());
+    } on NetworkException catch (_) {
+      // Network error - try cache
+      try {
+        final cachedExpenses = await localDataSource.getCachedExpenses();
+        if (cachedExpenses.isNotEmpty) {
+          return Right(cachedExpenses.map((model) => model.toEntity()).toList());
+        }
+      } catch (_) {}
+      return const Left(NetworkFailure());
+    } on TimeoutException catch (_) {
+      // Timeout - try cache
+      try {
+        final cachedExpenses = await localDataSource.getCachedExpenses();
+        if (cachedExpenses.isNotEmpty) {
+          return Right(cachedExpenses.map((model) => model.toEntity()).toList());
+        }
+      } catch (_) {}
+      return const Left(TimeoutFailure());
     } on ServerException catch (e) {
-      // If API fails, try to get from cache
+      // API error - try cache
       try {
         final cachedExpenses = await localDataSource.getCachedExpenses();
         if (cachedExpenses.isNotEmpty) {
@@ -55,6 +73,8 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       } catch (_) {}
       
       return Left(ServerFailure(message: e.message));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

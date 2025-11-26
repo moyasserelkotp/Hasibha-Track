@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../domain/entities/spending_analytics.dart';
 import '../../../../shared/const/colors.dart';
 
 class CategoryPieChart extends StatefulWidget {

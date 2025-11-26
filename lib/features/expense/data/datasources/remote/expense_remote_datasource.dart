@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../../domain/entities/expense.dart';
-import '../../../domain/entities/expense_category.dart';
-import '../../../../shared/core/api/api_constants.dart';
-import '../../../../shared/core/exceptions.dart';
+import '../../../../../shared/core/api/api_constants.dart';
+import '../../../../../shared/core/error/exceptions.dart';
 import '../../models/expense_model.dart';
 import '../../models/expense_category_model.dart';
 import '../../dtos/expense_dto.dart';

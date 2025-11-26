@@ -77,7 +77,7 @@ class SecondaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: buttonColor.withOpacity(0.1),
+          backgroundColor: buttonColor.withValues(alpha: 0.1),
           foregroundColor: buttonColor,
           elevation: 0,
           shape: RoundedRectangleBorder(

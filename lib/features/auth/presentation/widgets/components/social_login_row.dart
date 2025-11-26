@@ -51,12 +51,12 @@ class SocialLoginRow extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: AppColors.border.withOpacity(0.3),
+            color: AppColors.border.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
