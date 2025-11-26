@@ -15,5 +15,10 @@ class AppRoutes {
   static const String resetPasswordConfirmOtp= '/reset-password-confirm-otp';
   static const String resetPasswordSendEmail= '/reset-password-send-email';
   static const String changePassword= '/change-password';
+  
+  // Expense Routes
+  static const String expenses = '/expenses';
+  static const String addExpense = '/expenses/add';
+  static const String expenseDetail = '/expenses/:id';
 
 }

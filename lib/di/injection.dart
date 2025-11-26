@@ -66,6 +66,22 @@ import '../features/home/presentation/cubit/home_cubit.dart';
 import '../features/home/presentation/cubit/add_transaction_cubit.dart';
 import '../features/home/presentation/cubit/analytics_cubit.dart';
 
+// Expense Feature
+import 'package:hive/hive.dart';
+import '../features/expense/data/datasources/remote/expense_remote_datasource.dart';
+import '../features/expense/data/datasources/local/expense_local_datasource.dart';
+import '../features/expense/data/repositories/expense_repository_impl.dart';
+import '../features/expense/domain/repositories/expense_repository.dart';
+import '../features/expense/domain/usecases/get_expenses_usecase.dart';
+import '../features/expense/domain/usecases/create_expense_usecase.dart';
+import '../features/expense/domain/usecases/update_expense_usecase.dart';
+import '../features/expense/domain/usecases/delete_expense_usecase.dart';
+import '../features/expense/domain/usecases/get_categories_usecase.dart';
+import '../features/expense/domain/usecases/import_expense_from_image_usecase.dart';
+import '../features/expense/presentation/blocs/expense/expense_bloc.dart';
+import '../features/expense/presentation/blocs/category/category_bloc.dart';
+import '../shared/services/ocr_service.dart';
+
 // Settings & Services
 import '../shared/services/export_service.dart';
 import '../shared/services/backup_service.dart';
@@ -198,6 +214,54 @@ Future<void> init() async {
   sl.registerFactory(() => HomeCubit(getDashboardSummaryUseCase: sl()));
   sl.registerFactory(() => AddTransactionCubit(sl()));
   sl.registerFactory(() => AnalyticsCubit(sl()));
+
+  // --- Expense ---
+  // Services
+  sl.registerLazySingleton(() => OcrService());
+  
+  // Hive boxes for local storage
+  final expenseBox = await Hive.openBox<Map<dynamic, dynamic>>('expenses');
+  final categoryBox = await Hive.openBox<Map<dynamic, dynamic>>('categories');
+  sl.registerLazySingleton(() => expenseBox);
+  sl.registerLazySingleton(() => categoryBox);
+  
+  // Data Sources
+  sl.registerLazySingleton<ExpenseRemoteDataSource>(
+    () => ExpenseRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<ExpenseLocalDataSource>(
+    () => ExpenseLocalDataSourceImpl(
+      expenseBox: sl(),
+      categoryBox: sl(),
+    ),
+  );
+  
+  // Repository
+  sl.registerLazySingleton<ExpenseRepository>(
+    () => ExpenseRepositoryImpl(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+      ocrService: sl(),
+    ),
+  );
+  
+  // Use Cases
+  sl.registerLazySingleton(() => GetExpensesUseCase(sl()));
+  sl.registerLazySingleton(() => CreateExpenseUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateExpenseUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteExpenseUseCase(sl()));
+  sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
+  sl.registerLazySingleton(() => ImportExpenseFromImageUseCase(sl()));
+  
+  // BLoCs
+  sl.registerFactory(() => ExpenseBloc(
+    getExpensesUseCase: sl(),
+    createExpenseUseCase: sl(),
+    updateExpenseUseCase: sl(),
+    deleteExpenseUseCase: sl(),
+    importExpenseFromImageUseCase: sl(),
+  ));
+  sl.registerFactory(() => CategoryBloc(getCategoriesUseCase: sl()));
 
   // --- Settings & Services ---
   // Services

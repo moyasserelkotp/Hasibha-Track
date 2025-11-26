@@ -26,6 +26,14 @@ class ApiConstants {
   static const String recentTransactions = '/transactions/recent';
   static const String transactionsByCategory = '/transactions/category/{categoryId}';
 
+  // Expense Endpoints
+  static const String expenses = '/expenses';
+  static const String expenseById = '/expenses/{id}';
+  static const String expensesByCategory = '/expenses/category/{categoryId}';
+  static const String expensesByDateRange = '/expenses/date-range';
+  static const String expensesImportImage = '/expenses/import/image';
+  static const String expenseStats = '/expenses/stats';
+
   // Dashboard Endpoints
   static const String dashboardSummary = '/dashboard/summary';
   static const String monthlyReport = '/dashboard/monthly-report';
@@ -38,6 +46,13 @@ class ApiConstants {
   // Category Endpoints
   static const String categories = '/categories';
   static const String categoryById = '/categories/{id}';
+
+  // Budget Endpoints
+  static const String budgets = '/budgets';
+  static const String budgetById = '/budgets/{id}';
+  static const String budgetByCategory = '/budgets/category/{categoryId}';
+  static const String budgetExceeded = '/budgets/exceeded';
+  static const String budgetApproaching = '/budgets/approaching';
 
   // Goals Endpoints
   static const String goals = '/goals';
