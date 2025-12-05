@@ -3,4 +3,5 @@ class BoxNames {
   static const String categories = 'categories';
   static const String goals = 'goals';
   static const String settings = 'settings';
+  static const String debts = 'debts';
 }

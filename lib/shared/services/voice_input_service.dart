@@ -1,10 +1,11 @@
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
+
 import 'logger_service.dart';
 
 class VoiceInputService {
   final stt.SpeechToText _speech = stt.SpeechToText();
-  final _logger = LoggerService();
+  final _logger = Logger.get("VoiceInputService");
   bool _isListening = false;
   bool _isAvailable = false;
 

@@ -3,18 +3,20 @@ abstract class LoginEvent {
   const LoginEvent();
 }
 
-/// Login with username and password
+/// Login with identifier (email or phone) and password
 class LoginRequested extends LoginEvent {
-  final String username;
+  final String identifier;
   final String password;
 
   const LoginRequested({
-    required this.username,
+    required this.identifier,
     required this.password,
   });
 }
 
 /// Google Sign-In requested
 class GoogleSignInRequested extends LoginEvent {
-  const GoogleSignInRequested();
+  final String idToken;
+  
+  const GoogleSignInRequested({required this.idToken});
 }

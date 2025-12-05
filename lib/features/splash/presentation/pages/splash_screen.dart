@@ -84,14 +84,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<SplashCubit>(
       create: (_) => di.sl<SplashCubit>()..checkAuthStatus(),
       child: BlocListener<SplashCubit, SplashState>(
         listener: (context, state) {
           if (state is SplashNavigate) {
             // Navigate when authentication check is done
             Future.delayed(const Duration(milliseconds: 800), () {
-              context.go(state.route);
+              if (context.mounted) {
+                context.go(state.route);
+              }
             });
           }
 

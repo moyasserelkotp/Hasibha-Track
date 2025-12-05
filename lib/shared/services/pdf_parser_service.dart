@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+
 import 'logger_service.dart';
 
 class PdfParserService {
-  final _logger = LoggerService();
+  final _logger = Logger.get("PdfParserService");
   /// Pick and parse PDF file
   Future<List<Map<String, dynamic>>?> importFromPdf() async {
     try {

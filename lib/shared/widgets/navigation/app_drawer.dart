@@ -43,7 +43,7 @@ class AppDrawer extends StatelessWidget {
                   'Manage Your Finances',
                   style: TextStyle(
                     color: Colors.white.withAlpha(204),
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
               ],

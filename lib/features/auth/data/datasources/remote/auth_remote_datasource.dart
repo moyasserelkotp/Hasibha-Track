@@ -1,51 +1,43 @@
-import '../../dtos/change_password_request_dto.dart';
+
 import '../../dtos/login_request_dto.dart';
 import '../../dtos/register_request_dto.dart';
-import '../../dtos/verify_otp_request_dto.dart';
 import '../../models/auth_result_model.dart';
 import '../../models/auth_tokens_model.dart';
+import '../../models/user_model.dart';
 
 /// Remote data source interface for authentication
 abstract class AuthRemoteDataSource {
   // ========== Authentication ==========
   
-  /// Login with credentials
+  /// Login with credentials (email, phone, or identifier)
   Future<AuthResultModel> login(LoginRequestDto dto);
 
-  /// Register new user
-  Future<String> register(RegisterRequestDto dto);
+  /// Register new user (email-based)
+  Future<AuthResultModel> register(RegisterRequestDto dto);
 
-  /// Verify OTP after registration
-  Future<AuthResultModel> verifyOtp(VerifyOtpRequestDto dto);
+  /// Sign in with Google ID token
+  Future<AuthResultModel> signInWithGoogle(String idToken);
 
-  /// Resend OTP to email
-  Future<String> resendOtp(String email);
-
-  /// Sign in with Google
-  Future<AuthResultModel> signInWithGoogle();
+  /// Check authentication status
+  Future<UserModel> checkAuthStatus();
 
   // ========== Password Management ==========
 
-  /// Send password reset email
+  /// Send password reset email (forgot password)
   Future<String> sendPasswordResetEmail(String email);
 
-  /// Verify OTP for password reset
-  Future<String> verifyPasswordResetOtp({
-    required String resetToken,
-    required String otp,
-  });
-
-  /// Complete password reset
+  /// Reset password with code from email
   Future<String> resetPassword({
-    required String resetToken,
-    required String password,
+    required String email,
+    required String code,
+    required String newPassword,
   });
-
-  /// Change password for authenticated user
-  Future<String> changePassword(ChangePasswordRequestDto dto);
 
   // ========== Token Management ==========
 
   /// Refresh access token
   Future<AuthTokensModel> refreshToken(String refreshToken);
+
+  /// Logout (revoke refresh token)
+  Future<void> logout(String refreshToken);
 }

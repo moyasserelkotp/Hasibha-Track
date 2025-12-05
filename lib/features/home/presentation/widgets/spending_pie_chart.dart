@@ -9,8 +9,6 @@ class SpendingPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     // Generate colors for categories
     final colors = [
       AppColors.error,

@@ -115,8 +115,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<ExpenseBloc>()),
-        BlocProvider(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
+        BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()),
+        BlocProvider<CategoryBloc>(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
       ],
       child: Scaffold(
         backgroundColor: AppColors.background,

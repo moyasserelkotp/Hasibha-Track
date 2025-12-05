@@ -57,7 +57,7 @@ class _CreateSavingsGoalScreenState extends State<CreateSavingsGoalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<SavingsBloc>(
       create: (_) => di.sl<SavingsBloc>(),
       child: BlocListener<SavingsBloc, SavingsState>(
         listener: (context, state) {

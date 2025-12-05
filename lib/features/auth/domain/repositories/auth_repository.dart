@@ -2,59 +2,45 @@ import 'package:dartz/dartz.dart';
 import '../../../../shared/core/failure.dart';
 import '../entities/auth_result.dart';
 import '../entities/auth_tokens.dart';
+import '../entities/user.dart';
 
 /// Authentication repository interface
 /// Defines all authentication-related operations
 abstract class AuthRepository {
   // ========== Authentication ==========
 
-  /// Login with username and password
+  /// Login with email, phone, or identifier
   Future<Either<Failure, AuthResult>> login({
-    required String username,
+    String? email,
+    String? phone,
+    String? identifier,
     required String password,
   });
 
   /// Register a new user
-  Future<Either<Failure, String>> register({
+  Future<Either<Failure, AuthResult>> register({
     required String username,
     required String email,
     required String password,
-    required String fullName,
-    String? mobile,
+    required String confirmPassword,
+    String? phone,
   });
 
-  /// Verify OTP after registration
-  Future<Either<Failure, AuthResult>> verifyOtp({
-    required String email,
-    required String otp,
-  });
+  /// Sign in with Google ID token
+  Future<Either<Failure, AuthResult>> signInWithGoogle(String idToken);
 
-  /// Resend OTP to email
-  Future<Either<Failure, String>> resendOtp(String email);
-
-  /// Sign in with Google
-  Future<Either<Failure, AuthResult>> signInWithGoogle();
+  /// Check authentication status
+  Future<Either<Failure, User>> checkAuthStatus();
 
   // ========== Password Management ==========
 
   /// Send password reset email
   Future<Either<Failure, String>> sendPasswordResetEmail(String email);
 
-  /// Verify OTP for password reset
-  Future<Either<Failure, String>> verifyPasswordResetOtp({
-    required String resetToken,
-    required String otp,
-  });
-
-  /// Complete password reset
+  /// Reset password with code from email
   Future<Either<Failure, String>> resetPassword({
-    required String resetToken,
-    required String newPassword,
-  });
-
-  /// Change password for authenticated user
-  Future<Either<Failure, String>> changePassword({
-    required String currentPassword,
+    required String email,
+    required String code,
     required String newPassword,
   });
 
@@ -63,8 +49,8 @@ abstract class AuthRepository {
   /// Refresh access token using refresh token
   Future<Either<Failure, AuthTokens>> refreshAccessToken(String refreshToken);
 
-  /// Check if user has valid authentication
-  Future<Either<Failure, bool>> checkAuthStatus();
+  /// Get current authenticated user from local storage
+  Future<Either<Failure, User?>> getCurrentUser();
 
   /// Logout user and clear tokens
   Future<Either<Failure, void>> logout();

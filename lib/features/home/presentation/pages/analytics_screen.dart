@@ -19,7 +19,7 @@ class AnalyticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<AnalyticsCubit>(
       create: (_) => di.sl<AnalyticsCubit>()..loadAnalytics(),
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -200,7 +200,6 @@ class AnalyticsScreen extends StatelessWidget {
   }
 
   Widget _buildMonthlyOverview(BuildContext context, data) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

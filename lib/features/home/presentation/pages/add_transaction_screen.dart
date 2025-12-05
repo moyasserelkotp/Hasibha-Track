@@ -126,7 +126,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return BlocProvider(
+    return BlocProvider<AddTransactionCubit>(
       create: (_) => di.sl<AddTransactionCubit>(),
       child: Scaffold(
         backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,

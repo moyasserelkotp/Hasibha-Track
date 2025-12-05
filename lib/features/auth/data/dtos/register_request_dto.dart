@@ -4,15 +4,17 @@ class RegisterRequestDto {
   final String username;
   final String email;
   final String password;
-  final String fullName;
-  final String? mobile;
+  final String confirmPassword;
+  final String? phone;
+  final String? phoneVerificationToken;
 
   const RegisterRequestDto({
     required this.username,
     required this.email,
     required this.password,
-    required this.fullName,
-    this.mobile,
+    required this.confirmPassword,
+    this.phone,
+    this.phoneVerificationToken,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,8 +22,9 @@ class RegisterRequestDto {
       'username': username,
       'email': email,
       'password': password,
-      'full_name': fullName,
-      if (mobile != null) 'mobile': mobile,
+      'confirmPassword': confirmPassword,
+      if (phone != null) 'phone': phone,
+      if (phoneVerificationToken != null) 'phoneVerificationToken': phoneVerificationToken,
     };
   }
 }

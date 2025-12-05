@@ -49,17 +49,20 @@ class Throttler {
   }
 }
 
-/// Extension on Stream for debouncing
 extension StreamDebounceExtension<T> on Stream<T> {
   Stream<T> debounce(Duration duration) {
+    Timer? timer;
     return transform(
       StreamTransformer.fromHandlers(
         handleData: (data, sink) {
-          Timer? timer;
           timer?.cancel();
           timer = Timer(duration, () {
             sink.add(data);
           });
+        },
+        handleDone: (sink) {
+          timer?.cancel();
+          sink.close();
         },
       ),
     );

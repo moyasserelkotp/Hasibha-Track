@@ -16,7 +16,7 @@ class DebtDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<DebtBloc>(
       create: (_) => di.sl<DebtBloc>()..add(const LoadDebts()),
       child: const _DebtDashboardContent(),
     );

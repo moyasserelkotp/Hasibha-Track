@@ -19,18 +19,14 @@ class RegisterLoading extends RegisterState {
   const RegisterLoading();
 }
 
-/// Registration successful (awaiting OTP verification)
+/// Registration successful - user is now authenticated
 class RegisterSuccess extends RegisterState {
-  final String email;
-  final String message;
+  final AuthResult authResult;
 
-  const RegisterSuccess({
-    required this.email,
-    required this.message,
-  });
+  const RegisterSuccess(this.authResult);
 
   @override
-  List<Object?> get props => [email, message];
+  List<Object?> get props => [authResult];
 }
 
 /// Registration failed
@@ -38,41 +34,6 @@ class RegisterFailure extends RegisterState {
   final String message;
 
   const RegisterFailure(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-/// OTP verification in progress
-class OtpVerifying extends RegisterState {
-  const OtpVerifying();
-}
-
-/// OTP verified successfully
-class OtpVerified extends RegisterState {
-  final AuthResult authResult;
-
-  const OtpVerified(this.authResult);
-
-  @override
-  List<Object?> get props => [authResult];
-}
-
-/// OTP resent successfully
-class OtpResent extends RegisterState {
-  final String message;
-
-  const OtpResent(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-/// OTP operation failed
-class OtpFailure extends RegisterState {
-  final String message;
-
-  const OtpFailure(this.message);
 
   @override
   List<Object?> get props => [message];

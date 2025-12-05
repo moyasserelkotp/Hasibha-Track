@@ -18,11 +18,14 @@ class AnalyticsDashboardScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) {
         final now = DateTime.now();
-        return di.sl<AnalyticsBloc>()
-          ..add(LoadAnalytics(
+        final bloc = di.sl<AnalyticsBloc>() as AnalyticsBloc;
+        bloc.add(
+          LoadAnalytics(
             startDate: now.subtract(const Duration(days: 30)),
             endDate: now,
-          ));
+          ),
+        );
+        return bloc;
       },
       child: const _AnalyticsDashboardContent(),
     );

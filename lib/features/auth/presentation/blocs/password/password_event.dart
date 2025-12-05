@@ -10,35 +10,15 @@ class ResetPasswordEmailRequested extends PasswordEvent {
   const ResetPasswordEmailRequested(this.email);
 }
 
-/// Verify OTP for password reset
-class ResetPasswordOtpRequested extends PasswordEvent {
-  final String resetToken;
-  final String otp;
-
-  const ResetPasswordOtpRequested({
-    required this.resetToken,
-    required this.otp,
-  });
-}
-
-/// Complete password reset
-class ResetPasswordFinishRequested extends PasswordEvent {
-  final String resetToken;
+/// Reset password with code and new password
+class ResetPasswordRequested extends PasswordEvent {
+  final String email;
+  final String code;
   final String newPassword;
 
-  const ResetPasswordFinishRequested({
-    required this.resetToken,
-    required this.newPassword,
-  });
-}
-
-/// Change password for authenticated user
-class ChangePasswordRequested extends PasswordEvent {
-  final String currentPassword;
-  final String newPassword;
-
-  const ChangePasswordRequested({
-    required this.currentPassword,
+  const ResetPasswordRequested({
+    required this.email,
+    required this.code,
     required this.newPassword,
   });
 }

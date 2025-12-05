@@ -11,16 +11,19 @@ class AuthResultModel extends AuthResult {
 
   factory AuthResultModel.fromJson(Map<String, dynamic> json) {
     return AuthResultModel(
-      user: UserModel.fromJson(json['user_info'] as Map<String, dynamic>),
-      tokens: AuthTokensModel.fromJson(json),
+      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+      tokens: AuthTokensModel(
+        accessToken: json['accessToken'] as String,
+        refreshToken: json['refreshToken'] as String,
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'user_info': (user as UserModel).toJson(),
-      'access': tokens.accessToken,
-      'refresh': tokens.refreshToken,
+      'user': (user as UserModel).toJson(),
+      'accessToken': tokens.accessToken,
+      'refreshToken': tokens.refreshToken,
     };
   }
 

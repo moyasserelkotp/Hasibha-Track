@@ -1,4 +1,5 @@
 import '../../models/auth_tokens_model.dart';
+import '../../models/user_model.dart';
 
 /// Local data source interface for authentication
 abstract class AuthLocalDataSource {
@@ -19,4 +20,13 @@ abstract class AuthLocalDataSource {
 
   /// Clear all authentication data
   Future<void> clearTokens();
+
+  /// Save user data
+  Future<void> saveUser(UserModel user);
+
+  /// Get saved user data
+  Future<UserModel?> getUser();
+
+  /// Clear user data
+  Future<void> clearUser();
 }

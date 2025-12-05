@@ -16,36 +16,53 @@ import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../widgets/customer_text_form.dart';
 
 class ResetPasswordFinishScreen extends StatelessWidget {
-  final String? resetToken;
+  final String? email;
 
-  const ResetPasswordFinishScreen({super.key, this.resetToken});
+  const ResetPasswordFinishScreen({super.key, this.email});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<PasswordBloc>(
       create: (context) => di.sl<PasswordBloc>(),
-      child: _ResetPasswordFinishContent(resetToken: resetToken),
+      child: _ResetPasswordFinishContent(email: email),
     );
   }
 }
 
-class _ResetPasswordFinishContent extends StatelessWidget {
-  final String? resetToken;
-  _ResetPasswordFinishContent({this.resetToken});
+class _ResetPasswordFinishContent extends StatefulWidget {
+  final String? email;
+  const _ResetPasswordFinishContent({this.email});
 
+  @override
+  State<_ResetPasswordFinishContent> createState() =>
+      _ResetPasswordFinishContentState();
+}
+
+class _ResetPasswordFinishContentState
+    extends State<_ResetPasswordFinishContent> {
+  final TextEditingController _codeController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _validateAndSubmit(BuildContext context, String? resetToken) {
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _validateAndSubmit(BuildContext context) {
     AppSnackBar.hide(context);
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text.trim() ==
           _confirmPasswordController.text.trim()) {
-        context.read<PasswordBloc>().add(ResetPasswordFinishRequested(
-            resetToken: resetToken ?? '',
+        context.read<PasswordBloc>().add(ResetPasswordRequested(
+            email: widget.email ?? '',
+            code: _codeController.text.trim(),
             newPassword: _passwordController.text.trim()));
       } else {
         AppSnackBar.showError(context,
@@ -96,29 +113,43 @@ class _ResetPasswordFinishContent extends StatelessWidget {
                                   style: AppStyles.styleNormal13(context)
                                       .copyWith(color: AppColors.greyDark)),
                               SizedBox(height: 60.h),
+                              // Code Field
+                              CustomerTextForm(
+                                isPassword: false,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return AppStrings.errorRequiredField;
+                                  }
+                                  return null;
+                                },
+                                name: "Reset Code", // Add to strings later
+                                controller: _codeController,
+                                onFieldSubmitted: () {},
+                              ),
+                              SizedBox(height: 12),
+                              // Password Field
                               CustomerTextForm(
                                 isPassword: true,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return AppStrings.errorRequiredField;
-                                  } else if (value.length < 8) {
+                                  } else if (value.length < 6) {
                                     return AppStrings.errorInvalidPassword;
                                   }
                                   return null;
                                 },
                                 name: AppStrings.password,
                                 controller: _passwordController,
-                                onFieldSubmitted: () {
-                                  _validateAndSubmit(context, resetToken ?? "");
-                                },
+                                onFieldSubmitted: () {},
                               ),
                               SizedBox(height: 12),
+                              // Confirm Password Field
                               CustomerTextForm(
                                 isPassword: true,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return AppStrings.errorRequiredField;
-                                  } else if (value.length < 8) {
+                                  } else if (value.length < 6) {
                                     return AppStrings.errorInvalidPassword;
                                   }
                                   return null;
@@ -126,15 +157,14 @@ class _ResetPasswordFinishContent extends StatelessWidget {
                                 name: AppStrings.confirmPassword,
                                 controller: _confirmPasswordController,
                                 onFieldSubmitted: () {
-                                  _validateAndSubmit(context, resetToken ?? "");
+                                  _validateAndSubmit(context);
                                 },
                               ),
                               SizedBox(height: 40),
                               PrimaryButton(
                                 text: AppStrings.resetPassword,
                                 isLoading: state is PasswordLoading,
-                                onPressed: () => _validateAndSubmit(
-                                    context, resetToken ?? ""),
+                                onPressed: () => _validateAndSubmit(context),
                               ),
                               SizedBox(height: 20.h),
                             ],

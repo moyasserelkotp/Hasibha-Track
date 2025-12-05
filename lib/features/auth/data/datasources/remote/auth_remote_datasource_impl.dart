@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import '../../../../../shared/core/error/exceptions.dart';
 import '../../../../../shared/core/api/api_constants.dart';
-import '../../dtos/change_password_request_dto.dart';
+
 import '../../dtos/login_request_dto.dart';
 import '../../dtos/register_request_dto.dart';
-import '../../dtos/verify_otp_request_dto.dart';
 import '../../models/auth_result_model.dart';
 import '../../models/auth_tokens_model.dart';
+import '../../models/user_model.dart';
 import 'auth_remote_datasource.dart';
 
 /// Implementation of remote data source using Dio
@@ -24,90 +24,85 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ApiConstants.login,
         data: dto.toJson(),
       );
+
+      // Check if response contains success field
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Login failed',
+          statusCode: response.statusCode,
+        );
+      }
+
       return AuthResultModel.fromJson(response.data);
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
   }
 
   @override
-  Future<String> register(RegisterRequestDto dto) async {
+  Future<AuthResultModel> register(RegisterRequestDto dto) async {
     try {
       final response = await dio.post(
-        ApiConstants.register,
+        ApiConstants.signup,
         data: dto.toJson(),
       );
-      return response.data['message'] ?? 'Registration successful. Please verify your email.';
-    } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
 
-  @override
-  Future<AuthResultModel> verifyOtp(VerifyOtpRequestDto dto) async {
-    try {
-      final response = await dio.post(
-        ApiConstants.verifyOtp,
-        data: dto.toJson(),
-      );
+      // Check if response contains success field
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Registration failed',
+          statusCode: response.statusCode,
+        );
+      }
+
       return AuthResultModel.fromJson(response.data);
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
   }
 
   @override
-  Future<String> resendOtp(String email) async {
+  Future<AuthResultModel> signInWithGoogle(String idToken) async {
     try {
       final response = await dio.post(
-        ApiConstants.resendOtp,
-        data: {'email': email},
+        ApiConstants.googleSignIn,
+        data: {'idToken': idToken},
       );
-      return response.data['message'] ?? 'OTP resent successfully';
+
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Google sign-in failed',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return AuthResultModel.fromJson(response.data);
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
   }
 
   @override
-  Future<AuthResultModel> signInWithGoogle() async {
+  Future<UserModel> checkAuthStatus() async {
     try {
-      // TODO: Implement Google Sign-In logic
-      // This is a placeholder - implement with google_sign_in package
-      throw ServerException(
-        message: 'Google Sign-In not yet implemented',
-        statusCode: 501,
-      );
+      final response = await dio.get(ApiConstants.authMe);
+
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Authentication check failed',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return UserModel.fromJson(response.data['user'] as Map<String, dynamic>);
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -119,41 +114,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<String> sendPasswordResetEmail(String email) async {
     try {
       final response = await dio.post(
-        ApiConstants.resetPasswordEmail,
+        ApiConstants.forgotPassword,
         data: {'email': email},
       );
-      return response.data['message'] ?? 'Password reset email sent successfully';
-    } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
 
-  @override
-  Future<String> verifyPasswordResetOtp({
-    required String resetToken,
-    required String otp,
-  }) async {
-    try {
-      final response = await dio.post(
-        ApiConstants.resetPasswordVerifyOtp,
-        data: {
-          'token': resetToken,
-          'otp': otp,
-        },
-      );
-      return response.data['message'] ?? 'OTP verified successfully';
+      return response.data['message'] ??
+          'If the email exists, a reset code has been sent.';
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -161,43 +129,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String> resetPassword({
-    required String resetToken,
-    required String password,
+    required String email,
+    required String code,
+    required String newPassword,
   }) async {
     try {
       final response = await dio.post(
-        ApiConstants.resetPasswordFinish,
+        ApiConstants.resetPassword,
         data: {
-          'token': resetToken,
-          'password': password,
+          'email': email,
+          'code': code,
+          'newPassword': newPassword,
         },
       );
-      return response.data['message'] ?? 'Password reset successfully';
-    } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
-    } catch (e) {
-      throw ServerException(message: e.toString());
-    }
-  }
 
-  @override
-  Future<String> changePassword(ChangePasswordRequestDto dto) async {
-    try {
-      final response = await dio.post(
-        ApiConstants.changePassword,
-        data: dto.toJson(),
-      );
-      return response.data['message'] ?? 'Password changed successfully';
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Password reset failed',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return response.data['message'] ?? 'Password reset successful.';
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -210,15 +165,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await dio.post(
         ApiConstants.refreshToken,
-        data: {'refresh': refreshToken},
+        data: {'refreshToken': refreshToken},
       );
+
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Token refresh failed',
+          statusCode: response.statusCode,
+        );
+      }
+
       return AuthTokensModel.fromJson(response.data);
     } on DioException catch (e) {
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> logout(String refreshToken) async {
+    try {
+      await dio.post(
+        ApiConstants.logout,
+        data: {'refreshToken': refreshToken},
       );
+    } on DioException catch (e) {
+      _handleDioException(e);
     } catch (e) {
       throw ServerException(message: e.toString());
     }
@@ -226,26 +199,46 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   // ========== Helper Methods ==========
 
-  /// Extracts error message from DioException
-  String _extractErrorMessage(DioException e) {
+  /// Handles DioException by throwing appropriate exception type
+  Never _handleDioException(DioException e) {
+    // Check if it's a network connectivity issue
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      throw NetworkException(
+        'Connection timeout. Please check your internet connection.',
+      );
+    } else if (e.type == DioExceptionType.connectionError) {
+      throw NetworkException(
+        'No internet connection. Please check your network and try again.',
+      );
+    }
+
+    // It's a server error - extract message from response
     if (e.response != null) {
       final data = e.response!.data;
+      String errorMessage = 'An error occurred';
+
       if (data is Map<String, dynamic>) {
         // Try different error message keys
-        return data['message'] ??
+        errorMessage = data['message'] ??
             data['error'] ??
             data['detail'] ??
             data['non_field_errors']?.first ??
             'An error occurred';
+      } else {
+        errorMessage = data.toString();
       }
-      return data.toString();
-    } else if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout ||
-        e.type == DioExceptionType.sendTimeout) {
-      return 'Connection timeout. Please check your internet connection.';
-    } else if (e.type == DioExceptionType.connectionError) {
-      return 'No internet connection. Please check your network.';
+
+      throw ServerException(
+        message: errorMessage,
+        statusCode: e.response?.statusCode,
+      );
     }
-    return e.message ?? 'An unexpected error occurred';
+
+    // Unknown error
+    throw ServerException(
+      message: e.message ?? 'An unexpected error occurred',
+    );
   }
 }

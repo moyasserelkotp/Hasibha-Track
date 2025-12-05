@@ -45,6 +45,27 @@ class AuthValidators {
     return null;
   }
 
+  /// Identifier validation (email or phone)
+  static String? validateIdentifier(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email or phone is required';
+    }
+    
+    // Check if it looks like an email
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    
+    // Check if it looks like a phone number (with or without +)
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,15}$');
+    
+    if (emailRegex.hasMatch(value) || phoneRegex.hasMatch(value.replaceAll(RegExp(r'[\s-]'), ''))) {
+      return null;
+    }
+    
+    return 'Please enter a valid email or phone number';
+  }
+
   /// Password validation
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {

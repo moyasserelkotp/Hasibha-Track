@@ -9,7 +9,7 @@ class GoogleSignInUseCase {
 
   GoogleSignInUseCase({required this.repository});
 
-  Future<Either<Failure, AuthResult>> call() async {
-    return await repository.signInWithGoogle();
+  Future<Either<Failure, AuthResult>> call(String idToken) async {
+    return await repository.signInWithGoogle(idToken);
   }
 }

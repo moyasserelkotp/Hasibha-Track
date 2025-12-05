@@ -7,6 +7,7 @@ import '../models/app_settings.dart';
 
 class HiveService {
   static Future<void> init() async {
+    await Hive.initFlutter();
     // Get application directory
     final appDocumentDir = await getApplicationDocumentsDirectory();
     
@@ -19,8 +20,21 @@ class HiveService {
     Hive.registerAdapter(AppSettingsAdapter());
     
     // Open boxes
-    await openBoxes();
+    await Future.wait([
+      openBoxSafely(BoxNames.transactions),
+      openBoxSafely(BoxNames.categories),
+      openBoxSafely(BoxNames.goals),
+      openBoxSafely(BoxNames.settings),
+    ]);
   }
+
+  static Future<Box<T>> openBoxSafely<T>(String name) async {
+    if (Hive.isBoxOpen(name)) {
+      return Hive.box<T>(name);
+    }
+    return await Hive.openBox<T>(name);
+  }
+  static Box<T> getBox<T>(String name) => Hive.box<T>(name);
   
   static Future<void> openBoxes() async {
     await Hive.openBox(BoxNames.transactions);
@@ -28,14 +42,14 @@ class HiveService {
     await Hive.openBox(BoxNames.goals);
     await Hive.openBox(BoxNames.settings);
   }
-  
+
   static Future<void> closeBoxes() async {
     await Hive.box(BoxNames.transactions).close();
     await Hive.box(BoxNames.categories).close();
     await Hive.box(BoxNames.goals).close();
     await Hive.box(BoxNames.settings).close();
   }
-  
+
   static Future<void> clearAllData() async {
     await Hive.box(BoxNames.transactions).clear();
     await Hive.box(BoxNames.categories).clear();

@@ -38,7 +38,8 @@ class SocialLoginRow extends StatelessWidget {
       onTap: () {
         if (icon == 'google.png') {
           // Dispatch Google sign‑in request via LoginBloc
-          context.read<LoginBloc>().add(const GoogleSignInRequested());
+          // TODO: Implement actual Google Sign-In to get ID token
+          context.read<LoginBloc>().add(const GoogleSignInRequested(idToken: "placeholder_token"));
         } else {
           AppSnackBar.showInfo(context, message: AppStrings.featureComingSoon);
         }

@@ -3,14 +3,14 @@ import '../../../../shared/core/error/exceptions.dart';
 import '../../../../shared/core/failure.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/auth_tokens.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/auth_local_datasource.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
-import '../dtos/change_password_request_dto.dart';
 import '../dtos/login_request_dto.dart';
 import '../dtos/register_request_dto.dart';
-import '../dtos/verify_otp_request_dto.dart';
 import '../models/auth_tokens_model.dart';
+import '../models/user_model.dart';
 
 /// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
@@ -26,14 +26,26 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, AuthResult>> login({
-    required String username,
+    String? email,
+    String? phone,
+    String? identifier,
     required String password,
   }) async {
     try {
-      final dto = LoginRequestDto(
-        username: username,
-        password: password,
-      );
+      final LoginRequestDto dto;
+      
+      if (email != null) {
+        dto = LoginRequestDto.email(email: email, password: password);
+      } else if (phone != null) {
+        dto = LoginRequestDto.phone(phone: phone, password: password);
+      } else if (identifier != null) {
+        dto = LoginRequestDto.identifier(identifier: identifier, password: password);
+      } else {
+        return Left(ValidationFailure(
+          message: 'Email, phone, or identifier is required for login',
+          fieldErrors: const {'identifier': 'Email, phone, or identifier is required'},
+        ));
+      }
       
       final resultModel = await remoteDataSource.login(dto);
       
@@ -44,9 +56,16 @@ class AuthRepositoryImpl implements AuthRepository {
           refreshToken: resultModel.tokens.refreshToken,
         ),
       );
+
+      // Save user data locally
+      if (resultModel.user is UserModel) {
+        await localDataSource.saveUser(resultModel.user as UserModel);
+      }
       
       // Convert model to entity
       return Right(resultModel.toEntity());
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -55,40 +74,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> register({
+  Future<Either<Failure, AuthResult>> register({
     required String username,
     required String email,
     required String password,
-    required String fullName,
-    String? mobile,
+    required String confirmPassword,
+    String? phone,
   }) async {
     try {
       final dto = RegisterRequestDto(
         username: username,
         email: email,
         password: password,
-        fullName: fullName,
-        mobile: mobile,
+        confirmPassword: confirmPassword,
+        phone: phone,
       );
       
-      final message = await remoteDataSource.register(dto);
-      return Right(message);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthResult>> verifyOtp({
-    required String email,
-    required String otp,
-  }) async {
-    try {
-      final dto = VerifyOtpRequestDto(email: email, otp: otp);
-      
-      final resultModel = await remoteDataSource.verifyOtp(dto);
+      final resultModel = await remoteDataSource.register(dto);
       
       // Save tokens locally
       await localDataSource.saveTokens(
@@ -97,6 +99,40 @@ class AuthRepositoryImpl implements AuthRepository {
           refreshToken: resultModel.tokens.refreshToken,
         ),
       );
+
+      // Save user data locally
+      if (resultModel.user is UserModel) {
+        await localDataSource.saveUser(resultModel.user as UserModel);
+      }
+      
+      // Convert model to entity
+      return Right(resultModel.toEntity());
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthResult>> signInWithGoogle(String idToken) async {
+    try {
+      final resultModel = await remoteDataSource.signInWithGoogle(idToken);
+      
+      // Save tokens locally
+      await localDataSource.saveTokens(
+        AuthTokensModel(
+          accessToken: resultModel.tokens.accessToken,
+          refreshToken: resultModel.tokens.refreshToken,
+        ),
+      );
+
+      // Save user data locally
+      if (resultModel.user is UserModel) {
+        await localDataSource.saveUser(resultModel.user as UserModel);
+      }
       
       // Convert model to entity
       return Right(resultModel.toEntity());
@@ -108,33 +144,20 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> resendOtp(String email) async {
+  Future<Either<Failure, User>> checkAuthStatus() async {
     try {
-      final message = await remoteDataSource.resendOtp(email);
-      return Right(message);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthResult>> signInWithGoogle() async {
-    try {
-      final resultModel = await remoteDataSource.signInWithGoogle();
+      final userModel = await remoteDataSource.checkAuthStatus();
       
-      // Save tokens locally
-      await localDataSource.saveTokens(
-        AuthTokensModel(
-          accessToken: resultModel.tokens.accessToken,
-          refreshToken: resultModel.tokens.refreshToken,
-        ),
-      );
+      // Update local user data
+      await localDataSource.saveUser(userModel);
       
-      // Convert model to entity
-      return Right(resultModel.toEntity());
+      return Right(userModel.toEntity());
     } on ServerException catch (e) {
+      // If server returns 401, clear local auth
+      if (e.statusCode == 401) {
+        await localDataSource.clearTokens();
+        await localDataSource.clearUser();
+      }
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -156,53 +179,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> verifyPasswordResetOtp({
-    required String resetToken,
-    required String otp,
-  }) async {
-    try {
-      final message = await remoteDataSource.verifyPasswordResetOtp(
-        resetToken: resetToken,
-        otp: otp,
-      );
-      return Right(message);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, String>> resetPassword({
-    required String resetToken,
+    required String email,
+    required String code,
     required String newPassword,
   }) async {
     try {
       final message = await remoteDataSource.resetPassword(
-        resetToken: resetToken,
-        password: newPassword,
-      );
-      return Right(message);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    try {
-      final dto = ChangePasswordRequestDto(
-        currentPassword: currentPassword,
+        email: email,
+        code: code,
         newPassword: newPassword,
       );
-      
-      final message = await remoteDataSource.changePassword(dto);
       return Right(message);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
@@ -226,6 +213,11 @@ class AuthRepositoryImpl implements AuthRepository {
       // Convert model to entity
       return Right(tokensModel.toEntity());
     } on ServerException catch (e) {
+      // If refresh token is invalid/expired, clear local auth
+      if (e.statusCode == 401) {
+        await localDataSource.clearTokens();
+        await localDataSource.clearUser();
+      }
       return Left(ServerFailure(message: e.message));
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
@@ -233,19 +225,34 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> checkAuthStatus() async {
+  Future<Either<Failure, User?>> getCurrentUser() async {
     try {
-      final hasSession = await localDataSource.hasValidSession();
-      return Right(hasSession);
+      final userModel = await localDataSource.getUser();
+      return Right(userModel?.toEntity());
     } catch (e) {
-      return Left(CacheFailure(message: 'Failed to check auth status'));
+      return Left(CacheFailure(message: 'Failed to get current user'));
     }
   }
 
   @override
   Future<Either<Failure, void>> logout() async {
     try {
+      // Get refresh token before clearing
+      final tokens = await localDataSource.getTokens();
+      
+      // Call backend logout if we have a refresh token
+      if (tokens != null && tokens.refreshToken.isNotEmpty) {
+        try {
+          await remoteDataSource.logout(tokens.refreshToken);
+        } catch (e) {
+          // Ignore backend errors during logout
+        }
+      }
+      
+      // Clear local data
       await localDataSource.clearTokens();
+      await localDataSource.clearUser();
+      
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(message: 'Failed to logout'));

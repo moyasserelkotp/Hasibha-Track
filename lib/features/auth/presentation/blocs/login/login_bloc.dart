@@ -28,8 +28,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async {
     emit(const LoginLoading());
 
+    // Use identifier (email or phone) for login
     final result = await loginUseCase(
-      username: event.username,
+      identifier: event.identifier,
       password: event.password,
     );
 
@@ -52,7 +53,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   ) async {
     emit(const LoginLoading());
 
-    final result = await googleSignInUseCase();
+    // TODO: Get Google ID token from google_sign_in package
+    // For now, pass the ID token from event
+    final result = await googleSignInUseCase(event.idToken);
 
     result.fold(
       (failure) => emit(LoginFailure(failure.message)),

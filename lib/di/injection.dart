@@ -37,15 +37,11 @@ import '../features/auth/domain/usecases/google_sign_in_usecase.dart';
 import '../features/auth/domain/usecases/login_usecase.dart';
 import '../features/auth/domain/usecases/refresh_token_usecase.dart';
 import '../features/auth/domain/usecases/register_usecase.dart';
-import '../features/auth/domain/usecases/resend_otp_usecase.dart';
 import '../features/auth/domain/usecases/reset_password_send_email_usecase.dart';
-import '../features/auth/domain/usecases/reset_password_finish_usecase.dart';
-import '../features/auth/domain/usecases/reset_password_verify_otp_usecase.dart';
-import '../features/auth/domain/usecases/verify_otp_usecase.dart';
-import '../features/auth/domain/usecases/change_password_usecase.dart';
+import '../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../features/auth/domain/usecases/check_auth_status_usecase.dart';
+import '../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../features/auth/domain/usecases/logout_usecase.dart';
-import '../features/auth/core/services/token_service.dart';
 import '../features/auth/presentation/blocs/auth/auth_bloc.dart';
 import '../features/auth/presentation/blocs/login/login_bloc.dart';
 import '../features/auth/presentation/blocs/register/register_bloc.dart';
@@ -148,19 +144,52 @@ import '../shared/cubit/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
+// Configuration: Set to true to use mock data (no backend required)
+const bool USE_MOCK_DATA = true;
+
 Future<void> init() async {
   // ! External Dependencies
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-  
+
   const secureStorage = FlutterSecureStorage();
   sl.registerLazySingleton(() => secureStorage);
-  
+
   // Initialize CacheHelper with SharedPreferences and SecureStorage
   CacheHelper.sharedPreferences = sharedPreferences;
   CacheHelper.secureStorage = secureStorage;
-  
-  // Dio with interceptor
+
+  // --- Hive Boxes ---
+  // Helper function to open or reuse box
+  Future<Box<T>> openBoxSafely<T>(String name) async {
+    if (Hive.isBoxOpen(name)) {
+      // Close the existing box if it's open with wrong type
+      try {
+        await Hive.box(name).close();
+      } catch (e) {
+        // Box might already be closed or have different type, ignore
+      }
+    }
+    return await Hive.openBox<T>(name);
+  }
+
+  // Open all boxes safely
+  final categoryBox = await openBoxSafely<Map<dynamic, dynamic>>('categories');
+  final expenseBox = await openBoxSafely<Map<dynamic, dynamic>>('expenses');
+
+  final budgetBox = await openBoxSafely<Map<dynamic, dynamic>>('budgets');
+  final savingsBox = await openBoxSafely<Map<dynamic, dynamic>>('savings_goals');
+  final debtBox = await openBoxSafely<Map<dynamic, dynamic>>('debts');
+
+  // Register boxes with unique instance names
+  sl.registerLazySingleton(() => categoryBox, instanceName: 'categoryBox');
+  sl.registerLazySingleton(() => expenseBox, instanceName: 'expenseBox');
+
+  sl.registerLazySingleton(() => budgetBox, instanceName: 'budgetBox');
+  sl.registerLazySingleton(() => savingsBox, instanceName: 'savingsBox');
+  sl.registerLazySingleton(() => debtBox, instanceName: 'debtBox');
+
+  // --- Dio with interceptor ---
   final dio = Dio(BaseOptions(
     baseUrl: ApiConstants.apiBaseUrl,
     connectTimeout: const Duration(seconds: 30),
@@ -170,8 +199,6 @@ Future<void> init() async {
       'Accept': 'application/json',
     },
   ));
-  
-  // Add auth interceptor
   dio.interceptors.add(AuthInterceptor(dio: dio));
   sl.registerLazySingleton(() => dio);
 
@@ -191,74 +218,55 @@ Future<void> init() async {
   sl.registerFactory(() => OnboardingCubit(completeOnboardingUseCase: sl()));
 
   // --- Auth ---
-  // Data Sources
+  // Use mock data source for testing without backend
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(dio: sl()),
   );
-  sl.registerLazySingleton<AuthLocalDataSource>(
-    () => AuthLocalDataSourceImpl(),
-  );
-
-  // Repository
-  sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-    ),
-  );
-
-  // Services
-  sl.registerLazySingleton(
-    () => TokenService(localDataSource: sl()),
-  );
+  sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl());
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+  ));
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(repository: sl()));
   sl.registerLazySingleton(() => RegisterUseCase(repository: sl()));
-  sl.registerLazySingleton(() => VerifyOtpUseCase(repository: sl()));
-  sl.registerLazySingleton(() => ResendOtpUseCase(repository: sl()));
   sl.registerLazySingleton(() => ResetPasswordSendEmailUseCase(repository: sl()));
-  sl.registerLazySingleton(() => ResetPasswordVerifyOtpUseCase(repository: sl()));
-  sl.registerLazySingleton(() => ResetPasswordFinishUseCase(repository: sl()));
-  sl.registerLazySingleton(() => ChangePasswordUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(repository: sl()));
+  
   sl.registerLazySingleton(() => GoogleSignInUseCase(repository: sl()));
   sl.registerLazySingleton(() => RefreshTokenUseCase(repository: sl()));
   sl.registerLazySingleton(() => CheckAuthStatusUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
 
   // BLoCs
   sl.registerLazySingleton(() => AuthBloc(
-        checkAuthStatusUseCase: sl(),
-        logoutUseCase: sl(),
-      ));
-
+    checkAuthStatusUseCase: sl(),
+    getCurrentUserUseCase: sl(),
+    logoutUseCase: sl(),
+  ));
   sl.registerFactory(() => LoginBloc(
-        loginUseCase: sl(),
-        googleSignInUseCase: sl(),
-        authBloc: sl(),
-      ));
-
+    loginUseCase: sl(),
+    googleSignInUseCase: sl(),
+    authBloc: sl(),
+  ));
   sl.registerFactory(() => RegisterBloc(
-        registerUseCase: sl(),
-        verifyOtpUseCase: sl(),
-        resendOtpUseCase: sl(),
-        authBloc: sl(),
-      ));
-
+    registerUseCase: sl(),
+    authBloc: sl(),
+  ));
   sl.registerFactory(() => PasswordBloc(
-        resetPasswordSendEmailUseCase: sl(),
-        resetPasswordVerifyOtpUseCase: sl(),
-        resetPasswordFinishUseCase: sl(),
-        changePasswordUseCase: sl(),
-      ));
+    resetPasswordSendEmailUseCase: sl(),
+    resetPasswordUseCase: sl(),
+  ));
 
   // --- Home ---
   sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<HomeLocalDataSource>(() => HomeLocalDataSourceImpl());
   sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(
-        remoteDataSource: sl(),
-        localDataSource: sl(),
-      ));
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+  ));
   sl.registerLazySingleton(() => GetDashboardSummaryUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetRecentTransactionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => AddTransactionUseCase(sl()));
@@ -268,45 +276,24 @@ Future<void> init() async {
   sl.registerFactory(() => AnalyticsCubit(sl()));
 
   // --- Expense ---
-  // Services
   sl.registerLazySingleton(() => OcrService());
   sl.registerLazySingleton(() => BudgetExpenseSyncService(budgetRepository: sl()));
-  
-  // Hive boxes for local storage
-  final expenseBox = await Hive.openBox<Map<dynamic, dynamic>>('expenses');
-  final categoryBox = await Hive.openBox<Map<dynamic, dynamic>>('categories');
-  sl.registerLazySingleton(() => expenseBox);
-  sl.registerLazySingleton(() => categoryBox);
-  
-  // Data Sources
-  sl.registerLazySingleton<ExpenseRemoteDataSource>(
-    () => ExpenseRemoteDataSourceImpl(dio: sl()),
-  );
-  sl.registerLazySingleton<ExpenseLocalDataSource>(
-    () => ExpenseLocalDataSourceImpl(
-      expenseBox: sl(),
-      categoryBox: sl(),
-    ),
-  );
-  
-  // Repository
-  sl.registerLazySingleton<ExpenseRepository>(
-    () => ExpenseRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-      ocrService: sl(),
-    ),
-  );
-  
-  // Use Cases
+  sl.registerLazySingleton<ExpenseRemoteDataSource>(() => ExpenseRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<ExpenseLocalDataSource>(() => ExpenseLocalDataSourceImpl(
+    expenseBox: sl(instanceName: 'expenseBox'),
+    categoryBox: sl(instanceName: 'categoryBox'),
+  ));
+  sl.registerLazySingleton<ExpenseRepository>(() => ExpenseRepositoryImpl(
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+    ocrService: sl(),
+  ));
   sl.registerLazySingleton(() => GetExpensesUseCase(sl()));
   sl.registerLazySingleton(() => CreateExpenseUseCase(sl()));
   sl.registerLazySingleton(() => UpdateExpenseUseCase(sl()));
   sl.registerLazySingleton(() => DeleteExpenseUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
   sl.registerLazySingleton(() => ImportExpenseFromImageUseCase(sl()));
-  
-  // BLoCs
   sl.registerFactory(() => ExpenseBloc(
     getExpensesUseCase: sl(),
     createExpenseUseCase: sl(),
@@ -318,35 +305,18 @@ Future<void> init() async {
   sl.registerFactory(() => CategoryBloc(getCategoriesUseCase: sl()));
 
   // --- Budget ---
-  // Hive box for local storage
-  final budgetBox = await Hive.openBox<Map<dynamic, dynamic>>('budgets');
-  sl.registerLazySingleton(() => budgetBox);
-  
-  // Data Sources
-  sl.registerLazySingleton<BudgetRemoteDataSource>(
-    () => BudgetRemoteDataSourceImpl(dio: sl()),
-  );
-  sl.registerLazySingleton<BudgetLocalDataSource>(
-    () => BudgetLocalDataSourceImpl(budgetBox: sl()),
-  );
-  
-  // Repository
-  sl.registerLazySingleton<BudgetRepository>(
-    () => BudgetRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-    ),
-  );
-  
-  // Use Cases
+  sl.registerLazySingleton<BudgetRemoteDataSource>(() => BudgetRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<BudgetLocalDataSource>(() => BudgetLocalDataSourceImpl(budgetBox: sl(instanceName: 'budgetBox')));
+  sl.registerLazySingleton<BudgetRepository>(() => BudgetRepositoryImpl(
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+  ));
   sl.registerLazySingleton(() => GetBudgetsUseCase(sl()));
   sl.registerLazySingleton(() => CreateBudgetUseCase(sl()));
   sl.registerLazySingleton(() => UpdateBudgetUseCase(sl()));
   sl.registerLazySingleton(() => DeleteBudgetUseCase(sl()));
   sl.registerLazySingleton(() => CheckBudgetLimitsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateSpentAmountUseCase(sl()));
-  
-  // BLoC
   sl.registerFactory(() => BudgetBloc(
     getBudgetsUseCase: sl(),
     createBudgetUseCase: sl(),
@@ -356,57 +326,29 @@ Future<void> init() async {
   ));
 
   // --- Analytics ---
-  // Data Sources
-  sl.registerLazySingleton<AnalyticsRemoteDataSource>(
-    () => AnalyticsRemoteDataSourceImpl(dio: sl()),
-  );
-  
-  // Repository
-  sl.registerLazySingleton<AnalyticsRepository>(
-    () => AnalyticsRepositoryImpl(remoteDataSource: sl()),
-  );
-  
-  // Use Cases
+  sl.registerLazySingleton<AnalyticsRemoteDataSource>(() => AnalyticsRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<AnalyticsRepository>(() => AnalyticsRepositoryImpl(remoteDataSource: sl()));
   sl.registerLazySingleton(() => GetSpendingAnalyticsUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoryBreakdownUseCase(sl()));
   sl.registerLazySingleton(() => GetMonthlyComparisonUseCase(sl()));
-  
-  // BLoC
   sl.registerFactory(() => AnalyticsBloc(
     getSpendingAnalyticsUseCase: sl(),
     getMonthlyComparisonUseCase: sl(),
   ));
 
   // --- Savings ---
-  // Hive box
-  final savingsBox = await Hive.openBox<Map<dynamic, dynamic>>('savings_goals');
-  sl.registerLazySingleton(() => savingsBox);
-
-  // Data Sources
-  sl.registerLazySingleton<SavingsRemoteDataSource>(
-    () => SavingsRemoteDataSourceImpl(dio: sl()),
-  );
-  sl.registerLazySingleton<SavingsLocalDataSource>(
-    () => SavingsLocalDataSourceImpl(savingsBox: sl()),
-  );
-  
-  // Repository
-  sl.registerLazySingleton<SavingsRepository>(
-    () => SavingsRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-    ),
-  );
-  
-  // Use Cases
+  sl.registerLazySingleton<SavingsRemoteDataSource>(() => SavingsRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<SavingsLocalDataSource>(() => SavingsLocalDataSourceImpl(savingsBox: sl(instanceName: 'savingsBox')));
+  sl.registerLazySingleton<SavingsRepository>(() => SavingsRepositoryImpl(
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+  ));
   sl.registerLazySingleton(() => GetSavingsGoalsUseCase(sl()));
   sl.registerLazySingleton(() => CreateSavingsGoalUseCase(sl()));
   sl.registerLazySingleton(() => UpdateSavingsGoalUseCase(sl()));
   sl.registerLazySingleton(() => DeleteSavingsGoalUseCase(sl()));
   sl.registerLazySingleton(() => AddFundsToGoalUseCase(sl()));
   sl.registerLazySingleton(() => WithdrawFundsFromGoalUseCase(sl()));
-  
-  // BLoC
   sl.registerFactory(() => SavingsBloc(
     getSavingsGoalsUseCase: sl(),
     createSavingsGoalUseCase: sl(),
@@ -417,35 +359,18 @@ Future<void> init() async {
   ));
 
   // --- Debt ---
-  // Hive box
-  final debtBox = await Hive.openBox<Map<dynamic, dynamic>>('debts');
-  sl.registerLazySingleton(() => debtBox);
-
-  // Data Sources
-  sl.registerLazySingleton<DebtRemoteDataSource>(
-    () => DebtRemoteDataSourceImpl(dio: sl()),
-  );
-  sl.registerLazySingleton<DebtLocalDataSource>(
-    () => DebtLocalDataSourceImpl(debtBox: sl()),
-  );
-
-  // Repository
-  sl.registerLazySingleton<DebtRepository>(
-    () => DebtRepositoryImpl(
-      remoteDataSource: sl(),
-      localDataSource: sl(),
-    ),
-  );
-
-  // Use Cases
+  sl.registerLazySingleton<DebtRemoteDataSource>(() => DebtRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<DebtLocalDataSource>(() => DebtLocalDataSourceImpl(debtBox: sl(instanceName: 'debtBox')));
+  sl.registerLazySingleton<DebtRepository>(() => DebtRepositoryImpl(
+    remoteDataSource: sl(),
+    localDataSource: sl(),
+  ));
   sl.registerLazySingleton(() => GetDebtsUseCase(sl()));
   sl.registerLazySingleton(() => CreateDebtUseCase(sl()));
   sl.registerLazySingleton(() => UpdateDebtUseCase(sl()));
   sl.registerLazySingleton(() => DeleteDebtUseCase(sl()));
   sl.registerLazySingleton(() => AddPaymentUseCase(sl()));
   sl.registerLazySingleton(() => GetDebtSummaryUseCase(sl()));
-
-  // BLoC
   sl.registerFactory(() => DebtBloc(
     getDebtsUseCase: sl(),
     createDebtUseCase: sl(),
@@ -455,7 +380,7 @@ Future<void> init() async {
     getDebtSummaryUseCase: sl(),
   ));
 
-  // --- Phase 8: AI & Input Services ---
+  // --- AI & Input Services ---
   sl.registerLazySingleton(() => VoiceInputService());
   sl.registerLazySingleton(() => EnhancedOcrService());
   sl.registerLazySingleton(() => PdfParserService());
@@ -463,23 +388,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RecommendationEngine());
 
   // --- Settings & Services ---
-  // Services
   sl.registerLazySingleton(() => ExportService());
   sl.registerLazySingleton(() => BackupService(localDataSource: sl()));
-  
-  // Repository
-  sl.registerLazySingleton<SettingsRepository>(
-    () => SettingsRepositoryImpl(localDataSource: sl()),
-  );
-  
-  // Use Cases
+  sl.registerLazySingleton<SettingsRepository>(() => SettingsRepositoryImpl(localDataSource: sl()));
   sl.registerLazySingleton(() => GetSettingsUseCase(repository: sl()));
   sl.registerLazySingleton(() => UpdateSettingsUseCase(repository: sl()));
-  
-  // Cubits
-  sl.registerFactory(() => SettingsCubit(
-    getSettingsUseCase: sl(),
-    updateSettingsUseCase: sl(),
-  ));
+  sl.registerFactory(() => SettingsCubit(getSettingsUseCase: sl(), updateSettingsUseCase: sl()));
   sl.registerFactory(() => ThemeCubit(sharedPreferences: sl()));
 }
+

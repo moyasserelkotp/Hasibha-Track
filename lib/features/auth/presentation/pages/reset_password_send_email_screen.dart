@@ -20,7 +20,7 @@ class ResetPasswordSendEmailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<PasswordBloc>(
       create: (context) => di.sl<PasswordBloc>(),
       child: _ResetPasswordSendEmailContent(),
     );

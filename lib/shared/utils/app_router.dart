@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hasibha/features/auth/presentation/pages/otp_confirm_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/register_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_send_email_screen.dart';
-import 'package:hasibha/features/auth/presentation/pages/reset_password_verify_otp_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_finish_screen.dart';
 import 'package:hasibha/features/home/presentation/pages/home_screen_dashboard.dart';
 import 'package:hasibha/shared/pages/export_screen.dart';
@@ -46,6 +44,7 @@ class AppRouter {
         path: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
       ),
+      /*
       GoRoute(
         path: AppRoutes.otpConfirm,
         builder: (context, state) {
@@ -53,6 +52,7 @@ class AppRouter {
           return OtpConfirmScreen(email: email);
         },
       ),
+      */
       GoRoute(
         path: AppRoutes.resetPasswordSendEmail,
         builder: (context, state) => const ResetPasswordSendEmailScreen(),
@@ -60,15 +60,16 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.resetPasswordConfirmOtp,
         builder: (context, state) {
-           final resetToken = state.extra as String?;
-           return ResetPasswordVerifyOtpScreen(resetToken: resetToken);
+           final email = state.extra as String?;
+           // Reuse finish screen which now handles code entry
+           return ResetPasswordFinishScreen(email: email);
         },
       ),
       GoRoute(
         path: AppRoutes.resetPasswordFinish,
         builder: (context, state) {
-           final resetToken = state.extra as String?;
-           return ResetPasswordFinishScreen(resetToken: resetToken);
+           final email = state.extra as String?;
+           return ResetPasswordFinishScreen(email: email);
         },
       ),
       GoRoute(
@@ -92,6 +93,14 @@ class AppRouter {
           final debt = state.extra as Debt?;
           return CreateDebtScreen(debt: debt);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.debts,
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Debts List Screen - Coming Soon'),
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.debtDetail,
@@ -119,6 +128,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.insights,
         builder: (context, state) => const InsightsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.analytics,
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Analytics Screen - Coming Soon'),
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.offers,

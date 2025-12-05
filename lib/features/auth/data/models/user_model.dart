@@ -19,11 +19,12 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] as int,
-      username: json['username'] as String,
-      email: json['email'] as String,
-      fullName: json['full_name'] as String? ?? '',
-      mobile: json['mobile'] as String?,
+      id: json['id'] as String? ?? '',
+      username: json['username'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      fullName: json['full_name'] as String? ?? json['username'] as String? ?? '',
+      // Support both 'phone' (new API) and 'mobile' (old API)
+      mobile: json['phone'] as String? ?? json['mobile'] as String?,
       profile: json['profile'] != null
           ? UserProfileModel.fromJson(json['profile'] as Map<String, dynamic>)
           : null,
@@ -41,7 +42,7 @@ class UserModel extends User {
       'username': username,
       'email': email,
       'full_name': fullName,
-      if (mobile != null) 'mobile': mobile,
+      if (mobile != null) 'phone': mobile,  // Send as 'phone' to new API
       if (profile != null)
         'profile': (profile as UserProfileModel).toJson(),
       if (avatar != null) 'avatar': avatar,

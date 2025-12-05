@@ -101,8 +101,8 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<BudgetBloc>()),
-        BlocProvider(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
+        BlocProvider<BudgetBloc>(create: (_) => di.sl<BudgetBloc>()),
+        BlocProvider<CategoryBloc>(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
       ],
       child: Scaffold(
         backgroundColor: AppColors.background,

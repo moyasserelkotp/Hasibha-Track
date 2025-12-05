@@ -3,7 +3,7 @@ import 'user_profile.dart';
 
 /// Core User entity representing an authenticated user
 class User extends Equatable {
-  final int id;
+  final String id;
   final String username;
   final String email;
   final String fullName;

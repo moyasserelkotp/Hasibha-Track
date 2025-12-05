@@ -27,13 +27,13 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -42,7 +42,7 @@ class _LoginFormState extends State<LoginForm> {
     AppSnackBar.hide(context);
     if (_formKey.currentState!.validate()) {
       context.read<LoginBloc>().add(LoginRequested(
-            username: _usernameController.text.trim(),
+            identifier: _identifierController.text.trim(),
             password: _passwordController.text,
           ));
     }
@@ -56,10 +56,8 @@ class _LoginFormState extends State<LoginForm> {
       listener: (context, state) {
         AppSnackBar.hide(context);
 
-        context.go(AppRoutes.home);
-
         if (state is LoginSuccess) {
-          // Navigation will be handled by AuthBloc listener in main app
+          // Navigate to home on successful login
           context.go(AppRoutes.home);
         } else if (state is LoginFailure) {
           AppSnackBar.showError(context, message: state.message);
@@ -83,8 +81,8 @@ class _LoginFormState extends State<LoginForm> {
 
               SizedBox(height: 48.h),
 
-              // Username Field
-              _buildUsernameField(),
+              // Email or Phone Field
+              _buildIdentifierField(),
 
               SizedBox(height: 7.h),
 
@@ -127,12 +125,13 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildUsernameField() {
+  Widget _buildIdentifierField() {
     return CustomerTextForm(
-      name: AppStrings.email,
-      controller: _usernameController,
-      validator: (value) => AuthValidators.validateUsername(value),
+      name: AppStrings.emailOrPhone,
+      controller: _identifierController,
+      validator: (value) => AuthValidators.validateIdentifier(value),
       onFieldSubmitted: () => _validateAndLogin(context),
+      keyboardType: TextInputType.emailAddress,
     );
   }
 

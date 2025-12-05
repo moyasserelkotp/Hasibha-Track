@@ -35,6 +35,7 @@ class AppStrings {
   static const String email = 'Email';
   static const String username = 'Username';
   static const String usernameOrEmail = 'Username or Email';
+  static const String emailOrPhone = 'Email or Phone';
   static const String password = 'Password';
   static const String confirmPassword = 'Confirm Password';
   static const String fullName = 'Full Name';
@@ -134,7 +135,7 @@ class AppStrings {
   static const String errorServer = 'Server error. Please try again later.';
   static const String errorAuth = 'Authentication failed. Please login again.';
   static const String errorInvalidEmail = 'Please enter a valid email address.';
-  static const String errorInvalidPassword = 'Password must be at least 8 characters.';
+  static const String errorInvalidPassword = 'Password must be at least 6 characters.';
   static const String errorPasswordMismatch = 'Passwords do not match.';
   static const String errorRequiredField = 'This field is required.';
   static const String errorInvalidAmount = 'Please enter a valid amount.';

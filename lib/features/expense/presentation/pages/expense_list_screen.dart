@@ -21,8 +21,8 @@ class ExpenseListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<ExpenseBloc>()..add(const LoadExpenses())),
-        BlocProvider(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
+        BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()..add(const LoadExpenses())),
+        BlocProvider<CategoryBloc>(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
       ],
       child: const _ExpenseListContent(),
     );

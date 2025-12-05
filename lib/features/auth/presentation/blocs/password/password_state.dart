@@ -28,31 +28,11 @@ class PasswordResetEmailSent extends PasswordState {
   List<Object?> get props => [message];
 }
 
-/// Password reset OTP verified successfully
-class PasswordResetOtpVerified extends PasswordState {
-  final String resetToken;
-
-  const PasswordResetOtpVerified(this.resetToken);
-
-  @override
-  List<Object?> get props => [resetToken];
-}
-
 /// Password reset completed successfully
 class PasswordResetSuccess extends PasswordState {
   final String message;
 
   const PasswordResetSuccess(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-/// Password changed successfully
-class PasswordChangeSuccess extends PasswordState {
-  final String message;
-
-  const PasswordChangeSuccess(this.message);
 
   @override
   List<Object?> get props => [message];

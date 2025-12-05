@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<HomeCubit>(
       create: (context) => di.sl<HomeCubit>()..loadDashboardData(),
       child: PopScope(
         canPop: false, // Prevent back navigation from home - use logout instead
@@ -386,7 +386,7 @@ class HomeScreen extends StatelessWidget {
   Future<void> _showVoiceDialog(BuildContext context) async {
     await showDialog(
       context: context,
-      builder: (context) => BlocProvider(
+      builder: (context) => BlocProvider<ExpenseBloc>(
         create: (_) => di.sl<ExpenseBloc>(),
         child: const VoiceExpenseDialog(),
       ),

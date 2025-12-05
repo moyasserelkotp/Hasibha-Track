@@ -20,7 +20,7 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<RegisterBloc>(
       create: (context) => di.sl<RegisterBloc>(),
       child: const _RegisterContent(),
     );
@@ -92,8 +92,8 @@ class _RegisterContentState extends State<_RegisterContent>
             username: _usernameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
-            fullName: "", // Optional or add field
-            mobile: null, // Optional or add field
+            confirmPassword: _confirmPasswordController.text.trim(),
+            phone: null, // Optional - can add phone field later
           ));
     }
   }
@@ -107,15 +107,26 @@ class _RegisterContentState extends State<_RegisterContent>
         listener: (context, state) async {
           AppSnackBar.hide(context);
           if (state is RegisterSuccess) {
+            // User is now authenticated - navigate to home
             AppSnackBar.showSuccess(context,
-                message: "${AppStrings.welcome} ${state.email}");
-            // Navigate to OTP screen with email
-            context.pushReplacement(
-              AppRoutes.otpConfirm,
-              extra: _emailController.text.trim(),
-            );
+                message: "${AppStrings.welcome}! Account created successfully");
+            context.go(AppRoutes.home);
           } else if (state is RegisterFailure) {
-            AppSnackBar.showError(context, message: state.message);
+            // Check if it's a network error by looking for keywords
+            final isNetworkError = state.message.toLowerCase().contains('internet') ||
+                state.message.toLowerCase().contains('connection') ||
+                state.message.toLowerCase().contains('network') ||
+                state.message.toLowerCase().contains('timeout');
+            
+            if (isNetworkError) {
+              AppSnackBar.showError(
+                context,
+                message: 'No internet connection. Please check your network and try again.',
+                duration: const Duration(seconds: 4),
+              );
+            } else {
+              AppSnackBar.showError(context, message: state.message);
+            }
           }
         },
         builder: (context, state) {

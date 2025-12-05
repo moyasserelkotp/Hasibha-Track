@@ -1,22 +1,40 @@
 class ApiConstants {
   // Base URLs
-  static const String baseUrl = 'http://167.71.92.176:8000';
-  static const String apiVersion = '/api/v1';
+  static const String baseUrl = 'http://192.168.1.7:3210';
+  static const String apiVersion = '/api';
   static const String apiBaseUrl = '$baseUrl$apiVersion';
 
   // Auth Endpoints
   static const String login = '/auth/login';
-  static const String register = '/auth/register';
+  static const String signup = '/auth/signup';
+  static const String signupPhone = '/auth/signup-phone';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh-token';
-  static const String verifyOtp = '/auth/verify-otp';
-  static const String resendOtp = '/auth/resend-otp';
+  static const String googleSignIn = '/auth/google-signin';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
+  static const String authMe = '/auth/me';
+  
+  // SMS Verification Endpoints (for future use)
+  static const String smsSend = '/sms/send';
+  static const String smsVerify = '/sms/verify';
+  
+  // Deprecated endpoints - kept for reference, remove after migration
+  @Deprecated('Use signup instead')
+  static const String register = '/auth/register';
+  @Deprecated('Use forgotPassword and resetPassword flow')
   static const String resetPasswordEmail = '/auth/reset-password-email';
+  @Deprecated('No longer used in new API')
+  static const String verifyOtp = '/auth/verify-otp';
+  @Deprecated('No longer used in new API')
+  static const String resendOtp = '/auth/resend-otp';
+  @Deprecated('No longer used in new API')
   static const String resetPasswordVerifyOtp = '/auth/reset-password-verify-otp';
+  @Deprecated('No longer used in new API')
   static const String resetPasswordFinish = '/auth/reset-password-finish';
+  @Deprecated('No longer used in new API')
   static const String changePassword = '/auth/change-password';
+  @Deprecated('Use googleSignIn instead')
   static const String googleAuth = '/auth/google';
 
 

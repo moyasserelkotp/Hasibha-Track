@@ -1,11 +1,12 @@
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'logger_service.dart';
 
 class EnhancedOcrService {
   final TextRecognizer _textRecognizer = TextRecognizer();
   final ImagePicker _imagePicker = ImagePicker();
-  final _logger = LoggerService();
+  final _logger = Logger.get("EnhancedOcrService");
 
   /// Scan receipt from camera or gallery
   Future<Map<String, dynamic>?> scanReceipt({

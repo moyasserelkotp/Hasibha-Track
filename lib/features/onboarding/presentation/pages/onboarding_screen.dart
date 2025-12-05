@@ -47,7 +47,7 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<OnboardingCubit>(
       create: (context) => di.sl<OnboardingCubit>(),
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {

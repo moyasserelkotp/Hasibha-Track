@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/check_auth_status_usecase.dart';
+import '../../../domain/usecases/get_current_user_usecase.dart';
 import '../../../domain/usecases/logout_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -8,10 +9,12 @@ import 'auth_state.dart';
 /// Manages global auth state (authenticated/unauthenticated)
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final CheckAuthStatusUseCase checkAuthStatusUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
   final LogoutUseCase logoutUseCase;
 
   AuthBloc({
     required this.checkAuthStatusUseCase,
+    required this.getCurrentUserUseCase,
     required this.logoutUseCase,
   }) : super(const AuthInitial()) {
     on<AuthCheckStatusRequested>(_onCheckStatusRequested);
@@ -31,15 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(const AuthUnauthenticated()),
-      (isAuthenticated) {
-        if (isAuthenticated) {
-          // Note: In a real app, you might want to fetch user data here
-          // For now, we'll emit unauthenticated if we have tokens but no user data
-          emit(const AuthUnauthenticated());
-        } else {
-          emit(const AuthUnauthenticated());
-        }
-      },
+      (user) => emit(AuthAuthenticated(user)),
     );
   }
 

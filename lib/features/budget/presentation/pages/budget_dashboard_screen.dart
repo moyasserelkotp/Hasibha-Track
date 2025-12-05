@@ -16,7 +16,7 @@ class BudgetDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<BudgetBloc>(
       create: (_) => di.sl<BudgetBloc>()..add(const LoadBudgets()),
       child: const _BudgetDashboardContent(),
     );

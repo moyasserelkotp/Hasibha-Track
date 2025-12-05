@@ -15,7 +15,7 @@ class SavingsDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<SavingsBloc>(
       create: (_) => di.sl<SavingsBloc>()..add(const LoadSavingsGoals()),
       child: const _SavingsDashboardContent(),
     );
