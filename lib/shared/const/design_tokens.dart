@@ -83,36 +83,68 @@ class DesignTokens {
 
   // ============ GRADIENTS ============
   
-  /// Primary gradient for buttons and important elements
+  /// Hero gradient - Primary teal gradient for cards and CTAs
+  static const LinearGradient heroGradient = LinearGradient(
+    colors: [Color(0xFF00BFA5), Color(0xFF00ACC1)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  /// AI Assistant gradient - Purple gradient for AI features
+  static const LinearGradient aiGradient = LinearGradient(
+    colors: [Color(0xFF7C4DFF), Color(0xFFAB47BC)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  /// Savings gradient - Green to teal for savings features
+  static const LinearGradient savingsGradient = LinearGradient(
+    colors: [Color(0xFF4CAF50), Color(0xFF00BFA5)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  /// Quick Action gradients
+  static const LinearGradient expenseGradient = LinearGradient(
+    colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient scanGradient = LinearGradient(
+    colors: [Color(0xFF2196F3), Color(0xFF00BCD4)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  
+  static const LinearGradient sharedBudgetGradient = LinearGradient(
+    colors: [Color(0xFF7C4DFF), Color(0xFF536DFE)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  /// Primary gradient (context-aware fallback)
   static LinearGradient primaryGradient(BuildContext context) {
-    final theme = Theme.of(context);
-    return LinearGradient(
-      colors: [
-        theme.colorScheme.primary,
-        theme.colorScheme.primary.withValues(alpha: 0.8),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
+    return heroGradient;
   }
 
   /// Success gradient for positive actions
   static const LinearGradient successGradient = LinearGradient(
-    colors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
+    colors: [Color(0xFF00C853), Color(0xFF69F0AE)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   /// Error gradient for destructive actions
   static const LinearGradient errorGradient = LinearGradient(
-    colors: [Color(0xFFEF5350), Color(0xFFD32F2F)],
+    colors: [Color(0xFFFF5252), Color(0xFFFF8A80)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   /// Info gradient
   static const LinearGradient infoGradient = LinearGradient(
-    colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
+    colors: [Color(0xFF448AFF), Color(0xFF82B1FF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -178,6 +210,62 @@ class DesignTokens {
       borderRadius: borderRadiusLg,
       boxShadow: shadows ?? shadowMd,
       // Note: BackdropFilter should be applied as a separate widget
+    );
+  }
+  
+  // ============ GRADIENT DECORATIONS ============
+  
+  /// Hero gradient decoration for cards
+  static BoxDecoration heroGradientDecoration({
+    List<BoxShadow>? shadows,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxDecoration(
+      gradient: heroGradient,
+      borderRadius: borderRadius ?? borderRadiusXl,
+      boxShadow: shadows ?? [
+        BoxShadow(
+          color: const Color(0xFF00BFA5).withValues(alpha: 0.3),
+          blurRadius: 24,
+          offset: const Offset(0, 12),
+        ),
+      ],
+    );
+  }
+  
+  /// AI gradient decoration
+  static BoxDecoration aiGradientDecoration({
+    List<BoxShadow>? shadows,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxDecoration(
+      gradient: aiGradient,
+      borderRadius: borderRadius ?? borderRadiusLg,
+      boxShadow: shadows ?? [
+        BoxShadow(
+          color: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
+      ],
+    );
+  }
+  
+  /// Savings gradient decoration
+  static BoxDecoration savingsGradientDecoration({
+    List<BoxShadow>? shadows,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxDecoration(
+      gradient: savingsGradient,
+      borderRadius: borderRadius ?? borderRadiusXl,
+      boxShadow: shadows ?? [
+        BoxShadow(
+          color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+          blurRadius: 24,
+          offset: const Offset(0, 12),
+        ),
+      ],
     );
   }
 

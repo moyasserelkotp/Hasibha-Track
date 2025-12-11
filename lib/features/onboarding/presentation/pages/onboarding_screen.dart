@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../di/injection.dart' as di;
-import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/buttons/gradient_button.dart';
+import '../../../../shared/widgets/indicators/custom_page_indicator.dart';
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/app_strings.dart';
 import '../../../../shared/utils/routes.dart';
+import '../../../../shared/const/design_tokens.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_page_widget.dart';
-import '../widgets/onboarding_indicator.dart';
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -111,29 +112,27 @@ class OnboardingScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           // Page indicators
-                          OnboardingIndicator(
-                            itemCount: _items.length,
+                          CustomPageIndicator(
                             currentPage: cubit.currentPage,
+                            itemCount: _items.length,
                           ),
                           const SizedBox(height: 30),
 
                           // Next/Get Started button
-                          SizedBox(
-                            width: double.infinity,
-                            child: PrimaryButton(
-                              text: isLastPage ? AppStrings.getStarted : AppStrings.next,
-                              isLoading: state is OnboardingLoading,
-                              onPressed: () {
-                                if (isLastPage) {
-                                  cubit.completeOnboarding();
-                                } else {
-                                  _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                }
-                              },
-                            ),
+                          GradientButton(
+                            text: isLastPage ? AppStrings.getStarted : AppStrings.next,
+                            gradient: DesignTokens.heroGradient,
+                            isLoading: state is OnboardingLoading,
+                            onPressed: () {
+                              if (isLastPage) {
+                                cubit.completeOnboarding();
+                              } else {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),

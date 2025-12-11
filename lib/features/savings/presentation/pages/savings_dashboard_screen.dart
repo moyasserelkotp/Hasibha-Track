@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/const/colors.dart';
+import '../../../../shared/const/design_tokens.dart';
+import '../../../../shared/widgets/animations/animated_counter.dart';
 import '../../../../shared/utils/routes.dart';
 import '../blocs/savings_bloc.dart';
 import '../blocs/savings_event.dart';
@@ -87,46 +89,33 @@ class _SavingsDashboardContent extends StatelessWidget {
                 children: [
                   // Total Savings Summary
                   Container(
-                    padding: EdgeInsets.all(20.w),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
+                    padding: EdgeInsets.all(24.w),
+                    decoration: DesignTokens.savingsGradientDecoration(),
                     child: Column(
                       children: [
                         Text(
                           'Total Saved',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                         SizedBox(height: 8.h),
-                        Text(
-                          '\$${state.totalSaved.toStringAsFixed(2)}',
+                        AnimatedCounter(
+                          value: state.totalSaved,
+                          prefix: '\$',
                           style: TextStyle(
-                            fontSize: 32.sp,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 36.sp,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(height: 16.h),
-                        LinearProgressIndicator(
-                          value: state.overallProgress,
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 4.h),
                         Text(
-                          '${(state.overallProgress * 100).toInt()}% of Total Target',
+                          'Across ${state.goals.length} goals',
                           style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 13.sp,
+                            color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
