@@ -1,58 +1,41 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../domain/entities/spending_analytics.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../../shared/const/colors.dart';
+import '../../../../shared/const/design_tokens.dart';
 
 class MonthlyComparisonChart extends StatelessWidget {
-  final List<MonthlySpending> monthlyData;
-
-  const MonthlyComparisonChart({
-    super.key,
-    required this.monthlyData,
-  });
+  const MonthlyComparisonChart({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (monthlyData.isEmpty) {
-      return Center(
-        child: Text(
-          'No data available',
-          style: TextStyle(color: AppColors.textSecondary),
-        ),
-      );
-    }
-
-    // Ensure we have data for all months or at least sort them
-    final sortedData = List<MonthlySpending>.from(monthlyData)
-      ..sort((a, b) => a.month.compareTo(b.month));
-
-    final maxY = sortedData.isEmpty 
-        ? 100.0 
-        : sortedData.map((e) => e.amount).reduce((a, b) => a > b ? a : b);
-    final adjustedMaxY = maxY * 1.2;
+    // Mock data for current vs last month
+    final List<Map<String, dynamic>> data = [
+      {'category': 'Food', 'current': 450, 'last': 380},
+      {'category': 'Transport', 'current': 280, 'last': 320},
+      {'category': 'Shopping', 'current': 320, 'last': 250},
+      {'category': 'Bills', 'current': 500, 'last': 500},
+      {'category': 'Other', 'current': 180, 'last': 210},
+    ];
 
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: adjustedMaxY,
+        maxY: 600,
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
-            // tooltipBgColor: Colors.transparent, // Deprecated
-            tooltipPadding: const EdgeInsets.all(0),
-            tooltipMargin: 8,
-            getTooltipItem: (
-              BarChartGroupData group,
-              int groupIndex,
-              BarChartRodData rod,
-              int rodIndex,
-            ) {
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              final category = data[groupIndex]['category'];
+              final value = rod.toY;
+              final label = rodIndex == 0 ? 'This Month' : 'Last Month';
+              
               return BarTooltipItem(
-                rod.toY.round().toString(),
+                '$category\n$label\n\$${value.toInt()}',
                 TextStyle(
-                  color: AppColors.primary,
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  fontSize: 12.sp,
                 ),
               );
             },
@@ -60,57 +43,98 @@ class MonthlyComparisonChart extends StatelessWidget {
         ),
         titlesData: FlTitlesData(
           show: true,
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                final index = value.toInt();
-                if (index >= 0 && index < sortedData.length) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      sortedData[index].monthName,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10.sp,
-                      ),
-                    ),
-                  );
+                if (value.toInt() < 0 || value.toInt() >= data.length) {
+                  return const Text('');
                 }
-                return const Text('');
+                return Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Text(
+                    data[value.toInt()]['category'],
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11.sp,
+                    ),
+                  ),
+                );
               },
-              reservedSize: 30,
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 42,
+              interval: 150,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                return Text(
+                  '\$${value.toInt()}',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                );
+              },
+            ),
           ),
         ),
-        gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
-        barGroups: sortedData.asMap().entries.map((e) {
+        barGroups: data.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          
           return BarChartGroupData(
-            x: e.key,
+            x: index,
             barRods: [
               BarChartRodData(
-                toY: e.value.amount,
-                color: AppColors.primary,
-                width: 16.w,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4.r),
-                  topRight: Radius.circular(4.r),
+                toY: item['current'].toDouble(),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
                 ),
+                width: 16.w,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
+              ),
+              BarChartRodData(
+                toY: item['last'].toDouble(),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.secondary,
+                    AppColors.secondary.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+                width: 16.w,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
               ),
             ],
+            barsSpace: 4.w,
           );
         }).toList(),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: 150,
+          getDrawingHorizontalLine: (value) {
+            return FlLine(
+              color: AppColors.border.withValues(alpha: 0.3),
+              strokeWidth: 1,
+              dashArray: [5, 5],
+            );
+          },
+        ),
       ),
+      swapAnimationDuration: const Duration(milliseconds: 600),
+      swapAnimationCurve: Curves.easeOutCubic,
     );
   }
 }

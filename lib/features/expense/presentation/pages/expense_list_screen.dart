@@ -4,218 +4,333 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/const/colors.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/const/design_tokens.dart';
+import '../../../../shared/widgets/empty/empty_state.dart';
+import '../../../../shared/widgets/error/error_view.dart';
 import '../../../../shared/utils/routes.dart';
+import '../../domain/entities/expense.dart';
 import '../blocs/expense/expense_bloc.dart';
 import '../blocs/expense/expense_event.dart';
 import '../blocs/expense/expense_state.dart';
-import '../blocs/category/category_bloc.dart';
-import '../blocs/category/category_event.dart';
 import '../widgets/expense_card.dart';
-import '../widgets/expense_filter_sheet.dart';
 
-class ExpenseListScreen extends StatelessWidget {
+class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<ExpenseBloc>(create: (_) => di.sl<ExpenseBloc>()..add(const LoadExpenses())),
-        BlocProvider<CategoryBloc>(create: (_) => di.sl<CategoryBloc>()..add(const LoadCategories())),
-      ],
-      child: const _ExpenseListContent(),
-    );
-  }
+  State<ExpenseListScreen> createState() => _ExpenseListScreenState();
 }
 
-class _ExpenseListContent extends StatelessWidget {
-  const _ExpenseListContent();
+class _ExpenseListScreenState extends State<ExpenseListScreen> {
+  String _selectedFilter = 'All';
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Expenses'),
-        backgroundColor: AppColors.primary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              _showFilterSheet(context);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<ExpenseBloc>().add(const RefreshExpenses());
-            },
-          ),
-        ],
-      ),
-      body: BlocConsumer<ExpenseBloc, ExpenseState>(
-        listener: (context, state) {
-          if (state is ExpenseError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is ExpenseLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is ExpenseLoaded) {
-            if (state.expenses.isEmpty) {
-              return _buildEmptyState(context);
+    return BlocProvider(
+      create: (_) => di.sl<ExpenseBloc>()..add(const LoadExpenses()),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: AppBar(
+          title: const Text('Expenses'),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: _showFilterSheet,
+            ),
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _showSearchSheet,
+            ),
+          ],
+        ),
+        body: BlocBuilder<ExpenseBloc, ExpenseState>(
+          builder: (context, state) {
+            if (state is ExpenseLoading) {
+              return const Center(child: CircularProgressIndicator());
             }
 
-            return Column(
-              children: [
-                if (state.filterCategoryId != null || 
-                    state.filterStartDate != null)
-                  _buildActiveFilters(context, state),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<ExpenseBloc>().add(const RefreshExpenses());
-                    },
-                    child: ListView.builder(
-                      padding: EdgeInsets.all(16.w),
-                      itemCount: state.expenses.length,
-                      itemBuilder: (context, index) {
-                        final expense = state.expenses[index];
-                        return ExpenseCard(
-                          expense: expense,
-                          index: index,
-                          onTap: () {
-                            context.push('${AppRoutes.expenses}/${expense.id}');
-                          },
-                          onDelete: () {
-                            _showDeleteConfirmation(context, expense.id);
-                          },
-                        );
-                      },
+            if (state is ExpenseError) {
+              return ErrorView(
+                message: state.message,
+                onRetry: () => context.read<ExpenseBloc>().add(const LoadExpenses()),
+              );
+            }
+
+            if (state is ExpenseLoaded) {
+              if (state.expenses.isEmpty) {
+                return EmptyState(
+                  title: 'No Expenses Yet',
+                  subtitle: 'Start tracking your spending',
+                  icon: Icons.receipt_long_outlined,
+                  actionText: 'Add Expense',
+                  onAction: () => context.push(AppRoutes.addTransaction),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<ExpenseBloc>().add(const LoadExpenses());
+                },
+                child: Column(
+                  children: [
+                    // Summary Card
+                    Container(
+                      margin: EdgeInsets.all(DesignTokens.space16),
+                      padding: EdgeInsets.all(DesignTokens.space16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.error, AppColors.error.withValues(alpha: 0.7)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: DesignTokens.borderRadiusLg,
+                        boxShadow: DesignTokens.coloredShadow(AppColors.error),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total Spent',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: DesignTokens.textSm,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                '\$${_calculateTotal(state.expenses).toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: DesignTokens.text3xl,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${state.expenses.length} Transactions',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: DesignTokens.textSm,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                _getDateRangeText(),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  fontSize: DesignTokens.textXs,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+
+                    // Expense List
+                    Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.symmetric(horizontal: DesignTokens.space16),
+                        itemCount: state.expenses.length,
+                        itemBuilder: (context, index) {
+                          return ExpenseCard(
+                            expense: state.expenses[index],
+                            onTap: () => _showExpenseDetail(state.expenses[index]),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          }
+              );
+            }
 
-          return _buildEmptyState(context);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.push(AppRoutes.addExpense);
-        },
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 100.sp,
-            color: AppColors.grey,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'No expenses yet',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Track your spending by adding expenses',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          SizedBox(height: 24.h),
-          PrimaryButton(
-            text: 'Add First Expense',
-            onPressed: () {
-              context.push(AppRoutes.addExpense);
-            },
-          ),
-        ],
+            return const SizedBox();
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final result = await context.push(AppRoutes.addTransaction);
+            if (result == true && mounted) {
+              context.read<ExpenseBloc>().add(const LoadExpenses());
+            }
+          },
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }
 
-  Widget _buildActiveFilters(BuildContext context, ExpenseLoaded state) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      color: AppColors.primary.withValues(alpha: 0.1),
-      child: Row(
-        children: [
-          Icon(Icons.filter_list, size: 20.sp, color: AppColors.primary),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              'Filters active',
+  double _calculateTotal(List<Expense> expenses) {
+    return expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  String _getDateRangeText() {
+    if (_startDate != null && _endDate != null) {
+      return '${_startDate!.day}/${_startDate!.month} - ${_endDate!.day}/${_endDate!.month}';
+    }
+    return 'This Month';
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(DesignTokens.space20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Filter Expenses',
               style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+                fontSize: DesignTokens.textXl,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<ExpenseBloc>().add(const LoadExpenses());
-            },
-            child: const Text('Clear'),
-          ),
-        ],
+            SizedBox(height: DesignTokens.space16),
+            Wrap(
+              spacing: 8,
+              children: ['All', 'Today', 'This Month', 'Last Month', 'Custom']
+                  .map((filter) => FilterChip(
+                        label: Text(filter),
+                        selected: _selectedFilter == filter,
+                        onSelected: (selected) {
+                          setState(() => _selectedFilter = filter);
+                          Navigator.pop(context);
+                        },
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showFilterSheet(BuildContext context) {
+  void _showSearchSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => BlocProvider.value(
-        value: context.read<ExpenseBloc>(),
-        child: const ExpenseFilterSheet(),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: DesignTokens.space16,
+          right: DesignTokens.space16,
+          top: DesignTokens.space20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Search expenses...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: DesignTokens.borderRadiusMd,
+                ),
+              ),
+              onChanged: (value) {
+                // Implement search
+              },
+            ),
+            SizedBox(height: DesignTokens.space16),
+          ],
+        ),
       ),
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, String id) {
-    showDialog(
+  void _showExpenseDetail(Expense expense) {
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Expense'),
-        content: const Text('Are you sure you want to delete this expense?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          padding: EdgeInsets.all(DesignTokens.space20),
+          child: ListView(
+            controller: scrollController,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Expense Details',
+                    style: TextStyle(
+                      fontSize: DesignTokens.textXl,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              SizedBox(height: DesignTokens.space24),
+              Center(
+                child: Text(
+                  '\$${expense.amount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: DesignTokens.text4xl,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+              SizedBox(height: DesignTokens.space24),
+              _buildDetailRow('Description', expense.description ?? 'N/A'),
+              _buildDetailRow('Category', expense.categoryId),
+              _buildDetailRow('Date', '${expense.date.day}/${expense.date.month}/${expense.date.year}'),
+              if (expense.merchant != null) _buildDetailRow('Merchant', expense.merchant!),
+              if (expense.note != null) _buildDetailRow('Note', expense.note!),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              context.read<ExpenseBloc>().add(DeleteExpense(id));
-              Navigator.pop(ctx);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: DesignTokens.space16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100.w,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: DesignTokens.textSm,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: DesignTokens.textBase,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ],
       ),

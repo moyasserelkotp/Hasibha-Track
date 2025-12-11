@@ -19,6 +19,12 @@ import '../../features/ai_assistant/presentation/pages/ai_chat_screen.dart';
 import '../../features/ai_assistant/presentation/pages/insights_screen.dart';
 import '../../features/offers/presentation/pages/offers_screen.dart';
 import '../../features/expense/presentation/pages/add_expense_screen.dart';
+import '../../features/analytics/presentation/pages/analytics_dashboard_screen.dart';
+import '../../features/profile/presentation/pages/profile_screen.dart';
+import '../../features/notifications/presentation/pages/notifications_screen.dart';
+import '../../features/notifications/presentation/pages/notification_settings_screen.dart';
+import '../../features/shared_budget/presentation/pages/shared_budgets_screen.dart';
+import '../../features/analytics/presentation/pages/reports_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -131,15 +137,35 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.analytics,
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Analytics Screen - Coming Soon'),
-          ),
-        ),
+        builder: (context, state) => const AnalyticsDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.analyticsDashboard,
+        builder: (context, state) => const AnalyticsDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.offers,
         builder: (context, state) => const OffersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationSettings,
+        builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.sharedBudgets,
+        builder: (context, state) => const SharedBudgetsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.reports,
+        builder: (context, state) => const ReportsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
