@@ -1,4 +1,7 @@
 import 'package:hasibha/features/home/data/models/transaction_model.dart';
+import 'package:hasibha/features/budget/domain/entities/budget.dart';
+import 'package:hasibha/features/savings/domain/entities/savings_goal.dart';
+import 'package:hasibha/features/notifications/domain/entities/notification.dart';
 
 /// Comprehensive mock data provider for testing the entire application
 class MockDataProvider {
@@ -163,90 +166,170 @@ class MockDataProvider {
   }
 
   // Savings goals mock data
-  static List<Map<String, dynamic>> getMockSavingsGoals() {
+  static List<SavingsGoal> getMockSavingsGoals() {
+    final now = DateTime.now();
     return [
-      {
-        'id': 'sg_001',
-        'name': 'Vacation Fund',
-        'targetAmount': 5000.00,
-        'currentAmount': 3250.00,
-        'deadline': DateTime.now().add(const Duration(days: 90)),
-        'color': '#FFB300', // Orange-yellow
-        'icon': 'card_travel',
-      },
-      {
-        'id': 'sg_002',
-        'name': 'Emergency Fund',
-        'targetAmount': 10000.00,
-        'currentAmount': 7200.00,
-        'deadline': DateTime.now().add(const Duration(days: 180)),
-        'color': '#4CAF50', // Green
-        'icon': 'security',
-      },
-      {
-        'id': 'sg_003',
-        'name': 'New Laptop',
-        'targetAmount': 2500.00,
-        'currentAmount': 1580.00,
-        'deadline': DateTime.now().add(const Duration(days: 60)),
-        'color': '#2196F3', // Blue
-        'icon': 'laptop',
-      },
-      {
-        'id': 'sg_004',
-        'name': 'Car Fund',
-        'targetAmount': 15000.00,
-        'currentAmount': 4230.00,
-        'deadline': DateTime.now().add(const Duration(days: 365)),
-        'color': '#9C27B0', // Purple
-        'icon': 'directions_car',
-      },
+      SavingsGoal(
+        id: 'sg_001',
+        name: 'Vacation Fund',
+        targetAmount: 5000.00,
+        currentAmount: 3250.00,
+        deadline: now.add(const Duration(days: 90)),
+        color: 0xFFFFB300, // Orange-yellow
+        icon: 'card_travel',
+        isCompleted: false,
+        createdAt: now.subtract(const Duration(days: 60)),
+        updatedAt: now.subtract(const Duration(days: 3)),
+      ),
+      SavingsGoal(
+        id: 'sg_002',
+        name: 'Emergency Fund',
+        targetAmount: 10000.00,
+        currentAmount: 7200.00,
+        deadline: now.add(const Duration(days: 180)),
+        color: 0xFF4CAF50, // Green
+        icon: 'security',
+        isCompleted: false,
+        createdAt: now.subtract(const Duration(days: 120)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+      SavingsGoal(
+        id: 'sg_003',
+        name: 'New Laptop',
+        targetAmount: 2500.00,
+        currentAmount: 1580.00,
+        deadline: now.add(const Duration(days: 60)),
+        color: 0xFF2196F3, // Blue
+        icon: 'laptop',
+        isCompleted: false,
+        createdAt: now.subtract(const Duration(days: 45)),
+        updatedAt: now.subtract(const Duration(days: 2)),
+      ),
+      SavingsGoal(
+        id: 'sg_004',
+        name: 'Car Fund',
+        targetAmount: 15000.00,
+        currentAmount: 4230.00,
+        deadline: now.add(const Duration(days: 365)),
+        color: 0xFF9C27B0, // Purple
+        icon: 'directions_car',
+        isCompleted: false,
+        createdAt: now.subtract(const Duration(days: 200)),
+        updatedAt: now.subtract(const Duration(days: 5)),
+      ),
     ];
   }
 
   // Budget mock data
-  static List<Map<String, dynamic>> getMockBudgets() {
+  static List<Budget> getMockBudgets() {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    final monthEnd = DateTime(now.year, now.month + 1, 0);
+    
     return [
-      {
-        'id': 'bud_001',
-        'category': 'Food & Dining',
-        'budgetAmount': 500.00,
-        'spentAmount': 250.75,
-        'period': 'monthly',
-        'color': '#FF6B6B',
-      },
-      {
-        'id': 'bud_002',
-        'category': 'Transportation',
-        'budgetAmount': 200.00,
-        'spentAmount': 76.30,
-        'period': 'monthly',
-        'color': '#4ECDC4',
-      },
-      {
-        'id': 'bud_003',
-        'category': 'Entertainment',
-        'budgetAmount': 150.00,
-        'spentAmount': 25.98,
-        'period': 'monthly',
-        'color': '#95E1D3',
-      },
-      {
-        'id': 'bud_004',
-        'category': 'Shopping',
-        'budgetAmount': 300.00,
-        'spentAmount': 96.98,
-        'period': 'monthly',
-        'color': '#FFE66D',
-      },
-      {
-        'id': 'bud_005',
-        'category': 'Bills & Utilities',
-        'budgetAmount': 400.00,
-        'spentAmount': 264.99,
-        'period': 'monthly',
-        'color': '#F38181',
-      },
+      Budget(
+        id: 'bud_001',
+        categoryId: 'Food',
+        limit: 500.00,
+        period: BudgetPeriod.monthly,
+        spent: 250.75,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
+      Budget(
+        id: 'bud_002',
+        categoryId: 'Transport',
+        limit: 200.00,
+        period: BudgetPeriod.monthly,
+        spent: 76.30,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
+      Budget(
+        id: 'bud_003',
+        categoryId: 'Entertainment',
+        limit: 150.00,
+        period: BudgetPeriod.monthly,
+        spent: 25.98,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
+      Budget(
+        id: 'bud_004',
+        categoryId: 'Shopping',
+        limit: 300.00,
+        period: BudgetPeriod.monthly,
+        spent: 96.98,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
+      Budget(
+        id: 'bud_005',
+        categoryId: 'Bills',
+        limit: 400.00,
+        period: BudgetPeriod.monthly,
+        spent: 264.99,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
+      // Add one exceeded budget for testing
+      Budget(
+        id: 'bud_006',
+        categoryId: 'Health',
+        limit: 100.00,
+        period: BudgetPeriod.monthly,
+        spent: 125.50,
+        startDate: monthStart,
+        endDate: monthEnd,
+        isActive: true,
+        alertSettings: const AlertSettings(
+          enabled: true,
+          threshold: 80.0,
+          notifyOnExceed: true,
+        ),
+        createdAt: monthStart,
+        updatedAt: now,
+      ),
     ];
   }
 
@@ -399,17 +482,85 @@ class MockDataProvider {
   // Get total saved across all goals
   static double getTotalSaved() {
     final goals = getMockSavingsGoals();
-    return goals.fold(
-        0.0, (sum, goal) => sum + (goal['currentAmount'] as double));
+    return goals.fold(0.0, (sum, goal) => sum + goal.currentAmount);
   }
 
   // Get overall savings progress
   static double getOverallProgress() {
     final goals = getMockSavingsGoals();
-    final totalTarget =
-        goals.fold(0.0, (sum, goal) => sum + (goal['targetAmount'] as double));
-    final totalCurrent = goals.fold(
-        0.0, (sum, goal) => sum + (goal['currentAmount'] as double));
+    final totalTarget = goals.fold(0.0, (sum, goal) => sum + goal.targetAmount);
+    final totalCurrent = goals.fold(0.0, (sum, goal) => sum + goal.currentAmount);
     return totalCurrent / totalTarget;
+  }
+  
+  // Get mock notifications
+  static List<AppNotification> getMockNotifications() {
+    final now = DateTime.now();
+    return [
+      AppNotification(
+        id: 'notif_001',
+        title: 'Budget Alert: Health',
+        body: "You've exceeded your Health budget by \$25.50",
+        type: NotificationType.budgetAlert,
+        priority: NotificationPriority.high,
+        scheduledTime: now.subtract(const Duration(hours: 2)),
+        sentTime: now.subtract(const Duration(hours: 2)),
+        isSent: true,
+        isRead: false,
+      ),
+      AppNotification(
+        id: 'notif_002',
+        title: 'Bill Reminder',
+        body: 'Electricity bill due in 3 days',
+        type: NotificationType.billReminder,
+        priority: NotificationPriority.medium,
+        scheduledTime: now.subtract(const Duration(hours: 5)),
+        sentTime: now.subtract(const Duration(hours: 5)),
+        isSent: true,
+        isRead: true,
+      ),
+      AppNotification(
+        id: 'notif_003',
+        title: 'Savings Milestone! 🎉',
+        body: "You've reached 65% of your Vacation Fund goal!",
+        type: NotificationType.savingsMilestone,
+        priority: NotificationPriority.medium,
+        scheduledTime: now.subtract(const Duration(days: 1)),
+        sentTime: now.subtract(const Duration(days: 1)),
+        isSent: true,
+        isRead: true,
+      ),
+      AppNotification(
+        id: 'notif_004',
+        title: 'Budget Warning: Food',
+        body: "You've used 50% of your Food budget",
+        type: NotificationType.budgetAlert,
+        priority: NotificationPriority.low,
+        scheduledTime: now.subtract(const Duration(days: 2)),
+        sentTime: now.subtract(const Duration(days: 2)),
+        isSent: true,
+        isRead: true,
+      ),
+    ];
+  }
+  
+  // Get mock user profile data
+  static Map<String, dynamic> getMockUserProfile() {
+    return {
+      'id': 'user_001',
+      'name': userName,
+      'email': userEmail,
+      'phone': '+1 234 567 8900',
+      'avatar': null,
+      'joinedDate': DateTime.now().subtract(const Duration(days: 180)),
+      'currency': 'USD',
+      'language': 'en',
+      'enableNotifications': true,
+      'enableBiometric': false,
+      'totalExpenses': monthlyExpenses,
+      'totalIncome': monthlyIncome,
+      'totalBudgets': 6,
+      'totalGoals': 4,
+    };
   }
 }

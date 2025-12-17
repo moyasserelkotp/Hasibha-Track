@@ -5,6 +5,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/design_tokens.dart';
 import '../../../../shared/utils/routes.dart';
+import '../../../../shared/data/mock_data_provider.dart';
 import '../../domain/entities/notification.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -15,41 +16,14 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  // Mock data - would come from BLoC in real implementation
-  final List<AppNotification> _notifications = [
-    AppNotification(
-      id: '1',
-      title: 'Budget Alert: Food',
-      body: 'You\'ve spent 85% of your food budget this month',
-      type: NotificationType.budgetAlert,
-      priority: NotificationPriority.high,
-      scheduledTime: DateTime.now().subtract(const Duration(hours: 2)),
-      sentTime: DateTime.now().subtract(const Duration(hours: 2)),
-      isSent: true,
-    ),
-    AppNotification(
-      id: '2',
-      title: 'Bill Reminder',
-      body: 'Electricity bill due in 3 days',
-      type: NotificationType.billReminder,
-      priority: NotificationPriority.medium,
-      scheduledTime: DateTime.now().subtract(const Duration(hours: 5)),
-      sentTime: DateTime.now().subtract(const Duration(hours: 5)),
-      isSent: true,
-      isRead: true,
-    ),
-    AppNotification(
-      id: '3',
-      title: 'Savings Milestone! 🎉',
-      body: 'You\'ve reached 50% of your vacation fund goal!',
-      type: NotificationType.savingsMilestone,
-      priority: NotificationPriority.medium,
-      scheduledTime: DateTime.now().subtract(const Duration(days: 1)),
-      sentTime: DateTime.now().subtract(const Duration(days: 1)),
-      isSent: true,
-      isRead: true,
-    ),
-  ];
+  // Load from MockDataProvider
+  late List<AppNotification> _notifications;
+  
+  @override
+  void initState() {
+    super.initState();
+    _notifications = MockDataProvider.getMockNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {

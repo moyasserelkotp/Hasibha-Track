@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/design_tokens.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/data/mock_data_provider.dart';
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
-import '../../../auth/presentation/blocs/auth/auth_bloc.dart';
-import '../../../auth/presentation/blocs/auth/auth_state.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,24 +16,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  File? _profileImage;
+  File? _avatarImage;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late Map<String, dynamic> _userProfile;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
+    _userProfile = MockDataProvider.getMockUserProfile();
     _loadUserData();
   }
 
   void _loadUserData() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      _nameController.text = authState.user.fullName; // This would be user.name in real implementation
-      _emailController.text = 'user@example.com'; // This would come from user data
-    }
+    _nameController = TextEditingController(text: _userProfile['name']);
+    _emailController = TextEditingController(text: _userProfile['email']);
+    _phoneController = TextEditingController(text: _userProfile['phone'] ?? '');
   }
 
   Future<void> _pickImage() async {
@@ -46,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (image != null) {
       setState(() {
-        _profileImage = File(image.path);
+        _avatarImage = File(image.path);
       });
     }
   }
@@ -89,8 +87,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       boxShadow: DesignTokens.shadowLg,
                     ),
                     child: ClipOval(
-                      child: _profileImage != null
-                          ? Image.file(_profileImage!, fit: BoxFit.cover)
+                      child: _avatarImage != null
+                          ? Image.file(_avatarImage!, fit: BoxFit.cover)
                           : Container(
                               color: AppColors.primary.withValues(alpha: 0.1),
                               child: Icon(
@@ -131,11 +129,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('Transactions', '156', Icons.receipt_long),
+                  child: _buildStatCard('Spending', '\$${_userProfile['totalExpenses'].toStringAsFixed(0)}', Icons.trending_down),
                 ),
                 SizedBox(width: DesignTokens.space12),
                 Expanded(
-                  child: _buildStatCard('Days Active', '45', Icons.calendar_today),
+                  child: _buildStatCard('Income', '\$${_userProfile['totalIncome'].toStringAsFixed(0)}', Icons.trending_up),
                 ),
               ],
             ),
@@ -143,11 +141,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _buildStatCard('Budgets', '8', Icons.account_balance_wallet),
+                  child: _buildStatCard('Budgets', _userProfile['totalBudgets'].toString(), Icons.account_balance_wallet),
                 ),
                 SizedBox(width: DesignTokens.space12),
                 Expanded(
-                  child: _buildStatCard('Savings Goals', '5', Icons.savings),
+                  child: _buildStatCard('Savings Goals', _userProfile['totalGoals'].toString(), Icons.savings),
                 ),
               ],
             ),
@@ -213,9 +211,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: DesignTokens.space24),
             
             // Save Button
-            PrimaryButton(
-              text: 'Save Changes',
-              onPressed: _saveProfile,
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(vertical: DesignTokens.space16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: DesignTokens.borderRadiusMd,
+                  ),
+                ),
+                child: const Text(
+                  'Save Changes',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
             ),
             
             SizedBox(height: DesignTokens.space16),

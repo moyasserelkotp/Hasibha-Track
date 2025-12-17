@@ -3,16 +3,28 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/design_tokens.dart';
-import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/data/mock_data_provider.dart';
 import '../../../../shared/utils/routes.dart';
 
-class SharedBudgetsScreen extends StatelessWidget {
+class SharedBudgetsScreen extends StatefulWidget {
   const SharedBudgetsScreen({super.key});
 
   @override
+  State<SharedBudgetsScreen> createState() => _SharedBudgetsScreenState();
+}
+
+class _SharedBudgetsScreenState extends State<SharedBudgetsScreen> {
+  late List<Map<String, dynamic>> _sharedBudgets;
+
+  @override
+  void initState() {
+    super.initState();
+    _sharedBudgets = MockDataProvider.getMockSharedBudgets();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Mock data - would come from Firebase in real implementation
-    final hasSharedBudgets = false;
+    final hasSharedBudgets = _sharedBudgets.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -24,7 +36,6 @@ class SharedBudgetsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.group_add),
             onPressed: () {
-              // Navigate to join budget with code
               _showJoinBudgetDialog(context);
             },
           ),
@@ -33,7 +44,6 @@ class SharedBudgetsScreen extends StatelessWidget {
       body: hasSharedBudgets ? _buildBudgetsList() : _buildEmptyState(context),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to create shared budget
           _showCreateBudgetSheet(context);
         },
         backgroundColor: AppColors.primary,
@@ -154,12 +164,176 @@ class SharedBudgetsScreen extends StatelessWidget {
   }
 
   Widget _buildBudgetsList() {
-    return ListView(
+    return ListView.builder(
       padding: EdgeInsets.all(DesignTokens.space16),
-      children: [
-        // Would show list of shared budgets
-        const Center(child: Text('Shared budgets list would appear here')),
-      ],
+      itemCount: _sharedBudgets.length,
+      itemBuilder: (context, index) {
+        final budget = _sharedBudgets[index];
+        final progress = (budget['totalSpent'] as double) / (budget['totalBudget'] as double);
+        final members = budget['members'] as List<dynamic>;
+        
+        return Container(
+          margin: EdgeInsets.only(bottom: DesignTokens.space16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: DesignTokens.borderRadiusLg,
+            boxShadow: DesignTokens.shadowMd,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with name and members
+              Container(
+                padding: EdgeInsets.all(DesignTokens.space16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(DesignTokens.radiusLg),
+                    topRight: Radius.circular(DesignTokens.radiusLg),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            budget['name'],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: DesignTokens.textLg,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            '${members.length} members',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontSize: DesignTokens.textSm,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Member avatars
+                    Row(
+                      children: members.take(3).map((member) {
+                        return Container(
+                          margin: EdgeInsets.only(left: 4.w),
+                          width: 32.w,
+                          height: 32.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.success,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: Center(
+                            child: Text(
+                              member['avatar'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Budget progress
+              Padding(
+                padding: EdgeInsets.all(DesignTokens.space16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Spent',
+                          style: TextStyle(
+                            fontSize: DesignTokens.textSm,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          '\$${budget['totalSpent'].toStringAsFixed(2)} / \$${budget['totalBudget'].toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: DesignTokens.textBase,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    ClipRRect(
+                      borderRadius: DesignTokens.borderRadiusSm,
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8.h,
+                        backgroundColor: AppColors.border.withValues(alpha: 0.2),
+                        valueColor: AlwaysStoppedAnimation(
+                          progress > 0.8 ? AppColors.error : AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: DesignTokens.space16),
+                    
+                    // Member spending
+                    ...members.map((member) => Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28.w,
+                            height: 28.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.info.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                member['avatar'],
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: Text(
+                              member['name'],
+                              style: TextStyle(fontSize: DesignTokens.textSm),
+                            ),
+                          ),
+                          Text(
+                            '\$${member['spent'].toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: DesignTokens.textSm,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -197,12 +371,15 @@ class SharedBudgetsScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          PrimaryButton(
-            text: 'Join',
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               // Would join budget here
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+            ),
+            child: const Text('Join', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -265,12 +442,25 @@ class SharedBudgetsScreen extends StatelessWidget {
               maxLines: 2,
             ),
             SizedBox(height: DesignTokens.space20),
-            PrimaryButton(
-              text: 'Create & Invite Members',
-              onPressed: () {
-                Navigator.pop(context);
-                // Would create budget and show invitation screen
-              },
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Would create budget and show invitation screen
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(vertical: DesignTokens.space16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: DesignTokens.borderRadiusMd,
+                  ),
+                ),
+                child: const Text(
+                  'Create & Invite Members',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
             ),
             SizedBox(height: DesignTokens.space16),
           ],

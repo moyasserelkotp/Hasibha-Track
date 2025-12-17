@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../shared/data/mock_data_provider.dart';
 import '../../domain/usecases/get_savings_goals_usecase.dart';
 import '../../domain/usecases/create_savings_goal_usecase.dart';
 import '../../domain/usecases/update_savings_goal_usecase.dart';
@@ -15,6 +16,7 @@ class SavingsBloc extends Bloc<SavingsEvent, SavingsState> {
   final DeleteSavingsGoalUseCase deleteSavingsGoalUseCase;
   final AddFundsToGoalUseCase addFundsToGoalUseCase;
   final WithdrawFundsFromGoalUseCase withdrawFundsFromGoalUseCase;
+  final bool useMockData;
 
   SavingsBloc({
     required this.getSavingsGoalsUseCase,
@@ -23,6 +25,7 @@ class SavingsBloc extends Bloc<SavingsEvent, SavingsState> {
     required this.deleteSavingsGoalUseCase,
     required this.addFundsToGoalUseCase,
     required this.withdrawFundsFromGoalUseCase,
+    this.useMockData = true, // Default to mock data for testing
   }) : super(const SavingsInitial()) {
     on<LoadSavingsGoals>(_onLoadSavingsGoals);
     on<CreateSavingsGoal>(_onCreateSavingsGoal);
@@ -37,6 +40,14 @@ class SavingsBloc extends Bloc<SavingsEvent, SavingsState> {
     Emitter<SavingsState> emit,
   ) async {
     emit(const SavingsLoading());
+
+    if (useMockData) {
+      // Load mock data
+      await Future.delayed(const Duration(milliseconds: 600));
+      final goals = MockDataProvider.getMockSavingsGoals();
+      emit(SavingsLoaded(goals));
+      return;
+    }
 
     final result = await getSavingsGoalsUseCase();
 

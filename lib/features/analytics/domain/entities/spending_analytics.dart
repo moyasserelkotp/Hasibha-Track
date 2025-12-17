@@ -49,7 +49,12 @@ class SpendingAnalytics extends Equatable {
   
   String? get highestSpendingDay {
     if (dailyTrend.isEmpty) return null;
-    final highest = dailyTrend.reduce((a, b) => a.amount > b.amount ? a : b);
+    var highest = dailyTrend.first;
+    for (final day in dailyTrend) {
+      if (day.amount > highest.amount) {
+        highest = day;
+      }
+    }
     return '${highest.date.year}-${highest.date.month.toString().padLeft(2, '0')}-${highest.date.day.toString().padLeft(2, '0')}';
   }
   

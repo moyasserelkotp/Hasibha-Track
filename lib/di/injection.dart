@@ -329,7 +329,7 @@ Future<void> init() async {
   ));
 
   // --- Analytics ---
-  sl.registerLazySingleton<AnalyticsRemoteDataSource>(() => AnalyticsRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<AnalyticsRemoteDataSource>(() => MockAnalyticsRemoteDataSource());
   sl.registerLazySingleton<AnalyticsRepository>(() => AnalyticsRepositoryImpl(remoteDataSource: sl()));
   sl.registerLazySingleton(() => GetSpendingAnalyticsUseCase(sl()));
   sl.registerLazySingleton(() => GetCategoryBreakdownUseCase(sl()));

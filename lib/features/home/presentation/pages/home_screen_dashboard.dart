@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
-                // TODO: Handle notifications
+                context.push(AppRoutes.notifications);
               },
             ),
             PopupMenuButton<String>(
@@ -83,11 +83,7 @@ class HomeScreen extends StatelessWidget {
                 if (value == 'logout') {
                   context.read<AuthBloc>().add(const AuthLogoutRequested());
                 } else if (value == 'profile') {
-                  // Profile screen not implemented yet
-                  AppSnackBar.showInfo(
-                    context,
-                    message: 'Profile feature coming soon!',
-                  );
+                  context.push(AppRoutes.profile);
                 } else if (value == 'change_password') {
                   context.push(AppRoutes.changePassword);
                 }

@@ -32,6 +32,10 @@ class HomeCubit extends Cubit<HomeState> {
     await Future.delayed(const Duration(milliseconds: 800));
     
     try {
+      // Get budget and savings data for stats
+      final budgets = MockDataProvider.getMockBudgets();
+      final savingsGoals = MockDataProvider.getMockSavingsGoals();
+      
       final mockSummary = DashboardSummaryModel(
         totalBalance: MockDataProvider.totalBalance,
         totalIncome: MockDataProvider.monthlyIncome,
@@ -42,6 +46,10 @@ class HomeCubit extends Cubit<HomeState> {
         monthlyIncome: MockDataProvider.monthlyIncome,
         monthlyExpenses: MockDataProvider.monthlyExpenses,
         unreadNotifications: 3,
+        activeBudgets: budgets.length,
+        budgetsOnTrack: budgets.where((b) => !b.isExceeded && !b.isApproachingLimit).length,
+        savingsGoals: savingsGoals.length,
+        goalsAchieved: savingsGoals.where((g) => g.isCompleted).length,
       );
       
       emit(HomeLoaded(summary: mockSummary));

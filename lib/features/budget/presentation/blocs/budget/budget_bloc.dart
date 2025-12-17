@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../shared/data/mock_data_provider.dart';
 import '../../../domain/usecases/get_budgets_usecase.dart';
 import '../../../domain/usecases/create_budget_usecase.dart';
 import '../../../domain/usecases/update_budget_usecase.dart';
@@ -14,6 +15,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   final UpdateBudgetUseCase updateBudgetUseCase;
   final DeleteBudgetUseCase deleteBudgetUseCase;
   final CheckBudgetLimitsUseCase checkBudgetLimitsUseCase;
+  final bool useMockData;
 
   BudgetBloc({
     required this.getBudgetsUseCase,
@@ -21,6 +23,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     required this.updateBudgetUseCase,
     required this.deleteBudgetUseCase,
     required this.checkBudgetLimitsUseCase,
+    this.useMockData = true, // Default to mock data for testing
   }) : super(const BudgetInitial()) {
     on<LoadBudgets>(_onLoadBudgets);
     on<RefreshBudgets>(_onRefreshBudgets);
@@ -35,6 +38,21 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     Emitter<BudgetState> emit,
   ) async {
     emit(const BudgetLoading());
+
+    if (useMockData) {
+      // Load mock data
+      await Future.delayed(const Duration(milliseconds: 600));
+      final budgets = MockDataProvider.getMockBudgets();
+      final exceeded = budgets.where((b) => b.isExceeded).toList();
+      final approaching = budgets.where((b) => b.isApproachingLimit && !b.isExceeded).toList();
+      
+      emit(BudgetLoaded(
+        budgets: budgets,
+        exceededBudgets: exceeded,
+        approachingBudgets: approaching,
+      ));
+      return;
+    }
 
     final result = await getBudgetsUseCase(
       isActive: event.isActive,

@@ -4,6 +4,7 @@ import 'package:hasibha/features/auth/presentation/pages/register_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_send_email_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_finish_screen.dart';
 import 'package:hasibha/features/home/presentation/pages/home_screen_dashboard.dart';
+import 'package:hasibha/shared/pages/main_shell.dart';
 import 'package:hasibha/shared/pages/export_screen.dart';
 import 'package:hasibha/shared/pages/settings_screen.dart';
 import 'package:hasibha/features/onboarding/presentation/pages/onboarding_screen.dart';
@@ -25,6 +26,12 @@ import '../../features/notifications/presentation/pages/notifications_screen.dar
 import '../../features/notifications/presentation/pages/notification_settings_screen.dart';
 import '../../features/shared_budget/presentation/pages/shared_budgets_screen.dart';
 import '../../features/analytics/presentation/pages/reports_screen.dart';
+import '../../features/budget/presentation/pages/budget_dashboard_screen.dart';
+import '../../features/budget/presentation/pages/create_budget_screen.dart';
+import '../../features/savings/presentation/pages/savings_dashboard_screen.dart';
+import '../../features/savings/presentation/pages/create_savings_goal_screen.dart';
+import '../../features/expense/presentation/pages/expense_list_screen.dart';
+import '../../features/debt/presentation/pages/debt_dashboard_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -48,7 +55,7 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const MainShell(),
       ),
       /*
       GoRoute(
@@ -101,12 +108,28 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: AppRoutes.budgets,
+        builder: (context, state) => const BudgetDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createBudget,
+        builder: (context, state) => const CreateBudgetScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.savings,
+        builder: (context, state) => const SavingsDashboardScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.createSavingsGoal,
+        builder: (context, state) => const CreateSavingsGoalScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.transactions,
+        builder: (context, state) => const ExpenseListScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.debts,
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Debts List Screen - Coming Soon'),
-          ),
-        ),
+        builder: (context, state) => const DebtDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.debtDetail,

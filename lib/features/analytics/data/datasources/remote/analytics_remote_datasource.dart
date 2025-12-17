@@ -1,6 +1,4 @@
-import 'package:dio/dio.dart';
-import '../../../../../shared/core/api/api_constants.dart';
-import '../../../../../shared/core/error/exceptions.dart';
+import '../../../../../shared/data/mock_data_provider.dart';
 import '../../models/analytics_models.dart';
 
 abstract class AnalyticsRemoteDataSource {
@@ -24,33 +22,30 @@ abstract class AnalyticsRemoteDataSource {
   });
 }
 
-class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
-  final Dio dio;
-
-  AnalyticsRemoteDataSourceImpl({required this.dio});
-
+/// Mock implementation of Analytics Remote Data Source
+class MockAnalyticsRemoteDataSource implements AnalyticsRemoteDataSource {
   @override
   Future<SpendingAnalyticsModel> getSpendingAnalytics({
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    try {
-      final response = await dio.get(
-        ApiConstants.analyticsSpending,
-        queryParameters: {
-          'start_date': startDate.toIso8601String(),
-          'end_date': endDate.toIso8601String(),
-        },
-      );
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      return SpendingAnalyticsModel.fromJson(
-        response.data['data'] ?? response.data,
-      );
-    } on DioException catch (e) {
-      throw ServerException(
-        message: e.response?.data['message'] ?? 'Failed to fetch analytics',
-      );
-    }
+    final categoryBreakdown = MockDataProvider.getCategoryBreakdown();
+    final totalSpent = categoryBreakdown.values.fold(0.0, (sum, amount) => sum + amount);
+    final days = endDate.difference(startDate).inDays + 1;
+
+    return SpendingAnalyticsModel(
+      totalSpent: totalSpent,
+      averageDaily: totalSpent / days,
+      averageWeekly: (totalSpent / days) * 7,
+      averageMonthly: (totalSpent / days) * 30,
+      categoryBreakdown: categoryBreakdown,
+      dailyTrend: _generateDailyTrend(startDate, endDate),
+      monthlyTrend: _generateMonthlyTrend(startDate.year),
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 
   @override
@@ -58,22 +53,19 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    try {
-      final response = await dio.get(
-        ApiConstants.analyticsCategories,
-        queryParameters: {
-          'start_date': startDate.toIso8601String(),
-          'end_date': endDate.toIso8601String(),
-        },
-      );
+    await Future.delayed(const Duration(milliseconds: 300));
 
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => CategorySpendingModel.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw ServerException(
-        message: e.response?.data['message'] ?? 'Failed to fetch category breakdown',
-      );
-    }
+    final categoryBreakdown = MockDataProvider.getCategoryBreakdown();
+    final totalSpent = categoryBreakdown.values.fold(0.0, (sum, amount) => sum + amount);
+
+    return categoryBreakdown.entries
+        .map((e) => CategorySpendingModel(
+              categoryId: e.key.toLowerCase().replaceAll(' ', '_'),
+              categoryName: e.key,
+              amount: e.value,
+              percentage: (e.value / totalSpent * 100),
+            ))
+        .toList();
   }
 
   @override
@@ -81,40 +73,54 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    try {
-      final response = await dio.get(
-        ApiConstants.analyticsTrend,
-        queryParameters: {
-          'start_date': startDate.toIso8601String(),
-          'end_date': endDate.toIso8601String(),
-        },
-      );
-
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => DailySpendingModel.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw ServerException(
-        message: e.response?.data['message'] ?? 'Failed to fetch spending trend',
-      );
-    }
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _generateDailyTrend(startDate, endDate);
   }
 
   @override
   Future<List<MonthlySpendingModel>> getMonthlyComparison({
     required int year,
   }) async {
-    try {
-      final response = await dio.get(
-        ApiConstants.analyticsMonthly,
-        queryParameters: {'year': year},
-      );
+    await Future.delayed(const Duration(milliseconds: 400));
+    return _generateMonthlyTrend(year);
+  }
 
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => MonthlySpendingModel.fromJson(json)).toList();
-    } on DioException catch (e) {
-      throw ServerException(
-        message: e.response?.data['message'] ?? 'Failed to fetch monthly comparison',
-      );
+  List<DailySpendingModel> _generateDailyTrend(DateTime startDate, DateTime endDate) {
+    final days = endDate.difference(startDate).inDays;
+    final dailyTrend = <DailySpendingModel>[];
+
+    for (int i = 0; i <= days; i++) {
+      final date = startDate.add(Duration(days: i));
+      final baseAmount = 50.0 + (i % 7) * 30.0;
+      final variance = (i % 3) * 20.0;
+      final amount = baseAmount + variance;
+
+      dailyTrend.add(DailySpendingModel(
+        date: date,
+        amount: amount,
+      ));
     }
+
+    return dailyTrend;
+  }
+
+  List<MonthlySpendingModel> _generateMonthlyTrend(int year) {
+    final now = DateTime.now();
+    final monthlyTrend = <MonthlySpendingModel>[];
+
+    for (int month = 1; month <= 12; month++) {
+      final isPastMonth = year < now.year || (year == now.year && month <= now.month);
+      final amount = isPastMonth
+          ? 2500.0 + (month * 150.0) + ((month % 3) * 200.0)
+          : 0.0;
+
+      monthlyTrend.add(MonthlySpendingModel(
+        year: year,
+        month: month,
+        amount: amount,
+      ));
+    }
+
+    return monthlyTrend;
   }
 }

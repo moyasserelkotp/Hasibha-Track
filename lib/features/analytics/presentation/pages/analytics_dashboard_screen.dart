@@ -21,7 +21,7 @@ class AnalyticsDashboardScreen extends StatefulWidget {
 
 class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedPeriod = 'Month';
+  // String _selectedPeriod = 'Month'; // TODO: Implement period filtering
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             PopupMenuButton<String>(
               icon: const Icon(Icons.date_range),
               onSelected: (value) {
-                setState(() => _selectedPeriod = value);
+                // TODO: Filter analytics by period
                 context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
               },
               itemBuilder: (context) => [

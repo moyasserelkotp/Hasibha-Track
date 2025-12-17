@@ -15,6 +15,8 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     on<LoadAnalytics>(_onLoadAnalytics);
     on<LoadMonthlyComparison>(_onLoadMonthlyComparison);
     on<RefreshAnalytics>(_onRefreshAnalytics);
+    on<LoadSpendingAnalytics>(_onLoadSpendingAnalytics);
+    on<LoadCategoryBreakdown>(_onLoadCategoryBreakdown);
   }
 
   Future<void> _onLoadAnalytics(
@@ -86,5 +88,29 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
         endDate: now,
       ));
     }
+  }
+
+  Future<void> _onLoadSpendingAnalytics(
+    LoadSpendingAnalytics event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    // Default to last 30 days
+    final now = DateTime.now();
+    add(LoadAnalytics(
+      startDate: now.subtract(const Duration(days: 30)),
+      endDate: now,
+    ));
+  }
+
+  Future<void> _onLoadCategoryBreakdown(
+    LoadCategoryBreakdown event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    // Delegate to LoadAnalytics
+    final now = DateTime.now();
+    add(LoadAnalytics(
+      startDate: now.subtract(const Duration(days: 30)),
+      endDate: now,
+    ));
   }
 }
