@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../di/injection.dart' as di;
-import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/app_strings.dart';
+import '../../../../shared/const/colors.dart';
 import '../../../../shared/utils/routes.dart';
 import '../cubit/splash_cubit.dart';
 
@@ -110,9 +110,9 @@ class _SplashScreenState extends State<SplashScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFF66BB6A),
-                    Color(0xFF81C784),
-                    Color(0xFF9CCC65),
+                    AppColors.primaryLight,
+                    AppColors.primary,
+                  AppColors.primaryLight
                   ],
                 ),
               ),
@@ -147,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 child: const Icon(
                                   Icons.account_balance_wallet_rounded,
                                   size: 85,
-                                  color: AppColors.primaryDark,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),

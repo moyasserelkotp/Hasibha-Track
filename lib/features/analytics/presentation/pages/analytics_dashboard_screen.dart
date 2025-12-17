@@ -26,7 +26,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -69,6 +69,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
               Tab(text: 'Overview'),
               Tab(text: 'Categories'),
               Tab(text: 'Trends'),
+              Tab(text: 'Reports'),
             ],
           ),
         ),
@@ -92,6 +93,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                   _buildOverviewTab(state),
                   _buildCategoriesTab(state),
                   _buildTrendsTab(state),
+                  _buildReportsTab(state),
                 ],
               );
             }
@@ -558,6 +560,16 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   }
 
   Color _getCategoryColor(String category) {
+    final categoryLower = category.toLowerCase();
+    if (categoryLower.contains('food')) return AppColors.foodColor;
+    if (categoryLower.contains('transport')) return AppColors.transportColor;
+    if (categoryLower.contains('shopping')) return AppColors.shoppingColor;
+    if (categoryLower.contains('entertainment')) return AppColors.entertainmentColor;
+    if (categoryLower.contains('health')) return AppColors.healthColor;
+    if (categoryLower.contains('bills')) return AppColors.billsColor;
+    if (categoryLower.contains('education')) return AppColors.educationColor;
+    
+    // Fallback to chart colors for unknown categories
     final colors = DesignTokens.chartColors;
     final index = category.hashCode % colors.length;
     return colors[index];
@@ -572,5 +584,157 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
     if (categoryLower.contains('health')) return Icons.local_hospital;
     if (categoryLower.contains('education')) return Icons.school;
     return Icons.category;
+  }
+
+  Widget _buildReportsTab(AnalyticsLoaded state) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(DesignTokens.space16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Report Types
+          Text(
+            'Generate Financial Reports',
+            style: TextStyle(
+              fontSize: DesignTokens.textXl,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: DesignTokens.space16),
+          
+          // Report Type Cards
+          _buildReportTypeCard(
+            'Spending Summary',
+            'Comprehensive overview of all expenses',
+            Icons.receipt_long_rounded,
+            AppColors.primary,
+          ),
+          SizedBox(height: DesignTokens.space12),
+          _buildReportTypeCard(
+            'Budget Performance',
+            'Track budget progress and overspending',
+            Icons.account_balance_wallet_rounded,
+            AppColors.success,
+          ),
+          SizedBox(height: DesignTokens.space12),
+          _buildReportTypeCard(
+            'Category Breakdown',
+            'Detailed spending by category',
+            Icons.pie_chart_rounded,
+            AppColors.secondary,
+          ),
+          SizedBox(height: DesignTokens.space12),
+          _buildReportTypeCard(
+            'Savings Progress',
+            'Track your savings goals achievement',
+            Icons.savings_rounded,
+            const Color(0xFF00BFA5),
+          ),
+          
+          SizedBox(height: DesignTokens.space24),
+          
+          // Export Options
+          Text(
+            'Export Options',
+            style: TextStyle(
+              fontSize: DesignTokens.textLg,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: DesignTokens.space12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildExportOptionCard(
+                  'PDF Report',
+                  Icons.picture_as_pdf,
+                  AppColors.error,
+                ),
+              ),
+              SizedBox(width: DesignTokens.space12),
+              Expanded(
+                child: _buildExportOptionCard(
+                  'CSV Export',
+                  Icons.table_chart,
+                  AppColors.success,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportTypeCard(String title, String subtitle, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.all(DesignTokens.space16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: DesignTokens.borderRadiusMd,
+        boxShadow: DesignTokens.shadowSm,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(icon, color: color, size: 24.sp),
+          ),
+          SizedBox(width: DesignTokens.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: DesignTokens.textBase,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: DesignTokens.textSm,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExportOptionCard(String label, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.all(DesignTokens.space20),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: DesignTokens.borderRadiusMd,
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 40.sp),
+          SizedBox(height: DesignTokens.space8),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color,
+              fontSize: DesignTokens.textSm,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

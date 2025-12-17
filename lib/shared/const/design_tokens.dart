@@ -17,6 +17,7 @@ class DesignTokens {
   static double get space32 => 32.w;
   static double get space40 => 40.w;
   static double get space48 => 48.w;
+  static double get space18 => 18.w;
 
   // ============ BORDER RADIUS ============
   static double get radiusXs => 4.r;
@@ -287,4 +288,195 @@ class DesignTokens {
   static const double breakpointMobile = 600;
   static const double breakpointTablet = 900;
   static const double breakpointDesktop = 1200;
+  
+  // ============ ENHANCED GLASSMORPHISM ============
+  
+  /// Advanced glassmorphism decoration with customizable parameters
+  static BoxDecoration advancedGlassDecoration({
+    Color? backgroundColor,
+    double blur = 10,
+    double opacity = 0.15,
+    BorderRadius? borderRadius,
+    List<BoxShadow>? shadows,
+    Border? border,
+  }) {
+    return BoxDecoration(
+      color: (backgroundColor ?? Colors.white).withValues(alpha: opacity),
+      borderRadius: borderRadius ?? borderRadiusLg,
+      border: border ?? Border.all(
+        color: Colors.white.withValues(alpha: 0.2),
+        width: 1.5,
+      ),
+      boxShadow: shadows ?? shadowMd,
+    );
+  }
+  
+  // ============ NEUMORPHIC SHADOWS ============
+  
+  /// Neumorphic shadow for raised effect
+  static List<BoxShadow> get neumorphicRaised => [
+        BoxShadow(
+          color: Colors.white.withValues(alpha: 0.5),
+          blurRadius: 10,
+          offset: const Offset(-5, -5),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.15),
+          blurRadius: 10,
+          offset: const Offset(5, 5),
+        ),
+      ];
+  
+  /// Neumorphic shadow for pressed effect
+  static List<BoxShadow> get neumorphicPressed => [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.15),
+          blurRadius: 10,
+          offset: const Offset(2, 2),
+          spreadRadius: -2,
+        ),
+      ];
+  
+  // ============ RADIAL GRADIENTS ============
+  
+  /// Radial gradient for spotlight effects
+  static RadialGradient radialSpotlight({
+    required Color centerColor,
+    required Color edgeColor,
+  }) {
+    return RadialGradient(
+      colors: [centerColor, edgeColor],
+      stops: const [0.0, 1.0],
+      center: Alignment.center,
+      radius: 1.0,
+    );
+  }
+  
+  // ============ DIAGONAL GRADIENTS ============
+  
+  /// Premium diagonal gradient
+  static const LinearGradient premiumDiagonalGradient = LinearGradient(
+    colors: [Color(0xFFFFD700), Color(0xFFFFE55C)],
+    begin: Alignment(-1.0, -1.0),
+    end: Alignment(1.0, 1.0),
+  );
+  
+  /// Warning diagonal gradient
+  static const LinearGradient warningDiagonalGradient = LinearGradient(
+    colors: [Color(0xFFFFC107), Color(0xFFFFE082)],
+    begin: Alignment(-1.0, -1.0),
+    end: Alignment(1.0, 1.0),
+  );
+  
+  // ============ CARD DECORATION PRESETS ============
+  
+  /// Standard elevated card decoration
+  static BoxDecoration elevatedCardDecoration({
+    Color? backgroundColor,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxDecoration(
+      color: backgroundColor ?? Colors.white,
+      borderRadius: borderRadius ?? borderRadiusMd,
+      boxShadow: shadowMd,
+    );
+  }
+  
+  /// Interactive card decoration with hover state
+  static BoxDecoration interactiveCardDecoration({
+    Color? backgroundColor,
+    BorderRadius? borderRadius,
+    bool isHovered = false,
+  }) {
+    return BoxDecoration(
+      color: backgroundColor ?? Colors.white,
+      borderRadius: borderRadius ?? borderRadiusMd,
+      boxShadow: isHovered ? shadowLg : shadowSm,
+      border: Border.all(
+        color: isHovered 
+            ? const Color(0xFF00BFA5).withValues(alpha: 0.3)
+            : Colors.transparent,
+        width: 2,
+      ),
+    );
+  }
+  
+  /// Gradient card with shadow
+  static BoxDecoration gradientCardDecoration({
+    required Gradient gradient,
+    BorderRadius? borderRadius,
+    List<BoxShadow>? shadows,
+  }) {
+    return BoxDecoration(
+      gradient: gradient,
+      borderRadius: borderRadius ?? borderRadiusLg,
+      boxShadow: shadows ?? shadowMd,
+    );
+  }
+  
+  /// Category card decoration with color
+  static BoxDecoration categoryCardDecoration({
+    required Color color,
+    BorderRadius? borderRadius,
+  }) {
+    return BoxDecoration(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: borderRadius ?? borderRadiusMd,
+      border: Border.all(
+        color: color.withValues(alpha: 0.3),
+        width: 1.5,
+      ),
+    );
+  }
+  
+  // ============ SHIMMER ANIMATION ============
+  
+  /// Enhanced shimmer gradient with more stops for smoother animation
+  static LinearGradient get enhancedShimmerGradient => LinearGradient(
+    colors: [
+      Colors.grey.shade300,
+      Colors.grey.shade200,
+      Colors.grey.shade100,
+      Colors.grey.shade200,
+      Colors.grey.shade300,
+    ],
+    stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+    begin: const Alignment(-1.0, -0.3),
+    end: const Alignment(1.0, 0.3),
+  );
+  
+  // ============ ANIMATED BORDER ============
+  
+  /// Animated gradient border decoration
+  static BoxDecoration animatedBorderDecoration({
+    required Gradient gradient,
+    BorderRadius? borderRadius,
+    double borderWidth = 2.0,
+  }) {
+    return BoxDecoration(
+      borderRadius: borderRadius ?? borderRadiusMd,
+      border: Border.all(color: Colors.transparent),
+      // Note: Gradient border requires custom painting
+    );
+  }
+  
+  // ============ FLOATING ACTION BUTTON ============
+  
+  /// Premium FAB decoration with gradient and shadow
+  static BoxDecoration fabDecoration({
+    Gradient? gradient,
+    List<BoxShadow>? shadows,
+  }) {
+    return BoxDecoration(
+      gradient: gradient ?? heroGradient,
+      shape: BoxShape.circle,
+      boxShadow: shadows ?? [
+        BoxShadow(
+          color: const Color(0xFF00BFA5).withValues(alpha: 0.4),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
+      ],
+    );
+  }
 }

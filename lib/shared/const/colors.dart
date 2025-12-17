@@ -110,5 +110,71 @@ class AppColors {
   static const Color googleRed = Color(0xFFDB4437);
   static const Color facebookBlue = Color(0xFF4267B2);
   static const Color tiktokBlack = Color(0xFF000000);
+  
+  // Glassmorphism Colors
+  static const Color glassWhite = Color(0xFFFFFFFF);
+  static const Color glassBlack = Color(0xFF000000);
+  static Color frostedGlass = Colors.white.withValues(alpha: 0.1);
+  static Color frostedGlassDark = Colors.black.withValues(alpha: 0.2);
+  
+  // Shimmer Colors
+  static final Color shimmerBase = Colors.grey.shade300;
+  static final Color shimmerHighlight = Colors.grey.shade100;
+  static final Color shimmerBaseDark = Colors.grey.shade700;
+  static final Color shimmerHighlightDark = Colors.grey.shade600;
+  
+  // Enhanced Gradient Collections
+  
+  // Premium gradients for special features
+  static const List<Color> premiumGradient = [
+    Color(0xFFFFD700), // Gold
+    Color(0xFFFFE55C), // Light Gold
+  ];
+  
+  // Budget alert gradients
+  static const List<Color> warningGradient = [
+    Color(0xFFFFC107), // Amber
+    Color(0xFFFFE082), // Light Amber
+  ];
+  
+  // Debt tracking gradient
+  static const List<Color> debtGradient = [
+    Color(0xFFFF6B6B), // Coral Red
+    Color(0xFFFF8E53), // Light Coral
+  ];
+  
+  // Analytics gradient
+  static const List<Color> analyticsGradient = [
+    Color(0xFF2196F3), // Blue
+    Color(0xFF00BCD4), // Cyan
+  ];
+  
+  // Notification gradient
+  static const List<Color> notificationGradient = [
+    Color(0xFFAB47BC), // Purple 400
+    Color(0xFFBA68C8), // Purple 300
+  ];
+  
+  // Achievement gradient
+  static const List<Color> achievementGradient = [
+    Color(0xFFFFD700), // Gold
+    Color(0xFFFF8C00), // Dark Orange
+  ];
+  
+  // Dark mode gradients
+  static const List<Color> primaryGradientDark = [
+    Color(0xFF64FFDA), // Teal Light
+    Color(0xFF4DD0E1), // Cyan Light
+  ];
+  
+  // Category-specific colors (for expenses/budgets)
+  static const Color foodColor = Color(0xFFFF6B6B);
+  static const Color transportColor = Color(0xFF4ECDC4);
+  static const Color shoppingColor = Color(0xFFFFBE0B);
+  static const Color entertainmentColor = Color(0xFF9B59B6);
+  static const Color healthColor = Color(0xFF00C853);
+  static const Color billsColor = Color(0xFF3498DB);
+  static const Color educationColor = Color(0xFF00BFA5);
+  static const Color othersColor = Color(0xFF95A5A6);
 }
 

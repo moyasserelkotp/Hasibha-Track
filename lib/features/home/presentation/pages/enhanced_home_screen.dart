@@ -188,35 +188,53 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
           ],
         ),
 
-        // Premium Balance Card
+        // Premium Balance Card - Modern Enhanced Design
         SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: DesignTokens.space16,
-              vertical: DesignTokens.space12,
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: AppColors.primaryGradient,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: DesignTokens.borderRadiusXl,
-                boxShadow: DesignTokens.coloredShadow(AppColors.primary, opacity: 0.25),
+          child: FadeSlideTransition(
+            delay: const Duration(milliseconds: 200),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: DesignTokens.space16,
+                vertical: DesignTokens.space12,
               ),
-              padding: EdgeInsets.all(DesignTokens.space20),
-              child: Column(
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Row(
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF00D9A3),
+                          Color(0xFF00BFA5),
+                          Color(0xFF00ACC1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        stops: [0.0, 0.5, 1.0],
+                      ),
+                      borderRadius: DesignTokens.borderRadius2xl,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF00BFA5).withValues(alpha: 0.35),
+                          blurRadius: 28,
+                          offset: const Offset(0, 14),
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(DesignTokens.space24),
+                    child: Column(
+                      children: [
+                        Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         AppStrings.totalBalance,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: DesignTokens.textBase,
-                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.95),
+                          fontSize: DesignTokens.textLg,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
                         ),
                       ),
                       GestureDetector(
@@ -225,24 +243,32 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                             _isBalanceHidden = !_isBalanceHidden;
                           });
                         },
-                        child: Icon(
-                          _isBalanceHidden 
-                              ? Icons.visibility_off_outlined 
-                              : Icons.visibility_outlined,
-                          color: Colors.white.withValues(alpha: 0.9),
-                          size: 20.sp,
+                        child: Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Icon(
+                            _isBalanceHidden 
+                                ? Icons.visibility_off_outlined 
+                                : Icons.visibility_outlined,
+                            color: Colors.white,
+                            size: 18.sp,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: DesignTokens.space8),
+                  SizedBox(height: DesignTokens.space12),
                   _isBalanceHidden
                       ? Text(
                           '••••••',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: DesignTokens.text3xl,
-                            fontWeight: FontWeight.bold,
+                            fontSize: DesignTokens.text4xl,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 2,
                           ),
                         )
                       : AnimatedCounterText(
@@ -250,16 +276,22 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                           prefix: '\$',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: DesignTokens.text3xl,
-                            fontWeight: FontWeight.bold,
+                            fontSize: DesignTokens.text4xl,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                            height: 1.2,
                           ),
                         ),
-                  SizedBox(height: DesignTokens.space16),
+                  SizedBox(height: DesignTokens.space20),
                   Container(
-                    padding: EdgeInsets.all(DesignTokens.space12),
+                    padding: EdgeInsets.all(DesignTokens.space16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: DesignTokens.borderRadiusLg,
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: DesignTokens.borderRadiusXl,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -274,9 +306,19 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                           ),
                         ),
                         Container(
-                          width: 1,
-                          height: 40.h,
-                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1.5,
+                          height: 45.h,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0.0),
+                                Colors.white.withValues(alpha: 0.4),
+                                Colors.white.withValues(alpha: 0.0),
+                              ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
                         ),
                         Expanded(
                           child: _buildBalanceItem(
@@ -291,6 +333,56 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                       ],
                     ),
                   ),
+              ]),
+            ),
+                  // Enhanced decorative background circles
+                  Positioned(
+                    top: -30,
+                    right: -30,
+                    child: Container(
+                      width: 180,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.08),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -50,
+                    left: -30,
+                    child: Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.06),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  // Additional small accent circle
+                  Positioned(
+                    top: 50,
+                    left: 30,
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -299,21 +391,21 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
 
         // Quick Actions - Enhanced Grid
         SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: DesignTokens.space12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionHeader(
-                  title: AppStrings.quickActions,
-                  icon: Icons.flash_on_rounded,
-                ),
-                SizedBox(height: DesignTokens.space16),
-                _buildQuickActionsGrid(),
-              ],
+          child: FadeSlideTransition(
+            delay: const Duration(milliseconds: 400),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: DesignTokens.space12),
+              child: SectionHeader(
+                title: AppStrings.quickActions,
+                icon: Icons.flash_on_rounded,
+              ),
             ),
           ),
         ),
+        
+        SliverToBoxAdapter(child: SizedBox(height: DesignTokens.space16)),
+
+        _buildQuickActionsSliver(),
 
         SizedBox(height: DesignTokens.space16).toSliver(),
 
@@ -518,7 +610,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
     );
   }
 
-  Widget _buildQuickActionsGrid() {
+  Widget _buildQuickActionsSliver() {
     final actions = [
       {'icon': Icons.add_circle_rounded, 'label': 'Add\nExpense', 'color': AppColors.error, 'route': AppRoutes.addTransaction},
       {'icon': Icons.account_balance_wallet_rounded, 'label': 'Create\nBudget', 'color': AppColors.primary, 'route': AppRoutes.createBudget},
@@ -530,25 +622,31 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
       {'icon': Icons.group_rounded, 'label': 'Shared\nBudgets', 'color': AppColors.accentBlue, 'route': AppRoutes.sharedBudgets},
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 10.w,
-        mainAxisSpacing: 10.h,
-        childAspectRatio: 0.90,
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(horizontal: DesignTokens.space12),
+      sliver: SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 10.w,
+          mainAxisSpacing: 10.h,
+          childAspectRatio: 0.8,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final action = actions[index];
+            return FadeSlideTransition(
+              delay: Duration(milliseconds: 400 + (index * 50)),
+              child: _buildQuickActionItem(
+                action['icon'] as IconData,
+                action['label'] as String,
+                action['color'] as Color,
+                () => context.push(action['route'] as String),
+              ),
+            );
+          },
+          childCount: actions.length,
+        ),
       ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final action = actions[index];
-        return _buildQuickActionItem(
-          action['icon'] as IconData,
-          action['label'] as String,
-          action['color'] as Color,
-          () => context.push(action['route'] as String),
-        );
-      },
     );
   }
 
@@ -560,47 +658,73 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14.r),
-      child: AnimatedScale(
-        scale: 1.0,
-        duration: const Duration(milliseconds: 150),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14.r),
-          boxShadow: DesignTokens.shadowSm,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: color.withValues(alpha: 0.08),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color, color.withValues(alpha: 0.7)],
+                  colors: [
+                    color.withValues(alpha: 0.15),
+                    color.withValues(alpha: 0.25),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12.r),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: Colors.white, size: 20.sp),
+              child: Icon(icon, color: color, size: 24.sp),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 8.h),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w),
               child: Text(
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 9.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 11.5.sp,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
-                  height: 1.2,
+                  height: 1.3,
+                  letterSpacing: -0.2,
                 ),
               ),
             ),
           ],
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildInsightsScroll(List<String> insights) {
@@ -627,23 +751,50 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
       padding: EdgeInsets.all(DesignTokens.space16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.1), color.withValues(alpha: 0.05)],
+          colors: [
+            color.withValues(alpha: 0.12),
+            color.withValues(alpha: 0.05),
+            Colors.white,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: DesignTokens.borderRadiusLg,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: DesignTokens.borderRadiusXl,
+        border: Border.all(
+          color: color.withValues(alpha: 0.25),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8.w),
+            padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10.r),
+              gradient: LinearGradient(
+                colors: [color, color.withValues(alpha: 0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Icon(
               Icons.lightbulb_rounded,
-              color: color,
-              size: 20.sp,
+              color: Colors.white,
+              size: 22.sp,
             ),
           ),
           SizedBox(width: DesignTokens.space12),
@@ -653,7 +804,8 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
               style: TextStyle(
                 fontSize: DesignTokens.textSm,
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -853,60 +1005,145 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
   }
 
   Widget _buildTransactionCard(dynamic transaction) {
-    return Container(
-      padding: EdgeInsets.all(DesignTokens.space12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: DesignTokens.borderRadiusMd,
-        boxShadow: DesignTokens.shadowSm,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: _getCategoryColor(transaction.category).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(
-              _getCategoryIcon(transaction.category),
-              color: _getCategoryColor(transaction.category),
-              size: 24.sp,
-            ),
+    final categoryColor = _getCategoryColor(transaction.category);
+    
+    return FadeSlideTransition(
+      delay: const Duration(milliseconds: 100),
+      child: Container(
+        padding: EdgeInsets.all(DesignTokens.space16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              categoryColor.withValues(alpha: 0.01),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-          SizedBox(width: DesignTokens.space12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          borderRadius: DesignTokens.borderRadiusXl,
+          border: Border.all(
+            color: categoryColor.withValues(alpha: 0.12),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: categoryColor.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(13.w),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    categoryColor.withValues(alpha: 0.15),
+                    categoryColor.withValues(alpha: 0.25),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: categoryColor.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                _getCategoryIcon(transaction.category),
+                color: categoryColor,
+                size: 28.sp,
+              ),
+            ),
+            SizedBox(width: DesignTokens.space16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: DesignTokens.textLg,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          transaction.category,
+                          style: TextStyle(
+                            color: categoryColor,
+                            fontSize: DesignTokens.textXs,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  transaction.title,
+                  '${transaction.type == 'expense' ? '-' : '+'}\ \$${transaction.amount.toStringAsFixed(2)}',
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: DesignTokens.textBase,
+                    fontWeight: FontWeight.w800,
+                    fontSize: DesignTokens.textLg,
+                    color: transaction.type == 'expense'
+                        ? AppColors.error
+                        : AppColors.success,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                Text(
-                  transaction.category,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: DesignTokens.textSm,
+                SizedBox(height: 6.h),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 8.w,
+                    vertical: 3.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.textDisabled.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Text(
+                    'Today', 
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: DesignTokens.textXs,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Text(
-            '${transaction.type == 'expense' ? '-' : '+'}\$${transaction.amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: DesignTokens.textBase,
-              color: transaction.type == 'expense'
-                  ? AppColors.error
-                  : AppColors.success,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -914,19 +1151,21 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
   Color _getCategoryColor(String category) {
     switch (category.toLowerCase()) {
       case 'food':
-        return const Color(0xFFFF6B6B);
+        return AppColors.foodColor;
       case 'transport':
-        return const Color(0xFF4ECDC4);
+        return AppColors.transportColor;
       case 'shopping':
-        return const Color(0xFFFFE66D);
+        return AppColors.shoppingColor;
       case 'entertainment':
-        return const Color(0xFF95E1D3);
+        return AppColors.entertainmentColor;
       case 'bills':
-        return const Color(0xFFF38181);
+        return AppColors.billsColor;
       case 'health':
-        return const Color(0xFF4CAF50);
+        return AppColors.healthColor;
+      case 'education':
+        return AppColors.educationColor;
       default:
-        return AppColors.primary;
+        return AppColors.othersColor;
     }
   }
 

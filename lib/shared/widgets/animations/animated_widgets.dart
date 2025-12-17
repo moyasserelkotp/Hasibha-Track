@@ -224,3 +224,348 @@ class _ShimmerLoaderState extends State<ShimmerLoader>
     );
   }
 }
+
+class FadeSlideTransition extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+  final Duration duration;
+  final Offset offset;
+
+  const FadeSlideTransition({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+    this.duration = const Duration(milliseconds: 800),
+    this.offset = const Offset(0, 0.35),
+  });
+
+  @override
+  State<FadeSlideTransition> createState() => _FadeSlideTransitionState();
+}
+
+class _FadeSlideTransitionState extends State<FadeSlideTransition>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: widget.offset, end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    if (widget.delay == Duration.zero) {
+      _controller.forward();
+    } else {
+      Future.delayed(widget.delay, () {
+        if (mounted) _controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Scale animation widget for buttons and interactive elements
+class ScaleAnimation extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+  final double scaleFactor;
+  final VoidCallback? onTap;
+
+  const ScaleAnimation({
+    super.key,
+    required this.child,
+    this.duration = const Duration(milliseconds: 150),
+    this.scaleFactor = 0.95,
+    this.onTap,
+  });
+
+  @override
+  State<ScaleAnimation> createState() => _ScaleAnimationState();
+}
+
+class _ScaleAnimationState extends State<ScaleAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: widget.scaleFactor,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
+    if (widget.onTap != null) {
+      widget.onTap!();
+    }
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Rotating animation for loading indicators and icons
+class RotatingWidget extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+  final bool repeat;
+
+  const RotatingWidget({
+    super.key,
+    required this.child,
+    this.duration = const Duration(seconds: 2),
+    this.repeat = true,
+  });
+
+  @override
+  State<RotatingWidget> createState() => _RotatingWidgetState();
+}
+
+class _RotatingWidgetState extends State<RotatingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    if (widget.repeat) {
+      _controller.repeat();
+    } else {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _controller,
+      child: widget.child,
+    );
+  }
+}
+
+/// Bouncing animation for highlighting items
+class BouncingWidget extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+  final bool repeat;
+
+  const BouncingWidget({
+    super.key,
+    required this.child,
+    this.duration = const Duration(milliseconds: 600),
+    this.repeat = true,
+  });
+
+  @override
+  State<BouncingWidget> createState() => _BouncingWidgetState();
+}
+
+class _BouncingWidgetState extends State<BouncingWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+
+    _animation = TweenSequence([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: -20.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: -20.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.bounceOut)),
+        weight: 50,
+      ),
+    ]).animate(_controller);
+
+    if (widget.repeat) {
+      _controller.repeat();
+    } else {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _animation.value),
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
+
+/// Shimmer effect for loading states
+class ShimmerEffect extends StatefulWidget {
+  final Widget child;
+  final Color? baseColor;
+  final Color? highlightColor;
+  final Duration duration;
+
+  const ShimmerEffect({
+    super.key,
+    required this.child,
+    this.baseColor,
+    this.highlightColor,
+    this.duration = const Duration(milliseconds: 1500),
+  });
+
+  @override
+  State<ShimmerEffect> createState() => _ShimmerEffectState();
+}
+
+class _ShimmerEffectState extends State<ShimmerEffect>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              stops: [
+                _controller.value - 0.3,
+                _controller.value,
+                _controller.value + 0.3,
+              ].map((e) => e.clamp(0.0, 1.0)).toList(),
+              colors: [
+                widget.baseColor ?? AppColors.shimmerBase,
+                widget.highlightColor ?? AppColors.shimmerHighlight,
+                widget.baseColor ?? AppColors.shimmerBase,
+              ],
+            ).createShader(bounds);
+          },
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
+
+/// Helper extension to convert widgets to slivers
+extension WidgetToSliver on Widget {
+  Widget toSliver() {
+    return SliverToBoxAdapter(child: this);
+  }
+}

@@ -55,29 +55,66 @@ class _SavingsDashboardContent extends StatelessWidget {
           if (state is SavingsLoaded) {
             if (state.goals.isEmpty) {
               return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.savings_outlined, size: 64.sp, color: AppColors.textSecondary),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'No savings goals yet',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        color: AppColors.textSecondary,
+                child: Padding(
+                  padding: EdgeInsets.all(32.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(32.w),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.success.withValues(alpha: 0.1),
+                              const Color(0xFF00BFA5).withValues(alpha: 0.05),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.savings_outlined,
+                          size: 80.sp,
+                          color: AppColors.success,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 24.h),
-                    ElevatedButton.icon(
-                      onPressed: () => context.push(AppRoutes.createSavingsGoal),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Create Goal'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                      SizedBox(height: 24.h),
+                      Text(
+                        'Start Saving Today',
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 12.h),
+                      Text(
+                        'Create your first savings goal and\nstart building your financial future',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      SizedBox(height: 32.h),
+                      ElevatedButton.icon(
+                        onPressed: () => context.push(AppRoutes.createSavingsGoal),
+                        icon: const Icon(Icons.add_rounded),
+                        label: Text(
+                          'Create Savings Goal',
+                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                       ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -87,50 +124,107 @@ class _SavingsDashboardContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Total Savings Summary
+                  // Total Savings Summary - Enhanced
                   Container(
-                    padding: EdgeInsets.all(24.w),
-                    decoration: DesignTokens.savingsGradientDecoration(),
+                    padding: EdgeInsets.all(28.w),
+                    decoration: DesignTokens.savingsGradientDecoration(
+                      shadows: [
+                        BoxShadow(
+                          color: const Color(0xFF4CAF50).withValues(alpha: 0.35),
+                          blurRadius: 28,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
-                        Text(
-                          'Total Saved',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total Saved',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.95),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                '${state.goals.length} Goals',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 16.h),
                         AnimatedCounter(
                           value: state.totalSaved,
                           prefix: '\$',
                           style: TextStyle(
-                            fontSize: 36.sp,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 44.sp,
+                            fontWeight: FontWeight.w800,
                             color: Colors.white,
+                            letterSpacing: -1.0,
                           ),
                         ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Across ${state.goals.length} goals',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: Colors.white.withValues(alpha: 0.8),
-                          ),
+                        SizedBox(height: 8.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.trending_up_rounded,
+                              size: 18.sp,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'Keep up the great work!',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 28.h),
 
                   // Goals List
-                  Text(
-                    'Your Goals',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Your Goals',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => context.push(AppRoutes.createSavingsGoal),
+                       icon: Icon(Icons.add_circle_outline, size: 20.sp),
+                        label: const Text('Add Goal'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 16.h),
                   ...state.goals.map((goal) => SavingsGoalCard(
@@ -150,10 +244,26 @@ class _SavingsDashboardContent extends StatelessWidget {
           return const SizedBox();
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(AppRoutes.createSavingsGoal),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.success, const Color(0xFF00BFA5)],
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.success.withValues(alpha: 0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () => context.push(AppRoutes.createSavingsGoal),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

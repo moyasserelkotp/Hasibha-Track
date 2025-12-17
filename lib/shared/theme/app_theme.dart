@@ -49,11 +49,14 @@ class AppTheme {
 
     // Typography using Google Fonts (Poppins)
     textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme).copyWith(
-      headlineLarge: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w600),
-      titleLarge: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w600),
+      displayLarge: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1.0),
+      displayMedium: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+      headlineLarge: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w600, letterSpacing: -0.5),
+      headlineMedium: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.w600),
+      titleLarge: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.w700),
       titleMedium: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.15),
-      bodyLarge: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w400),
-      bodyMedium: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w400),
+      bodyLarge: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w400, height: 1.5),
+      bodyMedium: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w400, height: 1.5),
       labelLarge: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
     ),
 

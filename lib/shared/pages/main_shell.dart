@@ -27,10 +27,11 @@ class _MainShellState extends State<MainShell> {
   late PageController _pageController;
 
   final List<Widget> _pages = [
-    const EnhancedHomeScreen(),
-    const AnalyticsDashboardScreen(),
-    const BudgetDashboardScreen(),
-    const ProfileScreen(),
+    const EnhancedHomeScreen(), // Index 0 - Orders
+    const AnalyticsDashboardScreen(), // Index 1 - Product
+    const EnhancedHomeScreen(), // Index 2 - Dashboard (center button)
+    const BudgetDashboardScreen(), // Index 3 - Category
+    const ProfileScreen(), // Index 4 - Settings
   ];
 
   @override
@@ -47,12 +48,6 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onNavTap(int index) {
-    // Handle center FAB (Add action)
-    if (index == 4) {
-      context.push(AppRoutes.addTransaction);
-      return;
-    }
-
     if (index != _currentIndex) {
       setState(() {
         _currentIndex = index;
