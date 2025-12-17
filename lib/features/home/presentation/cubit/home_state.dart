@@ -18,12 +18,15 @@ class HomeLoading extends HomeState {
 }
 
 class HomeLoaded extends HomeState {
-  final DashboardSummary dashboardSummary;
+  final DashboardSummary summary;
 
-  const HomeLoaded({required this.dashboardSummary});
+  const HomeLoaded({required this.summary});
+  
+  // Getter for backwards compatibility
+  DashboardSummary get dashboardSummary => summary;
   
   @override
-  List<Object?> get props => [dashboardSummary];
+  List<Object?> get props => [summary];
 }
 
 class HomeError extends HomeState {

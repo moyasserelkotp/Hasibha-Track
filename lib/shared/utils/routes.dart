@@ -18,11 +18,15 @@ class AppRoutes {
   static const String debts = '/debts';
   static const String savings = '/savings';
   static const String budgets = '/budgets';
+  static const String createBudget = '/create-budget';
+  static const String budgetDetail = '/budget-detail';
   static const String transactions = '/transactions';
   static const String addTransaction = '/add-transaction';
   static const String transactionDetail = '/transaction-detail';
   static const String createDebt = '/create-debt';
   static const String debtDetail = '/debt-detail';
+  static const String createSavingsGoal = '/create-savings-goal';
+  static const String savingsGoalDetail = '/savings-goal-detail';
   static const String export = '/export';
   static const String settings = '/settings';
 

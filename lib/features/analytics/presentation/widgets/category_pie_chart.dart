@@ -87,8 +87,8 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
                 );
               }),
             ),
-            swapAnimationDuration: const Duration(milliseconds: 600),
-            swapAnimationCurve: Curves.easeOutCubic,
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
           ),
         ),
         SizedBox(height: DesignTokens.space16),

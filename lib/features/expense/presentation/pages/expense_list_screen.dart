@@ -64,10 +64,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               if (state.expenses.isEmpty) {
                 return EmptyState(
                   title: 'No Expenses Yet',
-                  subtitle: 'Start tracking your spending',
+                  message: 'Start tracking your spending',
                   icon: Icons.receipt_long_outlined,
-                  actionText: 'Add Expense',
-                  onAction: () => context.push(AppRoutes.addTransaction),
+                  action: ElevatedButton.icon(
+                    onPressed: () => context.push(AppRoutes.addTransaction),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Expense'),
+                  ),
                 );
               }
 
@@ -147,6 +150,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           return ExpenseCard(
                             expense: state.expenses[index],
                             onTap: () => _showExpenseDetail(state.expenses[index]),
+                            onDelete: () {  },
                           );
                         },
                       ),
@@ -163,7 +167,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           onPressed: () async {
             final result = await context.push(AppRoutes.addTransaction);
             if (result == true && mounted) {
-              context.read<ExpenseBloc>().add(const LoadExpenses());
+              if (mounted) {
+                context.read<ExpenseBloc>().add(const LoadExpenses());
+              }
             }
           },
           backgroundColor: AppColors.primary,

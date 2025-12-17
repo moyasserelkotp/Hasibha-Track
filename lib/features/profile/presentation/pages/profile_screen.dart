@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../shared/const/colors.dart';
-import '../../shared/const/design_tokens.dart';
-import '../../shared/widgets/buttons/primary_button.dart';
-import '../../shared/widgets/snackbars/app_snackbar.dart';
-import '../auth/presentation/blocs/auth/auth_bloc.dart';
-import '../auth/presentation/blocs/auth/auth_state.dart';
+import '../../../../shared/const/colors.dart';
+import '../../../../shared/const/design_tokens.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/snackbars/app_snackbar.dart';
+import '../../../auth/presentation/blocs/auth/auth_bloc.dart';
+import '../../../auth/presentation/blocs/auth/auth_state.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _loadUserData() {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      _nameController.text = authState.token; // This would be user.name in real implementation
+      _nameController.text = authState.user.fullName; // This would be user.name in real implementation
       _emailController.text = 'user@example.com'; // This would come from user data
     }
   }

@@ -271,7 +271,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetRecentTransactionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => AddTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetAnalyticsUseCase(sl()));
-  sl.registerFactory(() => HomeCubit(getDashboardSummaryUseCase: sl()));
+  sl.registerFactory(() => HomeCubit(
+    getDashboardSummaryUseCase: sl(),
+    useMockData: USE_MOCK_DATA,
+  ));
   sl.registerFactory(() => AddTransactionCubit(sl()));
   sl.registerFactory(() => AnalyticsCubit(sl()));
 

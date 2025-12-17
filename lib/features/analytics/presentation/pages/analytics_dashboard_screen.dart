@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/design_tokens.dart';
@@ -199,7 +198,6 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             SizedBox(height: DesignTokens.space12),
             
             ...analytics.topCategories.take(5).map((category) {
-              final percentage = (category['amount'] / analytics.totalSpending * 100);
               return Container(
                 margin: EdgeInsets.only(bottom: DesignTokens.space8),
                 padding: EdgeInsets.all(DesignTokens.space12),
@@ -214,12 +212,12 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       width: 40.w,
                       height: 40.w,
                       decoration: BoxDecoration(
-                        color: _getCategoryColor(category['name']).withValues(alpha: 0.1),
+                        color: _getCategoryColor(category.categoryName).withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _getCategoryIcon(category['name']),
-                        color: _getCategoryColor(category['name']),
+                        _getCategoryIcon(category.categoryName),
+                        color: _getCategoryColor(category.categoryName),
                         size: 20.sp,
                       ),
                     ),
@@ -229,7 +227,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            category['name'],
+                            category.categoryName,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: DesignTokens.textBase,
@@ -237,10 +235,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                           ),
                           SizedBox(height: 4.h),
                           LinearProgressIndicator(
-                            value: percentage / 100,
+                            value: category.percentage / 100,
                             backgroundColor: Colors.grey.shade200,
                             valueColor: AlwaysStoppedAnimation(
-                              _getCategoryColor(category['name']),
+                              _getCategoryColor(category.categoryName),
                             ),
                           ),
                         ],
@@ -251,14 +249,14 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${category['amount'].toStringAsFixed(2)}',
+                          '\$${category.amount.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: DesignTokens.textBase,
                           ),
                         ),
                         Text(
-                          '${percentage.toStringAsFixed(1)}%',
+                          '${category.percentage.toStringAsFixed(1)}%',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: DesignTokens.textSm,
@@ -312,9 +310,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             // Detailed Category List
             ...state.analytics.topCategories.map((category) {
               return _buildCategoryCard(
-                category['name'],
-                category['amount'],
-                category['count'],
+                category.categoryName,
+                category.amount,
+                0, // Count not available in CategorySpending
               );
             }),
           ],
@@ -326,7 +324,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildTrendsTab(AnalyticsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<AnalyticsBloc>().add(LoadMonthlyComparison());
+        context.read<AnalyticsBloc>().add(LoadMonthlyComparison(year: DateTime.now().year));
       },
       child: SingleChildScrollView(
         padding: EdgeInsets.all(DesignTokens.space16),
@@ -398,14 +396,14 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
             
             _buildInsightCard(
               'Highest Spending Day',
-              state.analytics.highestSpendingDay,
+              state.analytics.highestSpendingDay ?? 'N/A',
               Icons.trending_up,
               AppColors.error,
             ),
             
             _buildInsightCard(
               'Most Frequent Category',
-              state.analytics.mostFrequentCategory,
+              state.analytics.mostFrequentCategory ?? 'N/A',
               Icons.category,
               AppColors.secondary,
             ),

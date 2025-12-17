@@ -68,7 +68,7 @@ class EnhancedEmptyState extends StatelessWidget {
                 fontSize: DesignTokens.textBase,
                 color: AppColors.textSecondary,
               ),
-              textAl ign: TextAlign.center,
+              textAlign: TextAlign.center,
             ),
             
             // Tips

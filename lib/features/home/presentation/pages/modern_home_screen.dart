@@ -9,6 +9,7 @@ import '../../../../shared/widgets/animations/animated_counter.dart';
 import '../../../../shared/widgets/indicators/progress_ring.dart';
 import '../../../../shared/widgets/buttons/quick_action_button.dart';
 import '../cubit/home_cubit.dart';
+import '../cubit/home_state.dart';
 
 class ModernHomeScreen extends StatefulWidget {
   const ModernHomeScreen({super.key});

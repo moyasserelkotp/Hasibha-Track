@@ -8,6 +8,7 @@ import '../../../../shared/const/text_styles.dart';
 import '../../../../shared/widgets/common/app_widgets.dart';
 import '../../../../shared/widgets/animations/animated_widgets.dart';
 import '../cubit/home_cubit.dart';
+import '../cubit/home_state.dart';
 
 class EnhancedHomeScreen extends StatefulWidget {
   const EnhancedHomeScreen({super.key});
@@ -230,10 +231,10 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                 Expanded(
                   child: StatCard(
                     title: AppStrings.budgets,
-                    value: summary.activeBudgets.toString(),
+                    value: summary.activeBudgets?.toString() ?? '0',
                     icon: Icons.account_balance_wallet_rounded,
                     color: AppColors.primary,
-                    subtitle: '${summary.budgetsOnTrack} on track',
+                    subtitle: '${summary.budgetsOnTrack ?? 0} on track',
                     onTap: () => Navigator.pushNamed(context, '/budgets'),
                   ),
                 ),
@@ -241,10 +242,10 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                 Expanded(
                   child: StatCard(
                     title: AppStrings.savingsGoals,
-                    value: summary.savingsGoals.toString(),
+                    value: summary.savingsGoals?.toString() ?? '0',
                     icon: Icons.savings_rounded,
                     color: AppColors.success,
-                    subtitle: '${summary.goalsAchieved} achieved',
+                    subtitle: '${summary.goalsAchieved ?? 0} achieved',
                     onTap: () => Navigator.pushNamed(context, '/savings'),
                   ),
                 ),
@@ -316,7 +317,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
             child: EmptyStateWidget(
               icon: Icons.receipt_long_rounded,
               title: AppStrings.noTransactions,
-              subtitle: AppStrings.addFirstExpense,
+              subtitle: 'Start tracking your expenses',
               actionText: AppStrings.addExpense,
               onAction: () => Navigator.pushNamed(context, '/add-expense'),
             ),

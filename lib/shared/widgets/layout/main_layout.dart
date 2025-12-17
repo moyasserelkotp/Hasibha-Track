@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../const/colors.dart';
-import '../const/design_tokens.dart';
-import '../const/app_strings.dart';
-import '../const/text_styles.dart';
+import '../../const/app_strings.dart';
+import '../../const/colors.dart';
+import '../../const/design_tokens.dart';
+import '../../const/text_styles.dart';
+
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});

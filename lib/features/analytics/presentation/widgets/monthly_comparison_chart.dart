@@ -133,8 +133,8 @@ class MonthlyComparisonChart extends StatelessWidget {
           },
         ),
       ),
-      swapAnimationDuration: const Duration(milliseconds: 600),
-      swapAnimationCurve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
     );
   }
 }

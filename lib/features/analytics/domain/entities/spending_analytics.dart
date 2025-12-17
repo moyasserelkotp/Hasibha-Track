@@ -24,6 +24,42 @@ class SpendingAnalytics extends Equatable {
     required this.endDate,
   });
 
+  // Getters for backwards compatibility
+  double get totalSpending => totalSpent;
+  double get totalIncome => 0.0; // Not tracked in this entity, return 0
+  double get savingsRate => 0.0; // Calculate if needed: (income - spending) / income
+  double get averageDailySpending => averageDaily;
+  
+  List<CategorySpending> get topCategories {
+    // Convert categoryBreakdown map to sorted list of CategorySpending
+    final totalSpent = this.totalSpent;
+    final categories = categoryBreakdown.entries.map((entry) {
+      return CategorySpending(
+        categoryId: entry.key,
+        categoryName: entry.key, // In real app, look up name from ID
+        amount: entry.value,
+        percentage: totalSpent > 0 ? (entry.value / totalSpent) * 100 : 0,
+      );
+    }).toList();
+    
+    // Sort by amount descending and return top categories
+    categories.sort((a, b) => b.amount.compareTo(a.amount));
+    return categories;
+  }
+  
+  String? get highestSpendingDay {
+    if (dailyTrend.isEmpty) return null;
+    final highest = dailyTrend.reduce((a, b) => a.amount > b.amount ? a : b);
+    return '${highest.date.year}-${highest.date.month.toString().padLeft(2, '0')}-${highest.date.day.toString().padLeft(2, '0')}';
+  }
+  
+  String? get mostFrequentCategory {
+    if (categoryBreakdown.isEmpty) return null;
+    final sorted = categoryBreakdown.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sorted.first.key;
+  }
+
   @override
   List<Object?> get props => [
         totalSpent,

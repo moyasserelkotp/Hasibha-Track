@@ -24,6 +24,9 @@ class AppStrings {
   static const String close = 'Close';
   static const String loading = 'Loading...';
   static const String or = 'OR';
+  static const String budgets = 'Budgets';
+  static const String addFirstExpense = 'Add First Expense';
+  static const String totalBalance = 'Total Balance';
   
   // Authentication
   static const String login = 'Login';
@@ -165,6 +168,11 @@ class AppStrings {
   static const String emptyBudgets = 'No budgets set yet';
   static const String emptyGoals = 'No savings goals yet';
   static const String emptyNotifications = 'No new notifications';
+  // navHome
+  static const String navHome = 'Home';
+  static const String navAnalytics = 'Analytics';
+  static const String navBudgets = 'Budgets';
+  static const String navProfile = 'Profile';
   
   // Coming Soon
   static const String comingSoon = 'Coming Soon';

@@ -29,6 +29,14 @@ class LoadMonthlyComparison extends AnalyticsEvent {
   List<Object?> get props => [year];
 }
 
+class LoadSpendingAnalytics extends AnalyticsEvent {
+  const LoadSpendingAnalytics();
+}
+
+class LoadCategoryBreakdown extends AnalyticsEvent {
+  const LoadCategoryBreakdown();
+}
+
 class RefreshAnalytics extends AnalyticsEvent {
   const RefreshAnalytics();
 }

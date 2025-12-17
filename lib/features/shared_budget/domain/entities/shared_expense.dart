@@ -41,7 +41,7 @@ class SharedExpense extends Equatable {
     this.isSplit = false,
   });
 
-  ShareExpense copyWith({
+  SharedExpense copyWith({
     String? id,
     String? budgetId,
     String? category,
