@@ -65,6 +65,7 @@ import '../features/home/presentation/cubit/analytics_cubit.dart';
 // Expense Feature
 import 'package:hive/hive.dart';
 import '../features/expense/data/datasources/remote/expense_remote_datasource.dart';
+import '../features/expense/data/datasources/remote/mock_expense_remote_datasource.dart';
 import '../features/expense/data/datasources/local/expense_local_datasource.dart';
 import '../features/expense/data/repositories/expense_repository_impl.dart';
 import '../features/expense/domain/repositories/expense_repository.dart';
@@ -112,6 +113,7 @@ import '../features/budget/data/datasources/local/budget_local_datasource.dart';
 
 // Debt Feature
 import '../features/debt/data/datasources/remote/debt_remote_datasource.dart';
+import '../features/debt/data/datasources/remote/mock_debt_remote_datasource.dart';
 import '../features/debt/data/datasources/local/debt_local_datasource.dart';
 import '../features/debt/data/repositories/debt_repository_impl.dart';
 import '../features/debt/domain/repositories/debt_repository.dart';
@@ -121,7 +123,7 @@ import '../features/debt/domain/usecases/update_debt_usecase.dart';
 import '../features/debt/domain/usecases/delete_debt_usecase.dart';
 import '../features/debt/domain/usecases/add_payment_usecase.dart';
 import '../features/debt/domain/usecases/get_debt_summary_usecase.dart';
-import '../features/debt/presentation/blocs/debt_bloc.dart ';
+import '../features/debt/presentation/blocs/debt_bloc.dart';
 
 // Settings & Services
 import '../shared/services/export_service.dart';
@@ -281,7 +283,11 @@ Future<void> init() async {
   // --- Expense ---
   sl.registerLazySingleton(() => OcrService());
   sl.registerLazySingleton(() => BudgetExpenseSyncService(budgetRepository: sl()));
-  sl.registerLazySingleton<ExpenseRemoteDataSource>(() => ExpenseRemoteDataSourceImpl(dio: sl()));
+  if (USE_MOCK_DATA) {
+     sl.registerLazySingleton<ExpenseRemoteDataSource>(() => MockExpenseRemoteDataSource());
+  } else {
+     sl.registerLazySingleton<ExpenseRemoteDataSource>(() => ExpenseRemoteDataSourceImpl(dio: sl()));
+  }
   sl.registerLazySingleton<ExpenseLocalDataSource>(() => ExpenseLocalDataSourceImpl(
     expenseBox: sl(instanceName: 'expenseBox'),
     categoryBox: sl(instanceName: 'categoryBox'),
@@ -362,7 +368,12 @@ Future<void> init() async {
   ));
 
   // --- Debt ---
-  sl.registerLazySingleton<DebtRemoteDataSource>(() => DebtRemoteDataSourceImpl(dio: sl()));
+  if (USE_MOCK_DATA) {
+     sl.registerLazySingleton<DebtRemoteDataSource>(() => MockDebtRemoteDataSource());
+  } else {
+     sl.registerLazySingleton<DebtRemoteDataSource>(() => DebtRemoteDataSourceImpl(dio: sl()));
+  }
+  
   sl.registerLazySingleton<DebtLocalDataSource>(() => DebtLocalDataSourceImpl(debtBox: sl(instanceName: 'debtBox')));
   sl.registerLazySingleton<DebtRepository>(() => DebtRepositoryImpl(
     remoteDataSource: sl(),

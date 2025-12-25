@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../di/injection.dart' as di;
@@ -11,6 +12,7 @@ import '../blocs/analytics_state.dart';
 import '../widgets/category_pie_chart.dart';
 import '../widgets/spending_trend_chart.dart';
 import '../widgets/monthly_comparison_chart.dart';
+import '../../../../shared/widgets/loading/shimmer_loading.dart';
 
 class AnalyticsDashboardScreen extends StatefulWidget {
   const AnalyticsDashboardScreen({super.key});
@@ -76,7 +78,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         body: BlocBuilder<AnalyticsBloc, AnalyticsState>(
           builder: (context, state) {
             if (state is AnalyticsLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const AnalyticsSkeleton();
             }
 
             if (state is AnalyticsError) {
@@ -110,6 +112,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
     
     return RefreshIndicator(
       onRefresh: () async {
+        HapticFeedback.mediumImpact();
         context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
       },
       child: SingleChildScrollView(
@@ -174,10 +177,10 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: DesignTokens.space16),
+            SizedBox(height: DesignTokens.space20),
             
             Container(
-              height: 300.h,
+              height: 400.h,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: DesignTokens.borderRadiusLg,
@@ -279,6 +282,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildCategoriesTab(AnalyticsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
+        HapticFeedback.mediumImpact();
         context.read<AnalyticsBloc>().add(LoadCategoryBreakdown());
       },
       child: SingleChildScrollView(
@@ -288,7 +292,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
           children: [
             // Category Pie Chart
             Container(
-              height: 300.h,
+              height: 400.h,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: DesignTokens.borderRadiusLg,
@@ -326,6 +330,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildTrendsTab(AnalyticsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
+        HapticFeedback.mediumImpact();
         context.read<AnalyticsBloc>().add(LoadMonthlyComparison(year: DateTime.now().year));
       },
       child: SingleChildScrollView(

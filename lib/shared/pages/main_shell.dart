@@ -6,6 +6,7 @@ import '../../features/analytics/presentation/pages/analytics_dashboard_screen.d
 import '../../features/budget/presentation/pages/budget_dashboard_screen.dart';
 import '../../features/profile/presentation/pages/profile_screen.dart';
 import '../widgets/navigation/notch_bottom_nav_bar.dart';
+import '../widgets/buttons/ai_floating_button.dart';
 import '../utils/routes.dart';
 import '../../features/home/presentation/cubit/home_cubit.dart';
 import '../../di/injection.dart' as di;
@@ -81,6 +82,8 @@ class _MainShellState extends State<MainShell> {
         onTap: _onNavTap,
         notificationBadgeCount: 0, // TODO: Connect to real notification count
       ),
+      floatingActionButton: const AiFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

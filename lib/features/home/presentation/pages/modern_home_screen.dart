@@ -11,6 +11,9 @@ import '../../../../shared/widgets/buttons/quick_action_button.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
+import '../widgets/transaction_list_item.dart';
+import '../../domain/entities/transaction.dart';
+
 class ModernHomeScreen extends StatefulWidget {
   const ModernHomeScreen({super.key});
 
@@ -19,6 +22,8 @@ class ModernHomeScreen extends StatefulWidget {
 }
 
 class _ModernHomeScreenState extends State<ModernHomeScreen> {
+  bool _isBalanceVisible = true;
+
   @override
   void initState() {
     super.initState();
@@ -94,7 +99,7 @@ class _ModernHomeScreenState extends State<ModernHomeScreen> {
           backgroundColor: Colors.transparent,
           flexibleSpace: FlexibleSpaceBar(
             title: Text(
-              'Welcome Back!',
+              'Welcome Back, ${summary.userName?.split(' ').first ?? 'Friend'}!',
               style: AppTextStyles.titleLarge(context),
             ),
           ),
@@ -127,25 +132,48 @@ class _ModernHomeScreenState extends State<ModernHomeScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Icon(
-                        Icons.visibility_outlined,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        size: 20.sp,
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isBalanceVisible = !_isBalanceVisible;
+                          });
+                        },
+                        icon: Icon(
+                          _isBalanceVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          size: 20.sp,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
                   SizedBox(height: 8.h),
-                  AnimatedCounter(
-                    value: summary.totalBalance,
-                    prefix: '\$',
-                    style: TextStyle(
-                      fontSize: 42.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.1,
-                      letterSpacing: -1,
-                    ),
-                  ),
+                  _isBalanceVisible
+                      ? AnimatedCounter(
+                          value: summary.totalBalance,
+                          prefix: '\$',
+                          style: TextStyle(
+                            fontSize: 42.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.1,
+                            letterSpacing: -1,
+                          ),
+                        )
+                      : Text(
+                          '\$ ****',
+                          style: TextStyle(
+                            fontSize: 42.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1.1,
+                            letterSpacing: -1,
+                          ),
+                        ),
                   SizedBox(height: 20.h),
                   Row(
                     children: [
@@ -220,7 +248,7 @@ class _ModernHomeScreenState extends State<ModernHomeScreen> {
           ),
         ),
 
-        SizedBox(height: 24.h).toSliver(),
+        SizedBox(height: 26.h).toSliver(),
 
         // Quick Actions Header
         SliverToBoxAdapter(
@@ -239,7 +267,7 @@ class _ModernHomeScreenState extends State<ModernHomeScreen> {
           ),
         ),
 
-        SizedBox(height: 16.h).toSliver(),
+        SizedBox(height: 24.h).toSliver(),
 
         // Quick Actions Grid
         SliverToBoxAdapter(
@@ -277,64 +305,137 @@ class _ModernHomeScreenState extends State<ModernHomeScreen> {
           ),
         ),
 
+        SizedBox(height: 30.h).toSliver(),
+
+
+
         SizedBox(height: 24.h).toSliver(),
 
         // AI Insight Card
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Container(
-              padding: EdgeInsets.all(20.w),
-              decoration: DesignTokens.aiGradientDecoration(),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50.w,
-                    height: 50.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
+            child: _buildAiInsightCard(),
+          ),
+        ),
+
+        SizedBox(height: 30.h).toSliver(),
+
+        // Recent Transactions Header
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.history_rounded, color: AppColors.primary, size: 20.sp),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Recent Activity',
+                      style: AppTextStyles.titleLarge(context),
                     ),
-                    child: Icon(
-                      Icons.psychology_rounded,
-                      color: Colors.white,
-                      size: 28.sp,
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'AI Insight',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Your spending is on track this month!',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16.sp),
-                ],
-              ),
+                  ],
+                ),
+                TextButton(
+                  onPressed: () {}, // Navigate to full history
+                  child: Text('View All', style: AppTextStyles.labelLarge(context)),
+                ),
+              ],
             ),
           ),
         ),
 
+        SizedBox(height: 16.h).toSliver(),
+
+        // Recent Transactions List
+        if (summary.recentTransactions.isEmpty)
+          const SliverToBoxAdapter(
+            child: Center(child: Text("No recent transactions")),
+          )
+        else
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final transaction = summary.recentTransactions[index];
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: TransactionListItem(transaction: transaction),
+                  );
+                },
+                childCount: summary.recentTransactions.length > 5 
+                    ? 5 
+                    : summary.recentTransactions.length,
+              ),
+            ),
+          ),
+
         SizedBox(height: 100.h).toSliver(),
       ],
+    );
+  }
+
+  Widget _buildAiInsightCard() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.purple.shade900,
+            Colors.deepPurple.shade700,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.deepPurple.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.auto_awesome_rounded, color: Colors.amberAccent, size: 24.sp),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Spending Insight',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Your spending on "Food" is 15% lower than last week. Great job!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

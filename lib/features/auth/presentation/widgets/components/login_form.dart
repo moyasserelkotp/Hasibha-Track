@@ -55,6 +55,7 @@ class _LoginFormState extends State<LoginForm> {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         AppSnackBar.hide(context);
+        context.go(AppRoutes.home);
 
         if (state is LoginSuccess) {
           // Navigate to home on successful login

@@ -88,6 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
       create: (_) => di.sl<SplashCubit>()..checkAuthStatus(),
       child: BlocListener<SplashCubit, SplashState>(
         listener: (context, state) {
+          context.go(AppRoutes.onboarding);
           if (state is SplashNavigate) {
             // Navigate when authentication check is done
             Future.delayed(const Duration(milliseconds: 800), () {

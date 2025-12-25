@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import '../../const/colors.dart';
 
 class NotchBottomNavBar extends StatelessWidget {
@@ -101,16 +102,15 @@ class NotchBottomNavBar extends StatelessWidget {
           Positioned(
             top: -15.h,
             child: GestureDetector(
-              onTap: () => onTap(4), // Index 4 for Add action
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                onTap(4); // Index 4 for Add action
+              },
               child: Container(
                 width: 55.w,
                 height: 55.w,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: AppColors.primaryGradient,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -142,7 +142,10 @@ class NotchBottomNavBar extends StatelessWidget {
   }) {
     return Expanded(
       child: InkWell(
-        onTap: () => onTap(index),
+        onTap: () {
+          if (!isActive) HapticFeedback.lightImpact();
+          onTap(index);
+        },
         splashColor: AppColors.primary.withValues(alpha: 0.1),
         highlightColor: AppColors.primary.withValues(alpha: 0.05),
         child: Container(
@@ -225,48 +228,33 @@ class BottomNavClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final Path path = Path();
-
-    final double centerX = size.width / 2;
-    final double notchRadius = 55.w / 2 + 4;
-    final double notchDepth = 28;
-
-    // Start top-left
-    path.moveTo(0, 20);
-    path.quadraticBezierTo(0, 0, 20, 0);
-
-    // Left side before notch
-    path.lineTo(centerX - notchRadius * 2, 0);
-
-    // Left curve into notch
-    path.quadraticBezierTo(
-      centerX - notchRadius,
-      0,
-      centerX - notchRadius,
-      notchDepth,
+    final double width = size.width;
+    final double height = size.height;
+    
+    // Control points for the smooth notch
+    final double center = width / 2;
+    final double notchRadius = 38.0; // Slightly wider for the FAB
+    final double notchDepth = 45.0; // Deep enough for the button
+    
+    path.lineTo(center - notchRadius * 1.8, 0);
+    
+    // First curve down (left shoulder)
+    path.cubicTo(
+      center - notchRadius, 0, // Control point 1
+      center - notchRadius * 0.8, notchDepth * 0.8, // Control point 2
+      center, notchDepth, // End point (bottom center)
     );
-
-    // Circular notch
-    path.arcToPoint(
-      Offset(centerX + notchRadius, notchDepth),
-      radius: Radius.circular(notchRadius),
-      clockwise: false,
+    
+    // Second curve up (right shoulder)
+    path.cubicTo(
+      center + notchRadius * 0.8, notchDepth * 0.8, // Control point 1
+      center + notchRadius, 0, // Control point 2
+      center + notchRadius * 1.8, 0, // End point
     );
-
-    // Right curve out of notch
-    path.quadraticBezierTo(
-      centerX + notchRadius,
-      0,
-      centerX + notchRadius * 2,
-      0,
-    );
-
-    // Right top corner
-    path.lineTo(size.width - 20, 0);
-    path.quadraticBezierTo(size.width, 0, size.width, 20);
-
-    // Complete shape
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
+    
+    path.lineTo(width, 0);
+    path.lineTo(width, height);
+    path.lineTo(0, height);
     path.close();
 
     return path;

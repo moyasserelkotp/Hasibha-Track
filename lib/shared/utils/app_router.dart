@@ -32,6 +32,9 @@ import '../../features/savings/presentation/pages/savings_dashboard_screen.dart'
 import '../../features/savings/presentation/pages/create_savings_goal_screen.dart';
 import '../../features/expense/presentation/pages/expense_list_screen.dart';
 import '../../features/debt/presentation/pages/debt_dashboard_screen.dart';
+import '../../features/debt/presentation/blocs/debt_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../di/injection.dart' as di;
 
 class AppRouter {
   static final router = GoRouter(
@@ -135,7 +138,10 @@ class AppRouter {
         path: AppRoutes.debtDetail,
         builder: (context, state) {
           final debt = state.extra as Debt;
-          return DebtDetailScreen(debt: debt);
+          return BlocProvider<DebtBloc>(
+            create: (context) => di.sl<DebtBloc>(),
+            child: DebtDetailScreen(debt: debt),
+          );
         },
       ),
       GoRoute(

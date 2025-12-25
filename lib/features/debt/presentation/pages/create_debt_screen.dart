@@ -82,7 +82,7 @@ class _CreateDebtScreenState extends State<CreateDebtScreen> {
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(13),
+                    color: Colors.white.withAlpha(13),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -96,7 +96,7 @@ class _CreateDebtScreenState extends State<CreateDebtScreen> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.white,
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -107,7 +107,7 @@ class _CreateDebtScreenState extends State<CreateDebtScreen> {
                           DebtType.OWED_BY_ME,
                           'I Owe',
                           Icons.arrow_upward,
-                          AppColors.error,
+                          AppColors.white,
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -116,7 +116,7 @@ class _CreateDebtScreenState extends State<CreateDebtScreen> {
                           DebtType.OWED_TO_ME,
                           'Owed To Me',
                           Icons.arrow_downward,
-                          AppColors.success,
+                          AppColors.white,
                         ),
                       ),
                     ],

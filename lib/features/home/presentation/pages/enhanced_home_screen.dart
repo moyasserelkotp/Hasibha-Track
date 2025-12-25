@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../../shared/const/text_styles.dart';
 import '../../../../shared/utils/routes.dart';
 import '../../../../shared/widgets/common/app_widgets.dart';
 import '../../../../shared/widgets/animations/animated_widgets.dart';
+import '../../../../shared/widgets/loading/shimmer_loading.dart';
 import '../../../../shared/data/mock_data_provider.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
@@ -36,6 +38,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
+            HapticFeedback.mediumImpact(); // Haptic feedback on refresh
             context.read<HomeCubit>().loadDashboard();
           },
           child: BlocBuilder<HomeCubit, HomeState>(
@@ -61,19 +64,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
   }
 
   Widget _buildLoading() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          SizedBox(height: DesignTokens.space16),
-          Text(
-            AppStrings.loading,
-            style: AppTextStyles.bodyMedium(context),
-          ),
-        ],
-      ),
-    );
+    return const HomeSkeleton();
   }
 
   Widget _buildError(String message) {

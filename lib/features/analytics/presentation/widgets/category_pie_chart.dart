@@ -30,113 +30,92 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
 
     return Column(
       children: [
-        // Center text showing total
-        Text(
-          'Total Spending',
-          style: TextStyle(
-            fontSize: DesignTokens.textSm,
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          '\$${total.toStringAsFixed(2)}',
-          style: TextStyle(
-            fontSize: DesignTokens.text2xl,
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
-          ),
-        ),
-        SizedBox(height: DesignTokens.space16),
-        
-        // Pie Chart
+        // Chart Section with Center Text using Stack
         Expanded(
-          child: PieChart(
-            PieChartData(
-              pieTouchData: PieTouchData(
-                touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                  setState(() {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      touchedIndex = -1;
-                      return;
-                    }
-                    touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  });
-                },
-              ),
-              borderData: FlBorderData(show: false),
-              sectionsSpace: 3,
-              centerSpaceRadius: 0, // Removed center hole for better visibility
-              sections: List.generate(categories.length, (i) {
-                final isTouched = i == touchedIndex;
-                final fontSize = isTouched ? 15.0 : 13.0;
-                final radius = isTouched ? 115.0 : 105.0;
-                final category = categories[i];
-                final percentage = (category['value'] / total * 100);
-
-                return PieChartSectionData(
-                  color: category['color'],
-                  value: category['value'],
-                  title: '${percentage.toStringAsFixed(1)}%',
-                  radius: radius.w,
-                  titleStyle: TextStyle(
-                    fontSize: fontSize.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 2,
-                      ),
-                    ],
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // The Donut Chart
+              PieChart(
+                PieChartData(
+                  pieTouchData: PieTouchData(
+                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            pieTouchResponse == null ||
+                            pieTouchResponse.touchedSection == null) {
+                          touchedIndex = -1;
+                          return;
+                        }
+                        touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                      });
+                    },
                   ),
-                  badgeWidget: isTouched
-                      ? Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: DesignTokens.shadowLg,
-                            border: Border.all(
-                              color: category['color'],
-                              width: 2,
-                            ),
+                  borderData: FlBorderData(show: false),
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 50.r, // Slightly reduced to prevent overflow
+                  sections: List.generate(categories.length, (i) {
+                    final isTouched = i == touchedIndex;
+                    final fontSize = isTouched ? 16.0 : 14.0;
+                    final radius = isTouched ? 60.0 : 50.0; // Reduced radius
+                    final category = categories[i];
+                    final percentage = (category['value'] / total * 100);
+
+                    return PieChartSectionData(
+                      color: category['color'],
+                      value: category['value'],
+                      title: '${percentage.toStringAsFixed(0)}%',
+                      radius: radius.w,
+                      titleStyle: TextStyle(
+                        fontSize: fontSize.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 2,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                category['icon'],
-                                size: 16.sp,
-                                color: category['color'],
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                '\$${category['value'].toStringAsFixed(0)}',
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: category['color'],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : null,
-                  badgePositionPercentageOffset: 1.4,
-                );
-              }),
-            ),
-            swapAnimationDuration: const Duration(milliseconds: 600),
-            swapAnimationCurve: Curves.easeInOutCubic,
+                        ],
+                      ),
+                      badgeWidget: isTouched
+                          ? _buildBadge(category)
+                          : null,
+                      badgePositionPercentageOffset: 1.3,
+                    );
+                  }),
+                ),
+                swapAnimationDuration: const Duration(milliseconds: 600),
+                swapAnimationCurve: Curves.easeInOutCubic,
+              ),
+
+              // Center Text
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                   Text(
+                    'Total',
+                    style: TextStyle(
+                      fontSize: DesignTokens.textSm,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    '\$${total.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: DesignTokens.text2xl,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         
-        SizedBox(height: DesignTokens.space20),
+        SizedBox(height: 50.h), // Further increased spacing as requested
         
         // Legend with better styling
         Wrap(
@@ -214,6 +193,40 @@ class _CategoryPieChartState extends State<CategoryPieChart> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget _buildBadge(Map<String, dynamic> category) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: DesignTokens.shadowLg,
+        border: Border.all(
+          color: category['color'],
+          width: 2,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            category['icon'],
+            size: 16.sp,
+            color: category['color'],
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            '\$${category['value'].toStringAsFixed(0)}',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: category['color'],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

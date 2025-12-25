@@ -10,6 +10,7 @@ import '../blocs/debt_event.dart';
 import '../blocs/debt_state.dart';
 import '../widgets/debt_card.dart';
 import '../widgets/debt_summary_card.dart';
+import '../../../../shared/widgets/loading/shimmer_loading.dart';
 
 class DebtDashboardScreen extends StatelessWidget {
   const DebtDashboardScreen({super.key});
@@ -55,6 +56,9 @@ class _DebtDashboardContentState extends State<_DebtDashboardContent>
         backgroundColor: AppColors.primary,
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'Owed To Me'),
@@ -79,7 +83,7 @@ class _DebtDashboardContentState extends State<_DebtDashboardContent>
         },
         builder: (context, state) {
           if (state is DebtLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const DebtSkeleton();
           }
 
           if (state is DebtLoaded) {
@@ -158,8 +162,11 @@ class _DebtDashboardContentState extends State<_DebtDashboardContent>
           return DebtCard(
             debt: debts[index],
             onTap: () {
-              // Navigate to debt detail
-              context.push('${AppRoutes.debts}/${debts[index].id}');
+              context.push(AppRoutes.debtDetail, extra: debts[index]).then((_) {
+                if (context.mounted) {
+                  context.read<DebtBloc>().add(const RefreshDebts());
+                }
+              });
             },
           );
         },
