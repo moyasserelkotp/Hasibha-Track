@@ -155,7 +155,7 @@ class AppStrings {
   static const String otpSentSuccess = 'OTP sent successfully!';
   static const String resetPasswordDescription = 'Enter your email address to receive a verification code to reset your password.';
   static const String otpVerification = 'OTP Verification';
-  static const String otpVerificationDescription = 'Enter the OTP sent to your email address.';
+  static const String otpVerificationDescription = 'Enter the 4-digit code sent to your email.';
   static const String backToLogin = 'Back to Login';
   static const String createAccount = 'Create Account';
   static const String joinUs = 'Join us to start your journey';

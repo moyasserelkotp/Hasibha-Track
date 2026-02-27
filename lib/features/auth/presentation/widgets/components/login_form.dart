@@ -55,6 +55,7 @@ class _LoginFormState extends State<LoginForm> {
     return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) {
         AppSnackBar.hide(context);
+        context.go(AppRoutes.home);
 
         if (state is LoginSuccess) {
           // Navigate to home on successful login
@@ -72,11 +73,10 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               SizedBox(height: 20.h),
 
-              // Logo and Welcome Text
+              // Logo and App Header
               const AuthHeader(
-                icon: Icons.account_balance_wallet_rounded,
-                title: AppStrings.welcomeBack,
-                subtitle: AppStrings.signInToContinue,
+                title: AppStrings.appName,
+                subtitle: AppStrings.appTagline,
               ),
 
               SizedBox(height: 48.h),
@@ -84,7 +84,7 @@ class _LoginFormState extends State<LoginForm> {
               // Email or Phone Field
               _buildIdentifierField(),
 
-              SizedBox(height: 7.h),
+              SizedBox(height: 8.h),
 
               // Password Field
               _buildPasswordField(),

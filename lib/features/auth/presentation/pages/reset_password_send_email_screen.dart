@@ -7,13 +7,13 @@ import '../../../../di/injection.dart' as di;
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/const/app_strings.dart';
-import '../../../../shared/style/app_styles.dart';
 import '../../../../shared/utils/routes.dart';
 import '../blocs/password/password_bloc.dart';
 import '../blocs/password/password_event.dart';
 import '../blocs/password/password_state.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../widgets/customer_text_form.dart';
+import '../widgets/components/auth_header.dart';
 
 class ResetPasswordSendEmailScreen extends StatelessWidget {
   const ResetPasswordSendEmailScreen({super.key});
@@ -49,102 +49,115 @@ class _ResetPasswordSendEmailContent extends StatelessWidget {
     bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
-        backgroundColor: AppColors.background,
-        body: BlocConsumer<PasswordBloc, PasswordState>(
-          listener: (context, state) {
-            AppSnackBar.hide(context);
-            if (state is PasswordResetEmailSent) {
-              AppSnackBar.showSuccess(context,
-                  message: AppStrings.otpSentSuccess);
-              // Navigate to OTP verification screen with reset token
-              context.pushReplacement(
-                AppRoutes.resetPasswordConfirmOtp,
-                extra: state.message, // This is the reset token
-              );
-            } else if (state is PasswordFailure) {
-              AppSnackBar.showError(context, message: state.message);
-            }
-          },
-          builder: (context, state) {
-            return Center(
-              child: SizedBox(
-                width: 280.w,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              SizedBox(height: 120.h),
-                              Text(AppStrings.resetPassword,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  )),
-                              SizedBox(height: 30),
-                              Text(AppStrings.resetPasswordDescription,
-                                  textAlign: TextAlign.center,
-                                  style: AppStyles.styleNormal13(context)
-                                      .copyWith(color: AppColors.greyDark)),
-                              SizedBox(height: 60.h),
-                              CustomerTextForm(
-                                name: AppStrings.email,
-                                isPassword: false,
-                                controller: _emailController,
-                                onFieldSubmitted: () {
-                                  _validateAndSubmit(context);
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return AppStrings.errorEnterEmail;
-                                  }
-                                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                      .hasMatch(value)) {
-                                    return AppStrings.errorInvalidEmail;
-                                  }
-                                  return null;
-                                },
-                              ),
-                              SizedBox(height: 40),
-                              PrimaryButton(
-                                text: AppStrings.resetPassword,
-                                isLoading: state is PasswordLoading,
-                                onPressed: () => _validateAndSubmit(context),
-                              ),
-                              SizedBox(height: 20.h),
-                            ],
+      backgroundColor: AppColors.white,
+      body: BlocConsumer<PasswordBloc, PasswordState>(
+        listener: (context, state) {
+          AppSnackBar.hide(context);
+          if (state is PasswordResetEmailSent) {
+            AppSnackBar.showSuccess(context,
+                message: AppStrings.otpSentSuccess);
+            context.pushReplacement(
+              AppRoutes.resetPasswordConfirmOtp,
+              extra: _emailController.text.trim(),
+            );
+          } else if (state is PasswordFailure) {
+            AppSnackBar.showError(context, message: state.message);
+          }
+        },
+        builder: (context, state) {
+          return SafeArea(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(height: 60.h),
+
+                          // Logo + App Name + Reset Password label
+                          const AuthHeader(
+                            title: AppStrings.appName,
+                            subtitle: AppStrings.resetPassword,
                           ),
-                        ),
-                      ),
-                      if (!isKeyboardOpen)
-                        Align(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            onPressed: () {
-                              context.pop();
+
+                          SizedBox(height: 16.h),
+
+                          // Description
+                          Text(
+                            AppStrings.resetPasswordDescription,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              color: AppColors.textSecondary,
+                              height: 1.5,
+                            ),
+                          ),
+
+                          SizedBox(height: 40.h),
+
+                          // Email field
+                          CustomerTextForm(
+                            name: AppStrings.email,
+                            isPassword: false,
+                            controller: _emailController,
+                            onFieldSubmitted: () {
+                              _validateAndSubmit(context);
                             },
-                            child: Text(
-                              AppStrings.backToLogin,
-                              style: GoogleFonts.poppins(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return AppStrings.errorEnterEmail;
+                              }
+                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                  .hasMatch(value)) {
+                                return AppStrings.errorInvalidEmail;
+                              }
+                              return null;
+                            },
+                          ),
+
+                          SizedBox(height: 24.h),
+
+                          // Reset Password button
+                          PrimaryButton(
+                            text: AppStrings.resetPassword,
+                            isLoading: state is PasswordLoading,
+                            onPressed: () => _validateAndSubmit(context),
+                          ),
+
+                          SizedBox(height: 20.h),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (!isKeyboardOpen)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () => context.pop(),
+                          child: Text(
+                            AppStrings.backToLogin,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
                             ),
                           ),
                         ),
-                      if (!isKeyboardOpen) SizedBox(height: 20.h),
-                    ],
-                  ),
-                ),
+                      ),
+                    ),
+                ],
               ),
-            );
-          },
-        ));
+            ),
+          );
+        },
+      ),
+    );
   }
 }

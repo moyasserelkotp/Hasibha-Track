@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../../../di/injection.dart' as di;
 import '../../../../shared/const/app_strings.dart';
 import '../../../../shared/const/colors.dart';
 import '../../../../shared/utils/routes.dart';
 import '../cubit/splash_cubit.dart';
+import '../widgets/moving_points_background.dart';
+import '../widgets/three_dots_loading.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,69 +21,39 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late AnimationController _textController;
-
-  late Animation<double> _logoScaleAnimation;
-  late Animation<double> _logoFadeAnimation;
-  late Animation<Offset> _logoSlideAnimation;
-
-  late Animation<double> _textFadeAnimation;
-  late Animation<Offset> _textSlideAnimation;
+  late AnimationController _contentController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // ---------------- LOGO ANIMATION ----------------
-    _logoController = AnimationController(
-      duration: const Duration(milliseconds: 900),
+    _contentController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    _logoScaleAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.elasticOut),
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _contentController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      ),
     );
 
-    _logoFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.easeIn),
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _contentController,
+        curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
+      ),
     );
 
-    _logoSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.easeOut),
-    );
-
-    // ---------------- TEXT ANIMATION ----------------
-    _textController = AnimationController(
-      duration: const Duration(milliseconds: 650),
-      vsync: this,
-    );
-
-    _textFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeIn),
-    );
-
-    _textSlideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.25),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _textController, curve: Curves.easeOut),
-    );
-
-    // Run animations
-    _logoController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _textController.forward();
-    });
+    _contentController.forward();
   }
 
   @override
   void dispose() {
-    _logoController.dispose();
-    _textController.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
@@ -88,15 +63,15 @@ class _SplashScreenState extends State<SplashScreen>
       create: (_) => di.sl<SplashCubit>()..checkAuthStatus(),
       child: BlocListener<SplashCubit, SplashState>(
         listener: (context, state) {
+          context.go(AppRoutes.onboarding);
           if (state is SplashNavigate) {
-            // Navigate when authentication check is done
-            Future.delayed(const Duration(milliseconds: 800), () {
+            // Wait for animation to finish or at least 2.5 seconds
+            Future.delayed(const Duration(milliseconds: 2500), () {
               if (context.mounted) {
-                context.go(state.route);
+                // context.go(state.route);
               }
             });
           }
-
           if (state is SplashError) {
             context.go(AppRoutes.onboarding);
           }
@@ -104,106 +79,86 @@ class _SplashScreenState extends State<SplashScreen>
         child: PopScope(
           canPop: false,
           child: Scaffold(
-            body: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryLight,
-                    AppColors.primary,
-                  AppColors.primaryLight
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(), // empty space on top
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Animated Logo
-                        SlideTransition(
-                          position: _logoSlideAnimation,
-                          child: FadeTransition(
-                            opacity: _logoFadeAnimation,
-                            child: ScaleTransition(
-                              scale: _logoScaleAnimation,
-                              child: Container(
-                                padding: const EdgeInsets.all(22),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.black.withValues(alpha: 0.15),
-                                      blurRadius: 18,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.account_balance_wallet_rounded,
-                                  size: 85,
-                                  color: AppColors.primary,
-                                ),
+            backgroundColor: AppColors.white,
+            body: Stack(
+              children: [
+                // 1. Moving points background
+                const MovingPointsBackground(),
+
+                // 2. Main Content
+                SafeArea(
+                  child: Center(
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Spacer(flex: 3),
+                          
+                          // Logo Image
+                          ScaleTransition(
+                            scale: _scaleAnimation,
+                            child: Hero(
+                              tag: 'app_logo',
+                              child: Image.asset(
+                                'assets/images/app_logo.jpg',
+                                width: 120.w,
+                                height: 120.w,
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 35),
-
-                        // App Title
-                        SlideTransition(
-                          position: _textSlideAnimation,
-                          child: FadeTransition(
-                            opacity: _textFadeAnimation,
-                            child: const Text(
-                              AppStrings.appName,
-                              style: TextStyle(
-                                fontSize: 34,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // Tagline
-                        FadeTransition(
-                          opacity: _textFadeAnimation,
-                          child: Text(
-                            AppStrings.appTagline,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: AppColors.white.withValues(alpha: 0.7),
+                          
+                          SizedBox(height: 40.h),
+                          
+                          // App Name
+                          Text(
+                            AppStrings.appName,
+                            style: GoogleFonts.poppins(
+                              fontSize: 32.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary, // Darker teal from image
                               letterSpacing: 0.5,
                             ),
                           ),
-                        ),
+                          
+                          SizedBox(height: 12.h),
+                          
+                          // Tagline in pill background
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(30.r),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              AppStrings.appTagline,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primary,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
 
-                        const SizedBox(height: 50),
-                      ],
-                    ),
-                  ),
-                  // Bottom text
-                  FadeTransition(
-                    opacity: _textFadeAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20.0),
-                      child: const Text(
-                        AppStrings.developedBy,
-                        style: TextStyle(color: AppColors.white, fontSize: 12),
+                          SizedBox(height: 40.h),
+
+                          // Custom Loading Indicator
+                          const ThreeDotsLoading(),
+
+                          const Spacer(flex: 3),
+
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

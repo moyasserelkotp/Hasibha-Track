@@ -49,14 +49,14 @@ class _CustomerTextFormState extends State<CustomerTextForm> {
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
-        labelText: widget.name,
-        labelStyle: GoogleFonts.poppins(
+        hintText: widget.name,
+        hintStyle: GoogleFonts.poppins(
           fontSize: 16,
-          color: AppColors.textSecondary,
+          color: AppColors.textHint,
         ),
         filled: true,
-        fillColor: AppColors.greyLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: AppColors.greyLight.withValues(alpha: 0.5),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border, width: 1),

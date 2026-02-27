@@ -14,6 +14,8 @@ import '../../../../shared/widgets/buttons/primary_button.dart';
 import '../widgets/customer_text_form.dart';
 import '../widgets/components/auth_header.dart';
 import '../widgets/components/auth_footer.dart';
+import '../widgets/components/auth_divider.dart';
+import '../widgets/components/social_login_row.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -131,16 +133,7 @@ class _RegisterContentState extends State<_RegisterContent>
         },
         builder: (context, state) {
           return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.background,
-                  AppColors.primaryLight.withValues(alpha: 0.05),
-                ],
-              ),
-            ),
+            color: AppColors.white,
             child: SafeArea(
               child: Center(
                 child: SingleChildScrollView(
@@ -159,9 +152,8 @@ class _RegisterContentState extends State<_RegisterContent>
 
                             // Header Section
                             const AuthHeader(
-                              icon: Icons.person_add_rounded,
-                              title: AppStrings.createAccount,
-                              subtitle: AppStrings.joinUs,
+                              title: AppStrings.appName,
+                              subtitle: AppStrings.appTagline,
                             ),
 
                             SizedBox(height: 40.h),
@@ -174,15 +166,24 @@ class _RegisterContentState extends State<_RegisterContent>
                             // Sign Up Button
                             _buildSignUpButton(state),
 
-                            SizedBox(height: 24.h),
+                            SizedBox(height: 20.h),
 
-                            // Back to Login
-                            if (!isKeyboardOpen)
+                            // Divider
+                            const AuthDivider(),
+
+                            SizedBox(height: 20.h),
+
+                            // Social Login
+                            const SocialLoginRow(),
+
+                            if (!isKeyboardOpen) ...[
+                              SizedBox(height: 24.h),
                               AuthFooter(
                                 text: AppStrings.alreadyHaveAccount,
                                 actionText: AppStrings.signIn,
                                 onPressed: () => context.pop(),
                               ),
+                            ],
 
                             SizedBox(height: 20.h),
                           ],

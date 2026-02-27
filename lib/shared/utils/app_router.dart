@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hasibha/features/auth/presentation/pages/register_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_send_email_screen.dart';
 import 'package:hasibha/features/auth/presentation/pages/reset_password_finish_screen.dart';
+import 'package:hasibha/features/auth/presentation/pages/otp_verification_screen.dart';
 import 'package:hasibha/features/home/presentation/pages/home_screen_dashboard.dart';
 import 'package:hasibha/shared/pages/main_shell.dart';
 import 'package:hasibha/shared/pages/export_screen.dart';
@@ -74,15 +75,14 @@ class AppRouter {
         path: AppRoutes.resetPasswordConfirmOtp,
         builder: (context, state) {
            final email = state.extra as String?;
-           // Reuse finish screen which now handles code entry
-           return ResetPasswordFinishScreen(email: email);
+           return OtpVerificationScreen(email: email);
         },
       ),
       GoRoute(
         path: AppRoutes.resetPasswordFinish,
         builder: (context, state) {
-           final email = state.extra as String?;
-           return ResetPasswordFinishScreen(email: email);
+           final data = state.extra as Map<String, dynamic>?;
+           return ResetPasswordFinishScreen(data: data);
         },
       ),
       GoRoute(

@@ -53,16 +53,7 @@ class _LoginComponentState extends State<LoginComponent>
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.background,
-            AppColors.primaryLight.withValues(alpha: 0.05),
-          ],
-        ),
-      ),
+      color: AppColors.white,
       child: SafeArea(
         child: Center(
           child: SingleChildScrollView(

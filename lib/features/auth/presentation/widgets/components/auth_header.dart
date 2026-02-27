@@ -4,13 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../shared/const/colors.dart';
 
 class AuthHeader extends StatelessWidget {
-  final IconData icon;
   final String title;
   final String subtitle;
 
   const AuthHeader({
     super.key,
-    required this.icon,
     required this.title,
     required this.subtitle,
   });
@@ -19,69 +17,36 @@ class AuthHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // App Logo
         Center(
-          child: Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.1),
-                  AppColors.primaryLight.withValues(alpha: 0.05),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  blurRadius: 30,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primaryDark,
-                  ],
-                ),
-              ),
-              child: Icon(
-                icon,
-                size: 48.sp,
-                color: AppColors.white,
-              ),
-            ),
+          child: Image.asset(
+            'assets/images/app_logo.jpg',
+            width: 100.w,
+            height: 100.h,
+            fit: BoxFit.contain,
           ),
         ),
-        SizedBox(height: 48.h),
+        SizedBox(height: 24.h),
+        // App Name
         Text(
           title,
           textAlign: TextAlign.center,
           style: GoogleFonts.poppins(
-            fontSize: 32.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            fontSize: 30.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryDark,
             letterSpacing: -0.5,
-            height: 1.2,
           ),
         ),
-        SizedBox(height: 8.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 15.sp,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w400,
-            ),
+        SizedBox(height: 6.h),
+        // Subtitle / screen label
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 15.sp,
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
