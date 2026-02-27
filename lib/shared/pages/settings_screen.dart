@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
 import '../cubit/theme_cubit.dart';
@@ -133,29 +134,36 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Settings'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1A1C1E),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: ListView(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         children: [
           // Appearance Section
           _buildSectionHeader(context, 'Appearance'),
           BlocBuilder<ThemeCubit, ThemeMode>(
             builder: (context, themeMode) {
-              return ListTile(
-                leading: const Icon(Icons.brightness_6),
-                title: const Text('Theme'),
-                subtitle: Text(_getThemeName(themeMode)),
-                trailing: const Icon(Icons.chevron_right),
+              return _buildSettingTile(
+                icon: Icons.brightness_6_outlined,
+                title: 'Theme',
+                subtitle: _getThemeName(themeMode),
                 onTap: () => _showThemeDialog(context),
               );
             },
           ),
 
-          const Divider(),
+          _buildDivider(),
 
           // Preferences Section
           _buildSectionHeader(context, 'Preferences'),
@@ -164,18 +172,16 @@ class SettingsScreen extends StatelessWidget {
               if (state is SettingsLoaded) {
                 return Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(Icons.attach_money),
-                      title: const Text('Currency'),
-                      subtitle: Text(state.settings.currency),
-                      trailing: const Icon(Icons.chevron_right),
+                    _buildSettingTile(
+                      icon: Icons.attach_money_rounded,
+                      title: 'Currency',
+                      subtitle: state.settings.currency,
                       onTap: () => _showCurrencyDialog(context, state.settings.currency),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.calendar_today),
-                      title: const Text('Date Format'),
-                      subtitle: Text(state.settings.dateFormat),
-                      trailing: const Icon(Icons.chevron_right),
+                    _buildSettingTile(
+                      icon: Icons.calendar_today_outlined,
+                      title: 'Date Format',
+                      subtitle: state.settings.dateFormat,
                       onTap: () => _showDateFormatDialog(context, state.settings.dateFormat),
                     ),
                   ],
@@ -185,44 +191,45 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
 
-          const Divider(),
+          _buildDivider(),
 
           // Data Management Section
           _buildSectionHeader(context, 'Data Management'),
-          ListTile(
-            leading: const Icon(Icons.backup),
-            title: const Text('Backup Data'),
-            subtitle: const Text('Export all data as JSON'),
+          _buildSettingTile(
+            icon: Icons.backup_outlined,
+            title: 'Backup Data',
+            subtitle: 'Export all data as JSON',
             onTap: () => _exportBackup(context),
           ),
-          ListTile(
-            leading: const Icon(Icons.restore),
-            title: const Text('Restore Data'),
-            subtitle: const Text('Import data from backup'),
+          _buildSettingTile(
+            icon: Icons.restore_outlined,
+            title: 'Restore Data',
+            subtitle: 'Import data from backup',
             onTap: () => _importBackup(context),
           ),
-          ListTile(
-            leading: const Icon(Icons.delete_forever),
-            title: const Text('Clear All Data'),
-            subtitle: const Text('Delete all transactions'),
-            textColor: Colors.red,
+          _buildSettingTile(
+            icon: Icons.delete_outline_rounded,
+            title: 'Clear All Data',
+            subtitle: 'Delete all transactions',
+            subtitleColor: Colors.red.withValues(alpha: 0.7),
+            titleColor: Colors.red,
             iconColor: Colors.red,
             onTap: () => _clearAllData(context),
           ),
 
-          const Divider(),
+          _buildDivider(),
 
           // About Section
           _buildSectionHeader(context, 'About'),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('Version'),
-            subtitle: Text('1.0.0'),
+          _buildSettingTile(
+            icon: Icons.info_outline_rounded,
+            title: 'Version',
+            subtitle: '1.0.0',
           ),
-          const ListTile(
-            leading: Icon(Icons.code),
-            title: Text('Developer'),
-            subtitle: Text('Built with Flutter'),
+          _buildSettingTile(
+            icon: Icons.code_rounded,
+            title: 'Developer',
+            subtitle: 'Built with Flutter',
           ),
         ],
       ),
@@ -231,14 +238,59 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+        style: TextStyle(
+          color: const Color(0xFF00BFA5),
+          fontWeight: FontWeight.bold,
+          fontSize: 14.sp,
+          letterSpacing: 0.5,
+        ),
       ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    VoidCallback? onTap,
+    Color? iconColor,
+    Color? titleColor,
+    Color? subtitleColor,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? const Color(0xFF1A1C1E), size: 22.sp),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: titleColor ?? const Color(0xFF1A1C1E),
+          fontSize: 15.sp,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(
+                color: subtitleColor ?? Colors.grey[600],
+                fontSize: 12.sp,
+              ),
+            )
+          : null,
+      trailing: onTap != null ? Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 20.sp) : null,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: Colors.grey[50],
+      indent: 16.w,
+      endIndent: 16.w,
     );
   }
 
@@ -258,6 +310,7 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Select Theme'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -274,9 +327,10 @@ class SettingsScreen extends StatelessWidget {
     return BlocBuilder<ThemeCubit, ThemeMode>(
       builder: (context, currentMode) {
         return RadioListTile<ThemeMode>(
-          title: Text(title),
+          title: Text(title, style: TextStyle(fontSize: 15.sp)),
           value: mode,
           groupValue: currentMode,
+          activeColor: const Color(0xFF00BFA5),
           onChanged: (value) {
             if (value != null) {
               context.read<ThemeCubit>().setTheme(value);
@@ -295,13 +349,15 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Select Currency'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: currencies.map((currency) {
             return RadioListTile<String>(
-              title: Text(currency),
+              title: Text(currency, style: TextStyle(fontSize: 15.sp)),
               value: currency,
               groupValue: currentCurrency,
+              activeColor: const Color(0xFF00BFA5),
               onChanged: (value) {
                 if (value != null) {
                   context.read<SettingsCubit>().updateCurrency(value);
@@ -326,13 +382,15 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Select Date Format'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: formats.entries.map((entry) {
             return RadioListTile<String>(
-              title: Text(entry.value),
+              title: Text(entry.value, style: TextStyle(fontSize: 15.sp)),
               value: entry.key,
               groupValue: currentFormat,
+              activeColor: const Color(0xFF00BFA5),
               onChanged: (value) {
                 if (value != null) {
                   context.read<SettingsCubit>().updateDateFormat(value);

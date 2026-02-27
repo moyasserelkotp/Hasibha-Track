@@ -53,8 +53,12 @@ class _DebtDashboardContentState extends State<_DebtDashboardContent>
       appBar: AppBar(
         title: const Text('Debt Tracking'),
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'Owed To Me'),
@@ -119,6 +123,7 @@ class _DebtDashboardContentState extends State<_DebtDashboardContent>
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'debts_fab',
         onPressed: () => context.push(AppRoutes.createDebt),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add),

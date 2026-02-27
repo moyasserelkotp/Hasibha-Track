@@ -6,6 +6,8 @@ import 'package:hasibha/shared/utils/bloc_providers.dart';
 import 'package:hasibha/shared/utils/app_router.dart';
 import 'package:hasibha/shared/const/app_strings.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 
 import 'di/injection.dart' as di;
 import 'shared/local/hive_service.dart';
@@ -17,7 +19,13 @@ void main() async {
   await di.init();
 
   PhotoManager.setIgnorePermissionCheck(false);
-  runApp(const MyApp());
+  
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 
@@ -37,6 +45,9 @@ class MyApp extends StatelessWidget {
               minTextAdapt: true,
               builder: (context, child) {
                 return MaterialApp.router(
+                  useInheritedMediaQuery: true,
+                  locale: DevicePreview.locale(context),
+                  builder: DevicePreview.appBuilder,
                   debugShowCheckedModeBanner: false,
                   themeMode: themeMode,
                   theme: AppTheme.lightTheme,

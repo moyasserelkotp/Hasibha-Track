@@ -23,6 +23,8 @@ import '../../features/offers/presentation/pages/offers_screen.dart';
 import '../../features/expense/presentation/pages/add_expense_screen.dart';
 import '../../features/analytics/presentation/pages/analytics_dashboard_screen.dart';
 import '../../features/profile/presentation/pages/profile_screen.dart';
+import '../../features/profile/presentation/pages/edit_profile_screen.dart';
+import '../../features/profile/presentation/pages/security_settings_screen.dart';
 import '../../features/notifications/presentation/pages/notifications_screen.dart';
 import '../../features/notifications/presentation/pages/notification_settings_screen.dart';
 import '../../features/shared_budget/presentation/pages/shared_budgets_screen.dart';
@@ -57,6 +59,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.home,
         builder: (context, state) => const MainShell(),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.securitySettings,
+        builder: (context, state) => const SecuritySettingsScreen(),
       ),
       /*
       GoRoute(

@@ -32,8 +32,18 @@ class _SavingsDashboardContent extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Savings Goals'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color(0xFF00BFA5),
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: Colors.white,
+        title: Text(
+          'Savings Goals',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
       body: BlocConsumer<SavingsBloc, SavingsState>(
         listener: (context, state) {
@@ -126,13 +136,23 @@ class _SavingsDashboardContent extends StatelessWidget {
                 children: [
                   // Total Savings Summary - Enhanced
                   Container(
-                    padding: EdgeInsets.all(28.w),
-                    decoration: DesignTokens.savingsGradientDecoration(
-                      shadows: [
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 24.w),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primaryDark
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24.r),
+                      boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF4CAF50).withValues(alpha: 0.35),
-                          blurRadius: 28,
-                          offset: const Offset(0, 14),
+                          color: const Color(0xFF00BFA5).withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
@@ -144,17 +164,16 @@ class _SavingsDashboardContent extends StatelessWidget {
                             Text(
                               'Total Saved',
                               style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.95),
-                                letterSpacing: 0.5,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(20.r),
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(100.r),
                               ),
                               child: Text(
                                 '${state.goals.length} Goals',
@@ -167,18 +186,18 @@ class _SavingsDashboardContent extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 12.h),
                         AnimatedCounter(
                           value: state.totalSaved,
                           prefix: '\$',
                           style: TextStyle(
-                            fontSize: 44.sp,
+                            fontSize: 52.sp,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                             letterSpacing: -1.0,
                           ),
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 12.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -187,7 +206,7 @@ class _SavingsDashboardContent extends StatelessWidget {
                               size: 18.sp,
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
-                            SizedBox(width: 6.w),
+                            SizedBox(width: 8.w),
                             Text(
                               'Keep up the great work!',
                               style: TextStyle(
@@ -210,18 +229,25 @@ class _SavingsDashboardContent extends StatelessWidget {
                       Text(
                         'Your Goals',
                         style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1A1C1E),
                           letterSpacing: -0.5,
                         ),
                       ),
                       TextButton.icon(
                         onPressed: () => context.push(AppRoutes.createSavingsGoal),
-                       icon: Icon(Icons.add_circle_outline, size: 20.sp),
-                        label: const Text('Add Goal'),
+                        icon: Icon(Icons.add_circle_outline, size: 22.sp),
+                        label: Text(
+                          'Add Goal',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.success,
+                          foregroundColor: const Color(0xFF00BFA5),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                         ),
                       ),
                     ],
@@ -259,6 +285,7 @@ class _SavingsDashboardContent extends StatelessWidget {
           ],
         ),
         child: FloatingActionButton(
+          heroTag: 'savings_fab',
           onPressed: () => context.push(AppRoutes.createSavingsGoal),
           backgroundColor: Colors.transparent,
           elevation: 0,

@@ -70,6 +70,7 @@ class _CreateSavingsGoalScreenState extends State<CreateSavingsGoalScreen> {
           appBar: AppBar(
             title: const Text('Create Goal'),
             backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
           ),
           body: SingleChildScrollView(
             padding: EdgeInsets.all(16.w),

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../shared/data/mock_data_provider.dart';
 import '../../../../shared/core/use_case/use_case.dart';
 import '../../domain/usecases/add_payment_usecase.dart';
 import '../../domain/usecases/create_debt_usecase.dart';
@@ -16,6 +17,7 @@ class DebtBloc extends Bloc<DebtEvent, DebtState> {
   final DeleteDebtUseCase deleteDebtUseCase;
   final AddPaymentUseCase addPaymentUseCase;
   final GetDebtSummaryUseCase getDebtSummaryUseCase;
+  final bool useMockData;
 
   DebtBloc({
     required this.getDebtsUseCase,
@@ -24,6 +26,7 @@ class DebtBloc extends Bloc<DebtEvent, DebtState> {
     required this.deleteDebtUseCase,
     required this.addPaymentUseCase,
     required this.getDebtSummaryUseCase,
+    this.useMockData = true,
   }) : super(const DebtInitial()) {
     on<LoadDebts>(_onLoadDebts);
     on<RefreshDebts>(_onRefreshDebts);
@@ -39,6 +42,14 @@ class DebtBloc extends Bloc<DebtEvent, DebtState> {
     Emitter<DebtState> emit,
   ) async {
     emit(const DebtLoading());
+
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      final debts = MockDataProvider.getMockDebts();
+      final summary = MockDataProvider.getMockDebtSummary();
+      emit(DebtLoaded(debts: debts, summary: summary));
+      return;
+    }
 
     final result = await getDebtsUseCase(
       GetDebtsParams(type: event.type, status: event.status),

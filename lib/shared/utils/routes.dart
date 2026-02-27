@@ -33,6 +33,7 @@ class AppRoutes {
   // Profile
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
+  static const String securitySettings = '/security-settings';
 
   // AI & Insights
   static const String aiChat = '/ai-chat';

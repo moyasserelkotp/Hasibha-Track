@@ -27,11 +27,11 @@ class _MainShellState extends State<MainShell> {
   late PageController _pageController;
 
   final List<Widget> _pages = [
-    const EnhancedHomeScreen(), // Index 0 - Orders
-    const AnalyticsDashboardScreen(), // Index 1 - Product
-    const EnhancedHomeScreen(), // Index 2 - Dashboard (center button)
-    const BudgetDashboardScreen(), // Index 3 - Category
-    const ProfileScreen(), // Index 4 - Settings
+    const EnhancedHomeScreen(),      // Index 0: Home
+    const AnalyticsDashboardScreen(), // Index 1: Analytics
+    const SizedBox.shrink(),          // Index 2: Center Spacer (FAB)
+    const BudgetDashboardScreen(),    // Index 3: Budgets
+    const ProfileScreen(),           // Index 4: Profile
   ];
 
   @override
@@ -48,6 +48,12 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onNavTap(int index) {
+    if (index == 2) {
+      // Center "+" button
+      context.push(AppRoutes.addTransaction);
+      return;
+    }
+
     if (index != _currentIndex) {
       setState(() {
         _currentIndex = index;
@@ -63,6 +69,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: BlocProvider(
         create: (context) => di.sl<HomeCubit>(),
         child: PageView(

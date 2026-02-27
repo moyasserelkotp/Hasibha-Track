@@ -58,8 +58,12 @@ class _OffersScreenState extends State<OffersScreen> with SingleTickerProviderSt
       appBar: AppBar(
         title: const Text('Offers & Deals'),
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'For You'),

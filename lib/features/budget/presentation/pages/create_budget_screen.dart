@@ -109,6 +109,7 @@ class _CreateBudgetScreenState extends State<CreateBudgetScreen> {
         appBar: AppBar(
           title: Text(widget.budgetId == null ? 'Create Budget' : 'Edit Budget'),
           backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
         ),
         body: BlocListener<BudgetBloc, BudgetState>(
           listener: (context, state) {

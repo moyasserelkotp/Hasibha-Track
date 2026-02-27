@@ -21,58 +21,81 @@ class OnboardingPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(flex: 3),
-          
-          // Lottie Animation
-          Center(
-            child: Lottie.asset(
-              lottieAsset,
-              height: 280.h,
-              fit: BoxFit.contain,
-            ),
-          ),
-          
-          const Spacer(flex: 2),
-          
-          // Title with fade-in animation
-          FadeInUp(
-            delay: const Duration(milliseconds: 200),
-            child: Text(
-              title.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                letterSpacing: 1.2,
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: IntrinsicHeight(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 3),
+                  
+                  // Lottie Animation with Blob Background
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Decorative Blob
+                        Container(
+                          width: 260.w,
+                          height: 190.h,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFC0FFC0).withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.all(Radius.elliptical(150.w, 100.h)),
+                          ),
+                        ),
+                        Lottie.asset(
+                          lottieAsset,
+                          height: 260.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const Spacer(flex: 1),
+                  
+                  // Title
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 200),
+                    child: Text(
+                      title.toUpperCase(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 16.h),
+                  
+                  // Description
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 400),
+                    child: Text(
+                      description,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13.sp,
+                        color: const Color(0xFF888888),
+                        height: 1.5,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                  
+                  const Spacer(flex: 6),
+                ],
               ),
             ),
           ),
-          
-          SizedBox(height: 20.h),
-          
-          // Description with fade-in animation
-          FadeInUp(
-            delay: const Duration(milliseconds: 400),
-            child: Text(
-              description,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 14.sp,
-                color: AppColors.textDisabled,
-                height: 1.6,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          
-          const Spacer(flex: 5),
-        ],
+        ),
       ),
     );
   }

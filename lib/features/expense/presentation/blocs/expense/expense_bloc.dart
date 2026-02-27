@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../shared/data/mock_data_provider.dart';
 import '../../../../../shared/services/budget_expense_sync_service.dart';
+import '../../../domain/entities/expense.dart';
 import '../../../domain/usecases/get_expenses_usecase.dart';
 import '../../../domain/usecases/create_expense_usecase.dart';
 import '../../../domain/usecases/update_expense_usecase.dart';
@@ -15,6 +17,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   final DeleteExpenseUseCase deleteExpenseUseCase;
   final ImportExpenseFromImageUseCase importExpenseFromImageUseCase;
   final BudgetExpenseSyncService budgetSyncService;
+  final bool useMockData;
 
   ExpenseBloc({
     required this.getExpensesUseCase,
@@ -23,6 +26,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     required this.deleteExpenseUseCase,
     required this.importExpenseFromImageUseCase,
     required this.budgetSyncService,
+    this.useMockData = true,
   }) : super(const ExpenseInitial()) {
     on<LoadExpenses>(_onLoadExpenses);
     on<RefreshExpenses>(_onRefreshExpenses);
@@ -39,23 +43,19 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     Emitter<ExpenseState> emit,
   ) async {
     emit(const ExpenseLoading());
-
-    final result = await getExpensesUseCase(
+    
+    final expenses = await _fetchExpenses(
       startDate: event.startDate,
       endDate: event.endDate,
       categoryId: event.categoryId,
-      tags: event.tags,
     );
 
-    result.fold(
-      (failure) => emit(ExpenseError(failure.message)),
-      (expenses) => emit(ExpenseLoaded(
-        expenses: expenses,
-        filterStartDate: event.startDate,
-        filterEndDate: event.endDate,
-        filterCategoryId: event.categoryId,
-      )),
-    );
+    emit(ExpenseLoaded(
+      expenses: expenses,
+      filterStartDate: event.startDate,
+      filterEndDate: event.endDate,
+      filterCategoryId: event.categoryId,
+    ));
   }
 
   Future<void> _onRefreshExpenses(
@@ -74,21 +74,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       categoryId = loadedState.filterCategoryId;
     }
 
-    final result = await getExpensesUseCase(
+    final expenses = await _fetchExpenses(
       startDate: startDate,
       endDate: endDate,
       categoryId: categoryId,
     );
 
-    result.fold(
-      (failure) => emit(ExpenseError(failure.message)),
-      (expenses) => emit(ExpenseLoaded(
-        expenses: expenses,
-        filterStartDate: startDate,
-        filterEndDate: endDate,
-        filterCategoryId: categoryId,
-      )),
-    );
+    emit(ExpenseLoaded(
+      expenses: expenses,
+      filterStartDate: startDate,
+      filterEndDate: endDate,
+      filterCategoryId: categoryId,
+    ));
   }
 
   Future<void> _onCreateExpense(
@@ -97,15 +94,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     emit(const ExpenseLoading());
 
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      add(const RefreshExpenses());
+      return;
+    }
+
     final result = await createExpenseUseCase(event.expense);
 
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (expense) async {
-        // Sync with budget
         await budgetSyncService.onExpenseCreated(expense);
-        
-        // Reload expenses to show the new one
         add(const RefreshExpenses());
       },
     );
@@ -117,16 +117,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     emit(const ExpenseLoading());
 
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      add(const RefreshExpenses());
+      return;
+    }
+
     final result = await updateExpenseUseCase(event.expense);
 
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (expense) async {
-        // Sync with budget (pass old expense for comparison if needed)
-        // For now, just sync the new category
         await budgetSyncService.onExpenseCreated(expense);
-        
-        // Reload expenses to show the update
         add(const RefreshExpenses());
       },
     );
@@ -138,15 +140,17 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     emit(const ExpenseLoading());
 
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      add(const RefreshExpenses());
+      return;
+    }
+
     final result = await deleteExpenseUseCase(event.id);
 
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (_) async {
-        // Note: We can't sync budget here without knowing the deleted expense's category
-        // The backend should handle this
-        
-        // Reload expenses after deletion
         add(const RefreshExpenses());
       },
     );
@@ -172,7 +176,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     emit(const ExpenseLoading());
 
-    // Get current date filters if available
     DateTime? startDate;
     DateTime? endDate;
 
@@ -182,21 +185,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       endDate = loadedState.filterEndDate;
     }
 
-    final result = await getExpensesUseCase(
+    final expenses = await _fetchExpenses(
       startDate: startDate,
       endDate: endDate,
       categoryId: event.categoryId,
     );
 
-    result.fold(
-      (failure) => emit(ExpenseError(failure.message)),
-      (expenses) => emit(ExpenseLoaded(
-        expenses: expenses,
-        filterStartDate: startDate,
-        filterEndDate: endDate,
-        filterCategoryId: event.categoryId,
-      )),
-    );
+    emit(ExpenseLoaded(
+      expenses: expenses,
+      filterStartDate: startDate,
+      filterEndDate: endDate,
+      filterCategoryId: event.categoryId,
+    ));
   }
 
   Future<void> _onFilterByDateRange(
@@ -205,7 +205,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     emit(const ExpenseLoading());
 
-    // Get current category filter if available
     String? categoryId;
 
     if (state is ExpenseLoaded) {
@@ -213,20 +212,54 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       categoryId = loadedState.filterCategoryId;
     }
 
-    final result = await getExpensesUseCase(
+    final expenses = await _fetchExpenses(
       startDate: event.startDate,
       endDate: event.endDate,
       categoryId: categoryId,
     );
 
-    result.fold(
-      (failure) => emit(ExpenseError(failure.message)),
-      (expenses) => emit(ExpenseLoaded(
-        expenses: expenses,
-        filterStartDate: event.startDate,
-        filterEndDate: event.endDate,
-        filterCategoryId: categoryId,
-      )),
+    emit(ExpenseLoaded(
+      expenses: expenses,
+      filterStartDate: event.startDate,
+      filterEndDate: event.endDate,
+      filterCategoryId: categoryId,
+    ));
+  }
+
+  Future<List<Expense>> _fetchExpenses({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  }) async {
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 600));
+      return MockDataProvider.getAllTransactions()
+          .where((e) => e.type == 'expense')
+          .where((e) => categoryId == null || e.category == categoryId)
+          .where((e) => startDate == null || e.date.isAfter(startDate))
+          .where((e) => endDate == null || e.date.isBefore(endDate))
+          .map((e) => Expense(
+                id: e.id,
+                amount: e.amount,
+                categoryId: e.category,
+                date: e.date,
+                description: e.title,
+                note: e.description,
+                createdAt: e.date,
+                updatedAt: e.date,
+              ))
+          .toList();
+    }
+
+    final result = await getExpensesUseCase(
+      startDate: startDate,
+      endDate: endDate,
+      categoryId: categoryId,
+    );
+
+    return result.fold(
+      (failure) => [],
+      (expenses) => expenses,
     );
   }
 }

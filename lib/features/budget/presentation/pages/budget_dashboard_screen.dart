@@ -33,6 +33,7 @@ class _BudgetDashboardContent extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Budgets'),
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -149,6 +150,7 @@ class _BudgetDashboardContent extends StatelessWidget {
           ],
         ),
         child: FloatingActionButton.extended(
+          heroTag: 'budget_fab',
           onPressed: () {
             context.push(AppRoutes.createBudget);
           },

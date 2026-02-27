@@ -121,7 +121,7 @@ import '../features/debt/domain/usecases/update_debt_usecase.dart';
 import '../features/debt/domain/usecases/delete_debt_usecase.dart';
 import '../features/debt/domain/usecases/add_payment_usecase.dart';
 import '../features/debt/domain/usecases/get_debt_summary_usecase.dart';
-import '../features/debt/presentation/blocs/debt_bloc.dart ';
+import '../features/debt/presentation/blocs/debt_bloc.dart';
 
 // Settings & Services
 import '../shared/services/export_service.dart';
@@ -304,6 +304,7 @@ Future<void> init() async {
     deleteExpenseUseCase: sl(),
     importExpenseFromImageUseCase: sl(),
     budgetSyncService: sl(),
+    useMockData: USE_MOCK_DATA,
   ));
   sl.registerFactory(() => CategoryBloc(getCategoriesUseCase: sl()));
 
@@ -326,6 +327,7 @@ Future<void> init() async {
     updateBudgetUseCase: sl(),
     deleteBudgetUseCase: sl(),
     checkBudgetLimitsUseCase: sl(),
+    useMockData: USE_MOCK_DATA,
   ));
 
   // --- Analytics ---
@@ -359,6 +361,7 @@ Future<void> init() async {
     deleteSavingsGoalUseCase: sl(),
     addFundsToGoalUseCase: sl(),
     withdrawFundsFromGoalUseCase: sl(),
+    useMockData: USE_MOCK_DATA,
   ));
 
   // --- Debt ---
@@ -381,6 +384,7 @@ Future<void> init() async {
     deleteDebtUseCase: sl(),
     addPaymentUseCase: sl(),
     getDebtSummaryUseCase: sl(),
+    useMockData: USE_MOCK_DATA,
   ));
 
   // --- AI & Input Services ---

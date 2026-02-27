@@ -164,6 +164,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           },
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'expenses_fab',
           onPressed: () async {
             final result = await context.push(AppRoutes.addTransaction);
             if (result == true && mounted) {

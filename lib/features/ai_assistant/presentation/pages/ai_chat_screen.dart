@@ -96,7 +96,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AI Assistant', style: TextStyle(fontSize: 16.sp)),
+                Text('AI Assistant', style: TextStyle(fontSize: 16.sp, color: Colors.white)),
                 Text(
                   'Always here to help',
                   style: TextStyle(fontSize: 11.sp, color: Colors.white70),
@@ -106,6 +106,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           ],
         ),
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [

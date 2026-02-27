@@ -2,6 +2,8 @@ import 'package:hasibha/features/home/data/models/transaction_model.dart';
 import 'package:hasibha/features/budget/domain/entities/budget.dart';
 import 'package:hasibha/features/savings/domain/entities/savings_goal.dart';
 import 'package:hasibha/features/notifications/domain/entities/notification.dart';
+import 'package:hasibha/features/debt/domain/entities/debt.dart';
+import 'package:hasibha/features/debt/domain/entities/debt_enums.dart';
 
 /// Comprehensive mock data provider for testing the entire application
 class MockDataProvider {
@@ -561,6 +563,90 @@ class MockDataProvider {
       'totalIncome': monthlyIncome,
       'totalBudgets': 6,
       'totalGoals': 4,
+    };
+  }
+
+  // Debt mock data
+  static List<Debt> getMockDebts() {
+    final now = DateTime.now();
+    return [
+      Debt(
+        id: 'debt_001',
+        title: 'Home Loan',
+        description: 'Monthly mortgage payment',
+        amount: 250000.0,
+        paidAmount: 45000.0,
+        type: DebtType.OWED_BY_ME,
+        contactName: 'Bank of America',
+        createdDate: now.subtract(const Duration(days: 365 * 2)),
+        dueDate: now.add(const Duration(days: 365 * 28)),
+        status: DebtStatus.ACTIVE,
+        interestRate: 4.5,
+        paymentFrequency: PaymentFrequency.MONTHLY,
+      ),
+      Debt(
+        id: 'debt_002',
+        title: 'Car Loan',
+        description: 'Auto financing',
+        amount: 35000.0,
+        paidAmount: 12000.0,
+        type: DebtType.OWED_BY_ME,
+        contactName: 'Toyota Financial',
+        createdDate: now.subtract(const Duration(days: 365)),
+        dueDate: now.add(const Duration(days: 365 * 3)),
+        status: DebtStatus.PARTIALLY_PAID,
+        interestRate: 2.9,
+        paymentFrequency: PaymentFrequency.MONTHLY,
+      ),
+      Debt(
+        id: 'debt_003',
+        title: 'Loan to John',
+        description: 'Personal loan to John for his business',
+        amount: 5000.0,
+        paidAmount: 1500.0,
+        type: DebtType.OWED_TO_ME,
+        contactName: 'John Doe',
+        createdDate: now.subtract(const Duration(days: 60)),
+        dueDate: now.add(const Duration(days: 300)),
+        status: DebtStatus.ACTIVE,
+        paymentFrequency: PaymentFrequency.MONTHLY,
+      ),
+      Debt(
+        id: 'debt_004',
+        title: 'Credit Card',
+        description: 'Chase Sapphire Preferred',
+        amount: 1200.0,
+        paidAmount: 0.0,
+        type: DebtType.OWED_BY_ME,
+        contactName: 'Chase',
+        createdDate: now.subtract(const Duration(days: 15)),
+        dueDate: now.add(const Duration(days: 15)),
+        status: DebtStatus.ACTIVE,
+        paymentFrequency: PaymentFrequency.MONTHLY,
+      ),
+      Debt(
+        id: 'debt_005',
+        title: 'Freelance Work Owed',
+        description: 'Payment for web design work',
+        amount: 2500.0,
+        paidAmount: 0.0,
+        type: DebtType.OWED_TO_ME,
+        contactName: 'Tech Startup Inc',
+        createdDate: now.subtract(const Duration(days: 30)),
+        dueDate: now.subtract(const Duration(days: 2)),
+        status: DebtStatus.OVERDUE,
+      ),
+    ];
+  }
+
+  // Mock debt summary
+  static Map<String, double> getMockDebtSummary() {
+    return {
+      'total_owed_by_me': 274200.0,
+      'total_owed_to_me': 7500.0,
+      'net_debt': 266700.0,
+      'paid_amount': 58500.0,
+      'overdue_count': 1,
     };
   }
 }

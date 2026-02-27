@@ -22,37 +22,37 @@ class CircularProgressButton extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer progress border
+          // Outer progress border (Arc)
           SizedBox(
-            width: 80,
-            height: 80,
+            width: 86,
+            height: 86,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 4,
-              backgroundColor: color.withValues(alpha: 0.1),
+              strokeWidth: 2.5,
+              backgroundColor: Colors.transparent,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
           
-          // Inner button
+          // Inner circular button
           Container(
-            width: 60,
-            height: 60,
+            width: 68,
+            height: 68,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
                   color: color.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
             child: Icon(
               isLastPage ? Icons.check : Icons.arrow_forward,
               color: Colors.white,
-              size: 28,
+              size: 30,
             ),
           ),
         ],

@@ -73,15 +73,15 @@ class OnboardingScreen extends StatelessWidget {
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
-                        padding: EdgeInsets.only(right: 16.w, top: 16.h),
+                        padding: EdgeInsets.only(right: 30.w, top: 10.h),
                         child: TextButton(
                           onPressed: () => cubit.completeOnboarding(),
                           child: Text(
-                            AppStrings.skip,
+                            AppStrings.skip.toLowerCase(),
                             style: GoogleFonts.poppins(
-                              fontSize: 14.sp,
+                              fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                              color: const Color(0xFF9E9E9E),
                             ),
                           ),
                         ),
@@ -107,7 +107,7 @@ class OnboardingScreen extends StatelessWidget {
 
                     // Circular Progress Button
                     Padding(
-                      padding: EdgeInsets.only(bottom: 60.h),
+                      padding: EdgeInsets.only(bottom: 20.h),
                       child: CircularProgressButton(
                         progress: progress,
                         color: _items[cubit.currentPage].color,

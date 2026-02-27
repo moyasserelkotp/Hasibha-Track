@@ -107,6 +107,7 @@ dependencies:
   
   # Progress Indicators
   percent_indicator: ^4.2.3
+  device_preview: ^1.2.0
 
   # Phase 8: Additional UI
   avatar_glow: ^3.0.1

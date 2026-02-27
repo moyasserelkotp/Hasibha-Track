@@ -42,29 +42,45 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
-          title: const Text('Analytics & Insights'),
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          actions: [
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.date_range),
-              onSelected: (value) {
-                // TODO: Filter analytics by period
-                context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'Week', child: Text('This Week')),
-                const PopupMenuItem(value: 'Month', child: Text('This Month')),
-                const PopupMenuItem(value: 'Quarter', child: Text('This Quarter')),
-                const PopupMenuItem(value: 'Year', child: Text('This Year')),
-              ],
+          backgroundColor: const Color(0xFF00BFA5),
+          elevation: 0,
+          centerTitle: false,
+          title: Text(
+            'Analytics & Insights',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
             ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.calendar_today_rounded, color: Colors.white, size: 20.sp),
+              onPressed: () {
+                // TODO: Date range picker
+              },
+            ),
+            SizedBox(width: 8.w),
           ],
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
             indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            indicatorPadding: EdgeInsets.symmetric(horizontal: 10.w),
+            labelStyle: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Poppins',
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+            ),
             tabs: const [
               Tab(text: 'Overview'),
               Tab(text: 'Categories'),
@@ -113,165 +129,260 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
         context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
       },
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(DesignTokens.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Financial Summary Cards
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryCard(
-                    'Total Spending',
-                    '\$${analytics.totalSpending.toStringAsFixed(2)}',
-                    AppColors.error,
-                    Icons.trending_down,
+            // Financial Summary Grid
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Total Spending',
+                          '\$${analytics.totalSpending.toStringAsFixed(2)}',
+                          const Color(0xFFFF6B6B),
+                          Icons.trending_down_rounded,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Total Income',
+                          '\$${analytics.totalIncome.toStringAsFixed(2)}',
+                          const Color(0xFF4CAF50),
+                          Icons.trending_up_rounded,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(width: DesignTokens.space12),
-                Expanded(
-                  child: _buildSummaryCard(
-                    'Total Income',
-                    '\$${analytics.totalIncome.toStringAsFixed(2)}',
-                    AppColors.success,
-                    Icons.trending_up,
+                  SizedBox(height: 12.h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Balance',
+                          '\$${(analytics.totalIncome - analytics.totalSpending).toStringAsFixed(2)}',
+                          const Color(0xFF00BFA5),
+                          Icons.account_balance_wallet_rounded,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Savings Rate',
+                          '${analytics.savingsRate.toStringAsFixed(1)}%',
+                          const Color(0xFF6495ED),
+                          Icons.savings_rounded,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: DesignTokens.space12),
-            
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryCard(
-                    'Balance',
-                    '\$${(analytics.totalIncome - analytics.totalSpending).toStringAsFixed(2)}',
-                    AppColors.primary,
-                    Icons.account_balance_wallet,
-                  ),
-                ),
-                SizedBox(width: DesignTokens.space12),
-                Expanded(
-                  child: _buildSummaryCard(
-                    'Savings Rate',
-                    '${analytics.savingsRate.toStringAsFixed(1)}%',
-                    AppColors.info,
-                    Icons.savings,
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: DesignTokens.space24),
-            
-            // Spending by Category
-            Text(
-              'Spending by Category',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+                ],
               ),
             ),
-            SizedBox(height: DesignTokens.space16),
+            
+            // Spending by Category Section
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              child: Text(
+                'Spending by Category',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
+                ),
+              ),
+            ),
             
             Container(
-              height: 300.h,
+              margin: EdgeInsets.all(16.w),
+              padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 16.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: DesignTokens.borderRadiusLg,
-                boxShadow: DesignTokens.shadowMd,
+                borderRadius: BorderRadius.circular(24.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              padding: EdgeInsets.all(DesignTokens.space16),
-              child: const CategoryPieChart(),
-            ),
-            
-            SizedBox(height: DesignTokens.space24),
-            
-            // Top Categories
-            Text(
-              'Top Spending Categories',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+              child: CategoryPieChart(
+                categoryData: state.analytics.categoryBreakdown,
               ),
             ),
-            SizedBox(height: DesignTokens.space12),
             
-            ...analytics.topCategories.take(5).map((category) {
-              return Container(
-                margin: EdgeInsets.only(bottom: DesignTokens.space8),
-                padding: EdgeInsets.all(DesignTokens.space12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: DesignTokens.borderRadiusMd,
-                  boxShadow: DesignTokens.shadowSm,
+            // Top Spending Categories
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 8.h),
+              child: Text(
+                'Top Spending Categories',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
                 ),
-                child: Row(
+              ),
+            ),
+            
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                children: analytics.topCategories.take(5).map((category) {
+                  return _buildCategoryListItem(category);
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 20.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryPills(AnalyticsLoaded state) {
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 10.h,
+      alignment: WrapAlignment.center,
+      children: state.analytics.categoryBreakdown.entries.map((entry) {
+        final color = _getCategoryColor(entry.key);
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(100.r),
+            border: Border.all(color: color.withValues(alpha: 0.5)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_getCategoryIcon(entry.key), size: 14.sp, color: color),
+              SizedBox(width: 6.w),
+              Text(
+                entry.key,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1A1C1E),
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                '${(entry.value / state.analytics.totalSpending * 100).toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCategoryListItem(dynamic category) {
+    final color = _getCategoryColor(category.categoryName);
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _getCategoryIcon(category.categoryName),
+              color: color,
+              size: 20.sp,
+            ),
+          ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 40.w,
-                      height: 40.w,
-                      decoration: BoxDecoration(
-                        color: _getCategoryColor(category.categoryName).withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _getCategoryIcon(category.categoryName),
-                        color: _getCategoryColor(category.categoryName),
-                        size: 20.sp,
+                    Text(
+                      category.categoryName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.sp,
+                        color: const Color(0xFF1A1C1E),
                       ),
                     ),
-                    SizedBox(width: DesignTokens.space12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            category.categoryName,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: DesignTokens.textBase,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          LinearProgressIndicator(
-                            value: category.percentage / 100,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: AlwaysStoppedAnimation(
-                              _getCategoryColor(category.categoryName),
-                            ),
-                          ),
-                        ],
+                    Text(
+                      '\$${category.amount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.sp,
+                        color: const Color(0xFF1A1C1E),
                       ),
-                    ),
-                    SizedBox(width: DesignTokens.space12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '\$${category.amount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: DesignTokens.textBase,
-                          ),
-                        ),
-                        Text(
-                          '${category.percentage.toStringAsFixed(1)}%',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: DesignTokens.textSm,
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
-              );
-            }),
-          ],
-        ),
+                SizedBox(height: 8.h),
+                Stack(
+                  children: [
+                    Container(
+                      height: 4.h,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: (category.percentage / 100).clamp(0.0, 1.0),
+                      child: Container(
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${category.percentage.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -279,44 +390,38 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildCategoriesTab(AnalyticsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<AnalyticsBloc>().add(LoadCategoryBreakdown());
+        context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
       },
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(DesignTokens.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Category Pie Chart
-            Container(
-              height: 300.h,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: DesignTokens.borderRadiusLg,
-                boxShadow: DesignTokens.shadowMd,
-              ),
-              padding: EdgeInsets.all(DesignTokens.space16),
-              child: const CategoryPieChart(),
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: _buildCategoryPills(state),
             ),
             
-            SizedBox(height: DesignTokens.space24),
-            
-            Text(
-              'Category Details',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 12.h),
+              child: Text(
+                'Top Spending Categories',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
+                ),
               ),
             ),
-            SizedBox(height: DesignTokens.space16),
             
-            // Detailed Category List
-            ...state.analytics.topCategories.map((category) {
-              return _buildCategoryCard(
-                category.categoryName,
-                category.amount,
-                0, // Count not available in CategorySpending
-              );
-            }),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                children: state.analytics.topCategories.map((category) {
+                  return _buildCategoryListItem(category);
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -326,125 +431,213 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> wit
   Widget _buildTrendsTab(AnalyticsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
-        context.read<AnalyticsBloc>().add(LoadMonthlyComparison(year: DateTime.now().year));
+        context.read<AnalyticsBloc>().add(LoadSpendingAnalytics());
       },
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(DesignTokens.space16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Spending Trend Chart
-            Text(
-              'Spending Trend',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+            // Spending Trend
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 12.h),
+              child: Text(
+                'Spending Trend',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
+                ),
               ),
             ),
-            SizedBox(height: DesignTokens.space16),
             
             Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.w),
               height: 250.h,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: DesignTokens.borderRadiusLg,
-                boxShadow: DesignTokens.shadowMd,
+                borderRadius: BorderRadius.circular(24.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              padding: EdgeInsets.all(DesignTokens.space16),
+              padding: EdgeInsets.all(20.w),
               child: const SpendingTrendChart(),
             ),
             
-            SizedBox(height: DesignTokens.space24),
-            
             // Monthly Comparison
-            Text(
-              'Monthly Comparison',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 12.h),
+              child: Text(
+                'Monthly Comparison',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
+                ),
               ),
             ),
-            SizedBox(height: DesignTokens.space16),
             
             Container(
+              margin: EdgeInsets.symmetric(horizontal: 16.w),
               height: 250.h,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: DesignTokens.borderRadiusLg,
-                boxShadow: DesignTokens.shadowMd,
+                borderRadius: BorderRadius.circular(24.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              padding: EdgeInsets.all(DesignTokens.space16),
+              padding: EdgeInsets.all(20.w),
               child: const MonthlyComparisonChart(),
             ),
             
-            SizedBox(height: DesignTokens.space24),
-            
-            // Insights
-            Text(
-              'Financial Insights',
-              style: TextStyle(
-                fontSize: DesignTokens.textXl,
-                fontWeight: FontWeight.bold,
+            // Financial Insights
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 12.h),
+              child: Text(
+                'Financial Insights',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1C1E),
+                ),
               ),
             ),
-            SizedBox(height: DesignTokens.space12),
             
-            _buildInsightCard(
-              'Average Daily Spending',
-              '\$${state.analytics.averageDailySpending.toStringAsFixed(2)}',
-              Icons.calendar_today,
-              AppColors.primary,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                children: [
+                  _buildInsightItem(
+                    'Average Daily Spending',
+                    '\$${state.analytics.averageDailySpending.toStringAsFixed(2)}',
+                    Icons.calendar_today_rounded,
+                    const Color(0xFFE0F7F9),
+                    const Color(0xFF00BFA5),
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildInsightItem(
+                    'Highest Spending Day',
+                    state.analytics.highestSpendingDay ?? '2025-12-28',
+                    Icons.trending_up_rounded,
+                    const Color(0xFFFFF1F1),
+                    const Color(0xFFFF6B6B),
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildInsightItem(
+                    'Most Frequent Category',
+                    state.analytics.mostFrequentCategory ?? 'Food',
+                    Icons.category_rounded,
+                    const Color(0xFFF3F0FF),
+                    const Color(0xFF7C3AED),
+                  ),
+                ],
+              ),
             ),
-            
-            _buildInsightCard(
-              'Highest Spending Day',
-              state.analytics.highestSpendingDay ?? 'N/A',
-              Icons.trending_up,
-              AppColors.error,
-            ),
-            
-            _buildInsightCard(
-              'Most Frequent Category',
-              state.analytics.mostFrequentCategory ?? 'N/A',
-              Icons.category,
-              AppColors.secondary,
-            ),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildInsightItem(String title, String value, IconData icon, Color bgColor, Color iconColor) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: bgColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 24.sp),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF1A1C1E),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSummaryCard(String title, String value, Color color, IconData icon) {
     return Container(
-      padding: EdgeInsets.all(DesignTokens.space16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color, color.withValues(alpha: 0.7)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: DesignTokens.borderRadiusLg,
-        boxShadow: DesignTokens.coloredShadow(color, opacity: 0.3),
+        color: color,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: Colors.white, size: 24.sp),
-          SizedBox(height: DesignTokens.space8),
+          SizedBox(height: 12.h),
           Text(
             value,
             style: TextStyle(
               color: Colors.white,
-              fontSize: DesignTokens.text2xl,
-              fontWeight: FontWeight.bold,
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
+          SizedBox(height: 4.h),
           Text(
             title,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.9),
-              fontSize: DesignTokens.textSm,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

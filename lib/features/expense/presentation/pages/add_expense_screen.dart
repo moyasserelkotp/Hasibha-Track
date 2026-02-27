@@ -123,6 +123,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         appBar: AppBar(
           title: Text(widget.expenseId == null ? 'Add Expense' : 'Edit Expense'),
           backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
         ),
         body: BlocListener<ExpenseBloc, ExpenseState>(
           listener: (context, state) {

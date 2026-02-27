@@ -43,6 +43,7 @@ class _SharedBudgetsScreenState extends State<SharedBudgetsScreen> {
       ),
       body: hasSharedBudgets ? _buildBudgetsList() : _buildEmptyState(context),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'shared_budgets_fab',
         onPressed: () {
           _showCreateBudgetSheet(context);
         },

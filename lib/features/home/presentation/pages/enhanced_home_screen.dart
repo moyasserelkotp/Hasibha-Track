@@ -12,6 +12,7 @@ import '../../../../shared/widgets/animations/animated_widgets.dart';
 import '../../../../shared/data/mock_data_provider.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EnhancedHomeScreen extends StatefulWidget {
   const EnhancedHomeScreen({super.key});
@@ -32,29 +33,38 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            context.read<HomeCubit>().loadDashboard();
-          },
-          child: BlocBuilder<HomeCubit, HomeState>(
-            builder: (context, state) {
-              if (state is HomeLoading) {
-                return _buildLoading();
-              }
-              
-              if (state is HomeError) {
-                return _buildError(state.message);
-              }
-              
-              if (state is HomeLoaded) {
-                return _buildContent(state);
-              }
-              
+      backgroundColor: const Color(0xFFF8FAFB),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 10.h),
+        child: FloatingActionButton(
+          heroTag: 'home_fab',
+          onPressed: () => context.push(AppRoutes.aiChat),
+          backgroundColor: const Color(0xFF00BFA5),
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: Icon(Icons.smart_toy_rounded, color: Colors.white, size: 28.sp),
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<HomeCubit>().loadDashboard();
+        },
+        child: BlocBuilder<HomeCubit, HomeState>(
+          builder: (context, state) {
+            if (state is HomeLoading) {
               return _buildLoading();
-            },
-          ),
+            }
+
+            if (state is HomeError) {
+              return _buildError(state.message);
+            }
+
+            if (state is HomeLoaded) {
+              return _buildContent(state);
+            }
+
+            return _buildLoading();
+          },
         ),
       ),
     );
@@ -116,271 +126,146 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
     
     return CustomScrollView(
       slivers: [
-        // App Bar
-        SliverAppBar(
-          expandedHeight: 80.h,
-          floating: false,
-          pinned: true,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          flexibleSpace: FlexibleSpaceBar(
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // 1. New Redesigned Header (Welcome Back + Profile Image)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 40.h, 20.w, 20.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  AppStrings.welcomeBack,
-                  style: AppTextStyles.labelMedium(context).copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome Back',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16.sp,
+                        color: const Color(0xFF888888),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      'Mohamed Yaser',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  summary.userName ?? 'User',
-                  style: AppTextStyles.titleMedium(context),
+                Container(
+                  padding: EdgeInsets.all(2.w),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF00BFA5),
+                      width: 2,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 26.r,
+                    backgroundImage: const AssetImage('assets/images/avatar.jpg'),
+                  ),
                 ),
               ],
             ),
-            titlePadding: EdgeInsets.only(
-              left: DesignTokens.space20,
-              bottom: DesignTokens.space12,
-            ),
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                context.push(AppRoutes.notifications);
-              },
-              icon: Stack(
-                children: [
-                  const Icon(Icons.notifications_outlined),
-                  if (summary.unreadNotifications > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(4.w),
-                        decoration: const BoxDecoration(
-                          color: AppColors.error,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          summary.unreadNotifications > 9
-                              ? '9+'
-                              : summary.unreadNotifications.toString(),
-                          style: TextStyle(
-                            fontSize: 8.sp,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                context.push(AppRoutes.profile);
-              },
-              icon: const Icon(Icons.person_outline),
-            ),
-            SizedBox(width: DesignTokens.space8),
-          ],
         ),
 
-        // Premium Balance Card - Modern Enhanced Design
+        // 2. Refined Balance Card (Precisely matching the mockup)
         SliverToBoxAdapter(
-          child: FadeSlideTransition(
-            delay: const Duration(milliseconds: 200),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: DesignTokens.space16,
-                vertical: DesignTokens.space12,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.w),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF00BFA5),
+                    Color(0xFF009688),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(30.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00BFA5).withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-              child: Stack(
-                clipBehavior: Clip.none,
+              child: Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF00D9A3),
-                          Color(0xFF00BFA5),
-                          Color(0xFF00ACC1),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        stops: [0.0, 0.5, 1.0],
-                      ),
-                      borderRadius: DesignTokens.borderRadius2xl,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF00BFA5).withValues(alpha: 0.35),
-                          blurRadius: 28,
-                          offset: const Offset(0, 14),
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.all(DesignTokens.space24),
-                    child: Column(
-                      children: [
-                        Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // Total Balance Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         AppStrings.totalBalance,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.95),
-                          fontSize: DesignTokens.textLg,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
+                        style: GoogleFonts.poppins(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
+                      SizedBox(width: 8.w),
                       GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isBalanceHidden = !_isBalanceHidden;
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Icon(
-                            _isBalanceHidden 
-                                ? Icons.visibility_off_outlined 
-                                : Icons.visibility_outlined,
-                            color: Colors.white,
-                            size: 18.sp,
-                          ),
+                        onTap: () => setState(() => _isBalanceHidden = !_isBalanceHidden),
+                        child: Icon(
+                          _isBalanceHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: Colors.white,
+                          size: 16.sp,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: DesignTokens.space12),
-                  _isBalanceHidden
-                      ? Text(
-                          '••••••',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: DesignTokens.text4xl,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 2,
-                          ),
-                        )
-                      : AnimatedCounterText(
-                          value: summary.totalBalance,
-                          prefix: '\$',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: DesignTokens.text4xl,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            height: 1.2,
-                          ),
-                        ),
-                  SizedBox(height: DesignTokens.space20),
+                  SizedBox(height: 4.h),
+                  // Balance Amount
+                  Text(
+                    _isBalanceHidden ? '••••••' : '\$${summary.totalBalance.toStringAsFixed(2)}',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 44.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  // Integrated White Summary Card
                   Container(
-                    padding: EdgeInsets.all(DesignTokens.space16),
+                    padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: DesignTokens.borderRadiusXl,
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        width: 1,
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.r),
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Expanded(
-                          child: _buildBalanceItem(
-                            Icons.arrow_downward_rounded,
-                            AppStrings.income,
-                            summary.monthlyIncome,
-                            Colors.white,
-                            showTrend: true,
-                            trendUp: true,
-                          ),
+                        _buildBalanceSummaryItem(
+                          icon: Icons.arrow_upward_rounded,
+                          label: 'Income',
+                          amount: summary.monthlyIncome,
+                          color: const Color(0xFF4CAF50),
+                          bgColor: const Color(0xFFE8F5E9),
                         ),
                         Container(
-                          width: 1.5,
+                          width: 1,
                           height: 45.h,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withValues(alpha: 0.0),
-                                Colors.white.withValues(alpha: 0.4),
-                                Colors.white.withValues(alpha: 0.0),
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
+                          color: Colors.grey.withValues(alpha: 0.15),
                         ),
-                        Expanded(
-                          child: _buildBalanceItem(
-                            Icons.arrow_upward_rounded,
-                            AppStrings.expense,
-                            summary.monthlyExpenses,
-                            Colors.white,
-                            showTrend: true,
-                            trendUp: false,
-                          ),
+                        _buildBalanceSummaryItem(
+                          icon: Icons.arrow_downward_rounded,
+                          label: 'Expense',
+                          amount: summary.monthlyExpenses,
+                          color: const Color(0xFFF44336),
+                          bgColor: const Color(0xFFFFEBEE),
                         ),
                       ],
-                    ),
-                  ),
-              ]),
-            ),
-                  // Enhanced decorative background circles
-                  Positioned(
-                    top: -30,
-                    right: -30,
-                    child: Container(
-                      width: 180,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.white.withValues(alpha: 0.08),
-                            Colors.white.withValues(alpha: 0.0),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -50,
-                    left: -30,
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.white.withValues(alpha: 0.06),
-                            Colors.white.withValues(alpha: 0.0),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  // Additional small accent circle
-                  Positioned(
-                    top: 50,
-                    left: 30,
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
-                        shape: BoxShape.circle,
-                      ),
                     ),
                   ),
                 ],
@@ -388,22 +273,24 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
             ),
           ),
         ),
+
+        SliverToBoxAdapter(child: SizedBox(height: 4.h)),
 
         // Quick Actions - Enhanced Grid
         SliverToBoxAdapter(
           child: FadeSlideTransition(
             delay: const Duration(milliseconds: 400),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: DesignTokens.space12),
-              child: SectionHeader(
-                title: AppStrings.quickActions,
-                icon: Icons.flash_on_rounded,
+                padding: EdgeInsets.symmetric(horizontal: DesignTokens.space12),
+                child: SectionHeader(
+                  title: AppStrings.quickActions,
+                  icon: Icons.bolt_rounded,
+                ),
               ),
-            ),
           ),
         ),
         
-        SliverToBoxAdapter(child: SizedBox(height: DesignTokens.space16)),
+        SliverToBoxAdapter(child: SizedBox(height: DesignTokens.space4)),
 
         _buildQuickActionsSliver(),
 
@@ -545,7 +432,11 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
                     right: DesignTokens.space20,
                     bottom: DesignTokens.space12,
                   ),
-                  child: _buildTransactionCard(transaction),
+                  child: InkWell(
+                    onTap: () => _showTransactionDetail(context, transaction),
+                    borderRadius: DesignTokens.borderRadiusXl,
+                    child: _buildTransactionCard(transaction),
+                  ),
                 );
               },
               childCount: summary.recentTransactions.length,
@@ -553,7 +444,60 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
           ),
 
         SliverToBoxAdapter(
-          child: SizedBox(height: 100.h), // Space for bottom nav
+          child: SizedBox(height: 80.h), // Space for bottom nav
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBalanceSummaryItem({
+    required IconData icon,
+    required String label,
+    required double amount,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(6.w),
+              decoration: BoxDecoration(
+                color: bgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 12.sp, color: color),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 13.sp,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          '\$${amount.toStringAsFixed(2)}',
+          style: GoogleFonts.poppins(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: -0.5,
+          ),
+        ),
+        Text(
+          'This Month',
+          style: GoogleFonts.poppins(
+            fontSize: 11.sp,
+            color: AppColors.textDisabled,
+            fontWeight: FontWeight.w400,
+          ),
         ),
       ],
     );
@@ -627,9 +571,9 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
-          crossAxisSpacing: 10.w,
-          mainAxisSpacing: 10.h,
-          childAspectRatio: 0.8,
+          crossAxisSpacing: 12.w,
+          mainAxisSpacing: 12.h,
+          childAspectRatio: 0.72,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -662,22 +606,12 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: color.withValues(alpha: 0.08),
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -685,40 +619,26 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withValues(alpha: 0.15),
-                    color.withValues(alpha: 0.25),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: color.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: Icon(icon, color: color, size: 24.sp),
+              child: Icon(
+                icon,
+                color: color,
+                size: 20.sp,
+              ),
             ),
-            SizedBox(height: 8.h),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4.w),
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.3,
-                  letterSpacing: -0.2,
-                ),
+            SizedBox(height: 10.h),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+                height: 1.2,
               ),
             ),
           ],
@@ -1001,6 +921,125 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen> {
           );
         }).toList(),
       ),
+    );
+  }
+
+  void _showTransactionDetail(BuildContext context, dynamic transaction) {
+    final categoryColor = _getCategoryColor(transaction.category);
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
+        ),
+        padding: EdgeInsets.fromLTRB(28.w, 16.h, 28.w, 40.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getCategoryIcon(transaction.category),
+                color: categoryColor,
+                size: 40.sp,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              transaction.title,
+              style: GoogleFonts.poppins(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              transaction.category,
+              style: GoogleFonts.poppins(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              '${transaction.type == 'expense' ? '-' : '+'}\$${transaction.amount.toStringAsFixed(2)}',
+              style: GoogleFonts.poppins(
+                fontSize: 36.sp,
+                fontWeight: FontWeight.w800,
+                color: transaction.type == 'expense' ? AppColors.error : AppColors.success,
+              ),
+            ),
+            SizedBox(height: 32.h),
+            _buildDetailInfoRow(Icons.calendar_today_rounded, 'Date', 
+                '${transaction.date.day}/${transaction.date.month}/${transaction.date.year}'),
+            SizedBox(height: 16.h),
+            _buildDetailInfoRow(Icons.description_outlined, 'Description', 
+                transaction.description ?? 'No description provided'),
+            SizedBox(height: 32.h),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF1F3F4),
+                foregroundColor: AppColors.textPrimary,
+                minimumSize: Size(double.infinity, 56.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                elevation: 0,
+              ),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20.sp, color: AppColors.textSecondary),
+        SizedBox(width: 12.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: AppColors.textDisabled,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 15.sp,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

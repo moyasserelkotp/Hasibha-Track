@@ -92,29 +92,15 @@ class MonthlyComparisonChart extends StatelessWidget {
             barRods: [
               BarChartRodData(
                 toY: item['current'].toDouble(),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primary.withValues(alpha: 0.7),
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-                width: 16.w,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
+                color: const Color(0xFF00BFA5),
+                width: 14.w,
+                borderRadius: BorderRadius.circular(4.r),
               ),
               BarChartRodData(
                 toY: item['last'].toDouble(),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.secondary,
-                    AppColors.secondary.withValues(alpha: 0.7),
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                ),
-                width: 16.w,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
+                color: const Color(0xFF00BFA5).withValues(alpha: 0.3),
+                width: 14.w,
+                borderRadius: BorderRadius.circular(4.r),
               ),
             ],
             barsSpace: 4.w,
