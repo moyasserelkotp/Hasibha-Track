@@ -1,6 +1,4 @@
 
-import 'package:hasibha/features/home/data/models/transaction_model.dart';
-
 import '../../domain/entities/dashboard_summary.dart';
 
 class DashboardSummaryModel extends DashboardSummary {
@@ -21,30 +19,38 @@ class DashboardSummaryModel extends DashboardSummary {
   });
 
   factory DashboardSummaryModel.fromJson(Map<String, dynamic> json) {
+    // New backend shape:
+    // {
+    //   "user": { "name": "...", "photo": "...", "currency": "EGP" },
+    //   "balance": {
+    //     "total": 7499.5,
+    //     "income": 8500,
+    //     "expense": 1000.5,
+    //     "period": "This Month"
+    //   },
+    //   "quickActions": [ ... ]
+    // }
+    final balance = json['balance'] as Map<String, dynamic>? ?? const {};
+    final user = json['user'] as Map<String, dynamic>? ?? const {};
+
     return DashboardSummaryModel(
-      totalBalance: (json['totalBalance'] as num).toDouble(),
-      totalIncome: (json['totalIncome'] as num).toDouble(),
-      totalExpense: (json['totalExpense'] as num).toDouble(),
-      recentTransactions: (json['recentTransactions'] as List)
-          .map((t) => TransactionModel.fromJson(t as Map<String, dynamic>))
-          .toList(),
-      categoryBreakdown: Map<String, double>.from(
-        (json['categoryBreakdown'] as Map).map(
-          (key, value) => MapEntry(key, (value as num).toDouble()),
-        ),
-      ),
-      userName: json['userName'] as String?,
-      monthlyIncome: json['monthlyIncome'] != null 
-          ? (json['monthlyIncome'] as num).toDouble()
-          : null,
-      monthlyExpenses: json['monthlyExpenses'] != null
-          ? (json['monthlyExpenses'] as num).toDouble()
-          : null,
-      unreadNotifications: json['unreadNotifications'] as int? ?? 0,
-      activeBudgets: json['activeBudgets'] as int?,
-      budgetsOnTrack: json['budgetsOnTrack'] as int?,
-      savingsGoals: json['savingsGoals'] as int?,
-      goalsAchieved: json['goalsAchieved'] as int?,
+      totalBalance: (balance['total'] as num?)?.toDouble() ?? 0.0,
+      totalIncome: (balance['income'] as num?)?.toDouble() ?? 0.0,
+      totalExpense: (balance['expense'] as num?)?.toDouble() ?? 0.0,
+      // New dashboard endpoint does not yet return recent transactions
+      recentTransactions: const [],
+      // And it does not include category breakdown in this response
+      categoryBreakdown: const {},
+      userName: user['name'] as String?,
+      // Use income/expense as monthly defaults
+      monthlyIncome: (balance['income'] as num?)?.toDouble(),
+      monthlyExpenses: (balance['expense'] as num?)?.toDouble(),
+      // Not provided by backend dashboard response yet
+      unreadNotifications: 0,
+      activeBudgets: null,
+      budgetsOnTrack: null,
+      savingsGoals: null,
+      goalsAchieved: null,
     );
   }
 
@@ -53,9 +59,7 @@ class DashboardSummaryModel extends DashboardSummary {
       'totalBalance': totalBalance,
       'totalIncome': totalIncome,
       'totalExpense': totalExpense,
-      'recentTransactions': recentTransactions
-          .map((t) => (t as TransactionModel).toJson())
-          .toList(),
+      'recentTransactions': recentTransactions,
       'categoryBreakdown': categoryBreakdown,
       'userName': userName,
       'monthlyIncome': monthlyIncome,

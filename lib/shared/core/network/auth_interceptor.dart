@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../../features/auth/data/models/remote/refresh_token_model.dart';
+import '../../../features/auth/data/models/auth_tokens_model.dart';
 import '../../utils/securely_save.dart';
 
 /// Interceptor that automatically adds authentication tokens to requests
-/// and handles token refresh on 401 errors
+/// and handles token refresh on 401 errors (new backend contract).
 class AuthInterceptor extends Interceptor {
   final Dio dio;
   bool _isRefreshing = false;
@@ -26,7 +26,8 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Handle 401 Unauthorized - token expired
-    if (err.response?.statusCode == 401 && !_isAuthEndpoint(err.requestOptions.path)) {
+    if (err.response?.statusCode == 401 &&
+        !_isAuthEndpoint(err.requestOptions.path)) {
       // If already refreshing, queue this request
       if (_isRefreshing) {
         return _queueRequest(err, handler);
@@ -41,22 +42,28 @@ class AuthInterceptor extends Interceptor {
           return handler.reject(err);
         }
 
-        // Attempt to refresh the token
+        // Attempt to refresh the token using new API:
+        // POST /api/auth/refresh-token
+        // body: { "refreshToken": "<token>" }
+        // response: { success, accessToken, refreshToken, ... }
         final newTokens = await _refreshToken(refreshToken);
-        
-        if (newTokens != null) {
-          await saveAccessToken(newTokens.access ?? '');
-          await saveRefreshToken(newTokens.refresh ?? '');
+
+        if (newTokens != null &&
+            newTokens.accessToken.isNotEmpty &&
+            newTokens.refreshToken.isNotEmpty) {
+          await saveAccessToken(newTokens.accessToken);
+          await saveRefreshToken(newTokens.refreshToken);
 
           // Retry the original request with new token
           final opts = err.requestOptions;
-          opts.headers['Authorization'] = 'Bearer ${newTokens.access}';
-          
+          opts.headers['Authorization'] =
+              'Bearer ${newTokens.accessToken}';
+
           final response = await dio.fetch(opts);
           handler.resolve(response);
 
           // Process pending requests
-          _processPendingRequests(newTokens.access ?? '');
+          _processPendingRequests(newTokens.accessToken);
         } else {
           await _clearAuthAndNavigate();
           handler.reject(err);
@@ -75,12 +82,14 @@ class AuthInterceptor extends Interceptor {
 
   bool _isAuthEndpoint(String path) {
     return path.contains('/auth/login') ||
-           path.contains('/auth/register') ||
-           path.contains('/auth/refresh-token') ||
-           path.contains('/auth/google') ||
-           path.contains('/auth/reset-password') ||
-           path.contains('/auth/verify-otp') ||
-           path.contains('/auth/resend-otp');
+        path.contains('/auth/signup') ||
+        path.contains('/auth/signup-phone') ||
+        path.contains('/auth/refresh-token') ||
+        path.contains('/auth/google-signin') ||
+        path.contains('/auth/forgot-password') ||
+        path.contains('/auth/reset-password') ||
+        path.contains('/auth/sms/send') ||
+        path.contains('/auth/sms/verify');
   }
 
   void _queueRequest(DioException err, ErrorInterceptorHandler handler) {
@@ -100,18 +109,25 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  Future<RefreshTokenModel?> _refreshToken(String refreshToken) async {
+  Future<AuthTokensModel?> _refreshToken(String refreshToken) async {
     try {
       final response = await dio.post(
-        '/auth/refresh-token/',
-        data: {'refresh': refreshToken},
+        '/auth/refresh-token',
+        data: {'refreshToken': refreshToken},
         options: Options(
-          headers: {'Content-Type': 'application/json'},
+          headers: const {'Content-Type': 'application/json'},
         ),
       );
-      
+
       if (response.data is Map<String, dynamic>) {
-        return RefreshTokenModel.fromJson(response.data);
+        final data = response.data as Map<String, dynamic>;
+
+        // New backend: { success, accessToken, refreshToken, ... }
+        if (data['success'] == false) {
+          return null;
+        }
+
+        return AuthTokensModel.fromJson(data);
       }
       return null;
     } catch (e) {

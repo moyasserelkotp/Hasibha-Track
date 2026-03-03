@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../../../../shared/core/api/api_constants.dart';
+import 'package:hasibha/core/network/app_env.dart';
 import '../../../../../shared/core/error/exceptions.dart';
 import '../../models/savings_goal_model.dart';
 
@@ -21,9 +21,13 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   @override
   Future<List<SavingsGoalModel>> getSavingsGoals() async {
     try {
-      final response = await dio.get(ApiConstants.savingsGoals);
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => SavingsGoalModel.fromJson(json)).toList();
+      final response = await dio.get('${AppEnv.homeBaseUrl}/api/savings');
+      if (response.data is Map<String, dynamic>) {
+        final map = response.data as Map<String, dynamic>;
+        final List<dynamic> data = map['savingsGoals'] ?? const [];
+        return data.map((json) => SavingsGoalModel.fromJson(json)).toList();
+      }
+      return [];
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch savings goals',
@@ -35,9 +39,9 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   Future<SavingsGoalModel> getSavingsGoalById(String id) async {
     try {
       final response = await dio.get(
-        ApiConstants.savingsGoalById.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/savings/$id',
       );
-      return SavingsGoalModel.fromJson(response.data['data'] ?? response.data);
+      return SavingsGoalModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch savings goal',
@@ -49,10 +53,13 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   Future<SavingsGoalModel> createSavingsGoal(SavingsGoalModel goal) async {
     try {
       final response = await dio.post(
-        ApiConstants.savingsGoals,
+        '${AppEnv.homeBaseUrl}/api/savings',
         data: goal.toJson(),
       );
-      return SavingsGoalModel.fromJson(response.data['data'] ?? response.data);
+      return SavingsGoalModel.fromJson(
+        (response.data as Map<String, dynamic>)['savingsGoal'] ??
+            response.data,
+      );
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to create savings goal',
@@ -64,10 +71,13 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   Future<SavingsGoalModel> updateSavingsGoal(SavingsGoalModel goal) async {
     try {
       final response = await dio.put(
-        ApiConstants.savingsGoalById.replaceAll('{id}', goal.id),
+        '${AppEnv.homeBaseUrl}/api/savings/${goal.id}',
         data: goal.toJson(),
       );
-      return SavingsGoalModel.fromJson(response.data['data'] ?? response.data);
+      return SavingsGoalModel.fromJson(
+        (response.data as Map<String, dynamic>)['savingsGoal'] ??
+            response.data,
+      );
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to update savings goal',
@@ -79,7 +89,7 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   Future<void> deleteSavingsGoal(String id) async {
     try {
       await dio.delete(
-        ApiConstants.savingsGoalById.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/savings/$id',
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -92,10 +102,13 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   Future<SavingsGoalModel> addFunds(String id, double amount) async {
     try {
       final response = await dio.post(
-        ApiConstants.savingsGoalAddFunds.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/savings/$id/contribute',
         data: {'amount': amount},
       );
-      return SavingsGoalModel.fromJson(response.data['data'] ?? response.data);
+      return SavingsGoalModel.fromJson(
+        (response.data as Map<String, dynamic>)['savingsGoal'] ??
+            response.data,
+      );
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to add funds',
@@ -106,11 +119,15 @@ class SavingsRemoteDataSourceImpl implements SavingsRemoteDataSource {
   @override
   Future<SavingsGoalModel> withdrawFunds(String id, double amount) async {
     try {
+      // Not directly supported in new backend; simulate by negative contribution.
       final response = await dio.post(
-        ApiConstants.savingsGoalWithdraw.replaceAll('{id}', id),
-        data: {'amount': amount},
+        '${AppEnv.homeBaseUrl}/api/savings/$id/contribute',
+        data: {'amount': -amount},
       );
-      return SavingsGoalModel.fromJson(response.data['data'] ?? response.data);
+      return SavingsGoalModel.fromJson(
+        (response.data as Map<String, dynamic>)['savingsGoal'] ??
+            response.data,
+      );
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to withdraw funds',

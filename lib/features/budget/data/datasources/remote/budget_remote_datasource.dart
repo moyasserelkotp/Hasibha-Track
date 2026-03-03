@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:hasibha/core/network/app_env.dart';
 import '../../../domain/entities/budget.dart';
-import '../../../../../shared/core/api/api_constants.dart';
 import '../../../../../shared/core/error/exceptions.dart';
 import '../../models/budget_model.dart';
 import '../../dtos/budget_dto.dart';
@@ -31,16 +31,20 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   }) async {
     try {
       final queryParams = <String, dynamic>{};
-      if (isActive != null) queryParams['is_active'] = isActive;
-      if (categoryId != null) queryParams['category_id'] = categoryId;
+      if (isActive != null) queryParams['isActive'] = isActive;
+      if (categoryId != null) queryParams['category'] = categoryId;
 
       final response = await dio.get(
-        ApiConstants.budgets,
+        '${AppEnv.homeBaseUrl}/api/budgets',
         queryParameters: queryParams,
       );
 
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => BudgetModel.fromJson(json)).toList();
+      if (response.data is Map<String, dynamic>) {
+        final map = response.data as Map<String, dynamic>;
+        final List<dynamic> data = map['budgets'] ?? const [];
+        return data.map((json) => BudgetModel.fromJson(json)).toList();
+      }
+      return [];
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch budgets',
@@ -52,10 +56,10 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   Future<BudgetModel> getBudgetById(String id) async {
     try {
       final response = await dio.get(
-        ApiConstants.budgetById.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/budgets/$id',
       );
 
-      return BudgetModel.fromJson(response.data['data'] ?? response.data);
+      return BudgetModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch budget',
@@ -67,11 +71,11 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   Future<BudgetModel> createBudget(BudgetDto dto) async {
     try {
       final response = await dio.post(
-        ApiConstants.budgets,
+        '${AppEnv.homeBaseUrl}/api/budgets',
         data: dto.toJson(),
       );
 
-      return BudgetModel.fromJson(response.data['data'] ?? response.data);
+      return BudgetModel.fromJson(response.data['budget'] ?? response.data);
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to create budget',
@@ -83,11 +87,11 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   Future<BudgetModel> updateBudget(String id, BudgetDto dto) async {
     try {
       final response = await dio.put(
-        ApiConstants.budgetById.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/budgets/$id',
         data: dto.toJson(),
       );
 
-      return BudgetModel.fromJson(response.data['data'] ?? response.data);
+      return BudgetModel.fromJson(response.data['budget'] ?? response.data);
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to update budget',
@@ -99,7 +103,7 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   Future<void> deleteBudget(String id) async {
     try {
       await dio.delete(
-        ApiConstants.budgetById.replaceAll('{id}', id),
+        '${AppEnv.homeBaseUrl}/api/budgets/$id',
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -114,17 +118,11 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
     required BudgetPeriod period,
   }) async {
     try {
-      final periodStr = period.toString().split('.').last;
-      final response = await dio.get(
-        ApiConstants.budgetByCategory.replaceAll('{categoryId}', categoryId),
-        queryParameters: {'period': periodStr},
-      );
-
-      if (response.data == null || response.data['data'] == null) {
-        return null;
-      }
-
-      return BudgetModel.fromJson(response.data['data']);
+      // Not directly supported by new backend; derive from list.
+      final budgets = await getBudgets(isActive: true, categoryId: categoryId);
+      if (budgets.isEmpty) return null;
+      // Simple heuristic: return first matching budget.
+      return budgets.first;
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return null;
@@ -138,10 +136,12 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
   @override
   Future<List<BudgetModel>> getExceededBudgets() async {
     try {
-      final response = await dio.get(ApiConstants.budgetExceeded);
-
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => BudgetModel.fromJson(json)).toList();
+      // Not provided as a separate endpoint in new backend.
+      // Fetch active budgets and filter by percentageSpent >= 100.
+      final budgets = await getBudgets(isActive: true);
+      return budgets
+          .where((b) => (b.percentageSpent ?? 0) >= 100)
+          .toList();
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch exceeded budgets',
@@ -154,13 +154,12 @@ class BudgetRemoteDataSourceImpl implements BudgetRemoteDataSource {
     double threshold = 80.0,
   }) async {
     try {
-      final response = await dio.get(
-        ApiConstants.budgetApproaching,
-        queryParameters: {'threshold': threshold},
-      );
-
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      return data.map((json) => BudgetModel.fromJson(json)).toList();
+      // Not provided as separate endpoint in new backend.
+      // Fetch active budgets and filter by percentageSpent >= threshold.
+      final budgets = await getBudgets(isActive: true);
+      return budgets
+          .where((b) => (b.percentageSpent ?? 0) >= threshold)
+          .toList();
     } on DioException catch (e) {
       throw ServerException(
         message: e.response?.data['message'] ?? 'Failed to fetch approaching budgets',

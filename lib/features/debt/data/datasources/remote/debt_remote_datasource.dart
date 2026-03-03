@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../../../../shared/core/api/api_constants.dart';
+import 'package:hasibha/core/network/app_env.dart';
 import '../../../../../shared/core/error/exceptions.dart';
 import '../../../domain/entities/debt_enums.dart';
 import '../../models/debt_model.dart';
@@ -35,12 +35,14 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
       }
 
       final response = await dio.get(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debts}',
+        '${AppEnv.homeBaseUrl}/api/debts',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] as List<dynamic>;
+        final body = response.data;
+        final List<dynamic> data =
+            (body is Map<String, dynamic> ? body['debts'] : body) as List<dynamic>;
         return data
             .map((json) => DebtModel.fromJson(json as Map<String, dynamic>))
             .toList();
@@ -62,7 +64,7 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<DebtModel> getDebtById(String id) async {
     try {
       final response = await dio.get(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debtById.replaceAll('{id}', id)}',
+        '${AppEnv.homeBaseUrl}/api/debts/$id',
       );
 
       if (response.statusCode == 200) {
@@ -85,12 +87,15 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<DebtModel> createDebt(DebtModel debt) async {
     try {
       final response = await dio.post(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debts}',
+        '${AppEnv.homeBaseUrl}/api/debts',
         data: debt.toJson(),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        return DebtModel.fromJson(response.data['data'] as Map<String, dynamic>);
+        final body = response.data as Map<String, dynamic>;
+        return DebtModel.fromJson(
+          (body['debt'] ?? body) as Map<String, dynamic>,
+        );
       } else {
         throw ServerException(
           message: response.data['message'] ?? 'Failed to create debt',
@@ -109,12 +114,15 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<DebtModel> updateDebt(DebtModel debt) async {
     try {
       final response = await dio.put(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debtById.replaceAll('{id}', debt.id)}',
+        '${AppEnv.homeBaseUrl}/api/debts/${debt.id}',
         data: debt.toJson(),
       );
 
       if (response.statusCode == 200) {
-        return DebtModel.fromJson(response.data['data'] as Map<String, dynamic>);
+        final body = response.data as Map<String, dynamic>;
+        return DebtModel.fromJson(
+          (body['debt'] ?? body) as Map<String, dynamic>,
+        );
       } else {
         throw ServerException(
           message: response.data['message'] ?? 'Failed to update debt',
@@ -133,7 +141,7 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<void> deleteDebt(String id) async {
     try {
       final response = await dio.delete(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debtById.replaceAll('{id}', id)}',
+        '${AppEnv.homeBaseUrl}/api/debts/$id',
       );
 
       if (response.statusCode != 200 && response.statusCode != 204) {
@@ -154,12 +162,15 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<DebtModel> addPayment(String debtId, PaymentModel payment) async {
     try {
       final response = await dio.post(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debtPayments.replaceAll('{id}', debtId)}',
-        data: payment.toJson(),
+        '${AppEnv.homeBaseUrl}/api/debts/$debtId/payment',
+        data: {'amount': payment.amount, 'notes': payment.notes},
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        return DebtModel.fromJson(response.data['data'] as Map<String, dynamic>);
+        final body = response.data as Map<String, dynamic>;
+        return DebtModel.fromJson(
+          (body['debt'] ?? body) as Map<String, dynamic>,
+        );
       } else {
         throw ServerException(
           message: response.data['message'] ?? 'Failed to add payment',
@@ -178,15 +189,18 @@ class DebtRemoteDataSourceImpl implements DebtRemoteDataSource {
   Future<Map<String, double>> getDebtSummary() async {
     try {
       final response = await dio.get(
-        '${ApiConstants.apiBaseUrl}${ApiConstants.debtSummary}',
+        '${AppEnv.homeBaseUrl}/api/analytics/overview?period=monthly',
       );
 
       if (response.statusCode == 200) {
-        final data = response.data['data'] as Map<String, dynamic>;
+        final data = response.data['summary'] as Map<String, dynamic>;
+        // Map analytics summary into a simple debt summary-like structure.
         return {
-          'totalOwedToMe': (data['total_owed_to_me'] as num?)?.toDouble() ?? 0.0,
-          'totalOwedByMe': (data['total_owed_by_me'] as num?)?.toDouble() ?? 0.0,
-          'netBalance': (data['net_balance'] as num?)?.toDouble() ?? 0.0,
+          'totalOwedToMe':
+              (data['totalIncome'] as num?)?.toDouble() ?? 0.0,
+          'totalOwedByMe':
+              (data['totalExpense'] as num?)?.toDouble() ?? 0.0,
+          'netBalance': (data['netSavings'] as num?)?.toDouble() ?? 0.0,
         };
       } else {
         throw ServerException(

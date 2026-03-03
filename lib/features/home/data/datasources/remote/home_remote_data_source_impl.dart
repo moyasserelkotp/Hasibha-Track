@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:hasibha/core/network/app_env.dart';
 
 import '../../../../../shared/core/api/api_constants.dart';
 import '../../../../../shared/core/error/exceptions.dart';
@@ -16,12 +17,10 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<DashboardSummaryModel> getDashboardSummary() async {
     try {
-      // Try API endpoint (with trailing slash to match backend pattern)
-      final endpoint = ApiConstants.dashboardSummary.endsWith('/') 
-          ? ApiConstants.dashboardSummary 
-          : '${ApiConstants.dashboardSummary}/';
-      final response = await dio.get(endpoint);
-      
+      // New backend: GET {homeBaseUrl}/api/dashboard
+      final url = '${AppEnv.homeBaseUrl}/api/dashboard';
+      final response = await dio.get(url);
+
       if (response.data is Map<String, dynamic>) {
         return DashboardSummaryModel.fromJson(response.data as Map<String, dynamic>);
       }
@@ -48,21 +47,24 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<List<TransactionModel>> getRecentTransactions({int limit = 10}) async {
     try {
-      // Try API endpoint (with trailing slash to match backend pattern)
-      final endpoint = ApiConstants.recentTransactions.endsWith('/') 
-          ? ApiConstants.recentTransactions 
-          : '${ApiConstants.recentTransactions}/';
+      // New backend: GET {homeBaseUrl}/api/transactions?limit=&page=1
+      final url = '${AppEnv.homeBaseUrl}/api/transactions';
       final response = await dio.get(
-        endpoint,
-        queryParameters: {'limit': limit},
+        url,
+        queryParameters: {
+          'limit': limit,
+          'page': 1,
+        },
       );
-      
-      if (response.data is List) {
-        return (response.data as List)
+
+      if (response.data is Map<String, dynamic>) {
+        final data = response.data as Map<String, dynamic>;
+        final list = data['transactions'] as List? ?? const [];
+        return list
             .map((json) => TransactionModel.fromJson(json as Map<String, dynamic>))
             .toList();
       }
-      
+
       // Fallback to mock data if API structure is different
       return _getMockTransactions().take(limit).toList();
     } on DioException catch (e) {
