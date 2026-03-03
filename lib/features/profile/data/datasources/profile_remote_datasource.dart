@@ -14,36 +14,30 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   ProfileRemoteDataSourceImpl({required this.dio});
 
-  String get _profileUrl => '${AppEnv.homeBaseUrl}/api/profile';
-
   @override
   Future<UserProfileDto> getUserProfile() async {
     try {
-      // GET http://localhost:5001/api/profile
-      final response = await dio.get(_profileUrl);
+      final response = await dio.get(ApiConstants.profile);
       return UserProfileDto.fromJson(
         response.data as Map<String, dynamic>,
       );
     } catch (e) {
-      throw Exception('Failed to fetch profile: $e');
+      throw ServerException(message: 'Failed to fetch profile: $e');
     }
   }
 
   @override
   Future<UserProfileDto> updateProfile(UpdateProfileDto dto) async {
     try {
-      // PUT http://localhost:5001/api/profile
-      // Response: { message, profile: { ... } }
       final response = await dio.put(
-        _profileUrl,
+        ApiConstants.profile,
         data: dto.toJson(),
       );
       final data = response.data as Map<String, dynamic>;
-      final profileJson =
-          (data['profile'] ?? data) as Map<String, dynamic>;
+      final profileJson = (data['profile'] ?? data) as Map<String, dynamic>;
       return UserProfileDto.fromJson(profileJson);
     } catch (e) {
-      throw Exception('Failed to update profile: $e');
+      throw ServerException(message: 'Failed to update profile: $e');
     }
   }
 
@@ -55,7 +49,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       });
       
       final response = await dio.post(
-        '$_profileUrl/photo',
+        '${ApiConstants.profile}/photo',
         data: formData,
       );
       
@@ -65,16 +59,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
                   ? (data['profile'] as Map<String, dynamic>)['photoUrl']
                   : null)) as String;
     } catch (e) {
-      throw Exception('Failed to upload photo: $e');
+      throw ServerException(message: 'Failed to upload photo: $e');
     }
   }
 
   @override
   Future<void> deleteAccount() async {
     try {
-      await dio.delete(_profileUrl);
+      await dio.delete(ApiConstants.profile);
     } catch (e) {
-      throw Exception('Failed to delete account: $e');
+      throw ServerException(message: 'Failed to delete account: $e');
     }
   }
 }

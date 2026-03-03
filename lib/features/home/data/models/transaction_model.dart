@@ -58,31 +58,15 @@ class TransactionModel extends Transaction {
         );
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
-    // Support both legacy and new backend shapes.
-    // New backend transaction:
-    // {
-    //   "_id": "...",
-    //   "type": "income" | "expense",
-    //   "amount": 150.5,
-    //   "category": "Food & Dining",
-    //   "description": "Grocery shopping",
-    //   "date": "2026-02-25T00:00:00.000Z",
-    //   "paymentMethod": "cash",
-    //   "tags": [...],
-    //   "notes": "..."
-    // }
-    final id = (json['id'] ?? json['_id'] ?? '') as String;
+    final id = (json['_id'] ?? json['id'] ?? '') as String;
     final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
     final category = (json['category'] as String?) ?? 'Uncategorized';
     final type = (json['type'] as String?) ?? 'expense';
     final dateString = (json['date'] as String?) ?? DateTime.now().toIso8601String();
-    final description = (json['description'] ?? json['notes']) as String?;
-
-    // Derive a reasonable title if not present
-    final title = (json['title'] as String?) ??
-        (description?.isNotEmpty == true
-            ? description!
-            : category);
+    
+    // Legacy support: title. New backend use description or category
+    final description = (json['description'] ?? json['notes'] ?? json['title']) as String?;
+    final title = (json['title'] as String?) ?? description ?? category;
 
     return TransactionModel(
       id: id,

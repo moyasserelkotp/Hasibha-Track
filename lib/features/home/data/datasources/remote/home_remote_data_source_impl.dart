@@ -7,6 +7,7 @@ import '../../../domain/entities/transaction.dart';
 import '../../models/dashboard_summary_model.dart';
 import '../../models/transaction_model.dart';
 import '../../models/analytics_data_model.dart';
+import '../../dtos/transaction_dto.dart';
 import 'home_remote_data_source.dart';
 
 class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
@@ -17,91 +18,144 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<DashboardSummaryModel> getDashboardSummary() async {
     try {
-      // New backend: GET {homeBaseUrl}/api/dashboard
-      final url = '${AppEnv.homeBaseUrl}/api/dashboard';
-      final response = await dio.get(url);
+      final response = await dio.get(ApiConstants.dashboardSummary);
 
       if (response.data is Map<String, dynamic>) {
         return DashboardSummaryModel.fromJson(response.data as Map<String, dynamic>);
       }
       
-      // Fallback to mock data if API structure is different
-      return _getMockDashboardSummary();
+      throw const ServerException(message: 'Invalid response format');
     } on DioException catch (e) {
-      // If 404 or API not available, use mock data for development
-      if (e.response?.statusCode == 404 || e.type == DioExceptionType.connectionError) {
-        return _getMockDashboardSummary();
-      }
       final errorMessage = _extractErrorMessage(e);
       throw ServerException(
         message: errorMessage,
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
-      // If API is not available, return mock data for development
-      // In production, you might want to throw an exception instead
-      return _getMockDashboardSummary();
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getTransactions({
+    String? type,
+    String? category,
+    String? startDate,
+    String? endDate,
+    int? limit,
+    int? page,
+  }) async {
+    try {
+      final response = await dio.get(
+        ApiConstants.transactions,
+        queryParameters: {
+          if (type != null) 'type': type,
+          if (category != null) 'category': category,
+          if (startDate != null) 'startDate': startDate,
+          if (endDate != null) 'endDate': endDate,
+          if (limit != null) 'limit': limit,
+          if (page != null) 'page': page,
+        },
+      );
+
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ServerException(
+        message: _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TransactionModel> getTransactionById(String id) async {
+    try {
+      final response = await dio.get('${ApiConstants.transactionById}/$id');
+      return TransactionModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ServerException(
+        message: _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TransactionModel> createTransaction(TransactionDto dto) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.transactions,
+        data: dto.toJson(),
+      );
+      final data = response.data as Map<String, dynamic>;
+      final transactionJson = (data['transaction'] ?? data) as Map<String, dynamic>;
+      return TransactionModel.fromJson(transactionJson);
+    } on DioException catch (e) {
+      throw ServerException(
+        message: _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TransactionModel> updateTransaction(String id, TransactionDto dto) async {
+    try {
+      final response = await dio.put(
+        '${ApiConstants.transactionById}/$id',
+        data: dto.toJson(),
+      );
+      final data = response.data as Map<String, dynamic>;
+      final transactionJson = (data['transaction'] ?? data) as Map<String, dynamic>;
+      return TransactionModel.fromJson(transactionJson);
+    } on DioException catch (e) {
+      throw ServerException(
+        message: _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteTransaction(String id) async {
+    try {
+      await dio.delete('${ApiConstants.transactionById}/$id');
+    } on DioException catch (e) {
+      throw ServerException(
+        message: _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      throw ServerException(message: e.toString());
     }
   }
 
   @override
   Future<List<TransactionModel>> getRecentTransactions({int limit = 10}) async {
     try {
-      // New backend: GET {homeBaseUrl}/api/transactions?limit=&page=1
-      final url = '${AppEnv.homeBaseUrl}/api/transactions';
-      final response = await dio.get(
-        url,
-        queryParameters: {
-          'limit': limit,
-          'page': 1,
-        },
-      );
-
-      if (response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final list = data['transactions'] as List? ?? const [];
-        return list
-            .map((json) => TransactionModel.fromJson(json as Map<String, dynamic>))
-            .toList();
-      }
-
-      // Fallback to mock data if API structure is different
-      return _getMockTransactions().take(limit).toList();
-    } on DioException catch (e) {
-      // If 404 or API not available, use mock data for development
-      if (e.response?.statusCode == 404 || e.type == DioExceptionType.connectionError) {
-        return _getMockTransactions().take(limit).toList();
-      }
-      final errorMessage = _extractErrorMessage(e);
-      throw ServerException(
-        message: errorMessage,
-        statusCode: e.response?.statusCode,
-      );
+      final data = await getTransactions(limit: limit, page: 1);
+      final list = data['transactions'] as List? ?? const [];
+      return list
+          .map((json) => TransactionModel.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      // If API is not available, return mock data for development
-      // In production, you might want to throw an exception instead
+      // In development, you might still want fallback, but let's try to be consistent
       return _getMockTransactions().take(limit).toList();
     }
   }
 
   @override
   Future<void> addTransaction(Transaction transaction) async {
-    // For now, store locally - in production this would call API
-    // The transaction will be added to mock data until API is implemented
-    _getMockTransactions().add(
-      TransactionModel(
-        id: transaction.id,
-        title: transaction.title,
-        amount: transaction.amount,
-        category: transaction.category,
-        type: transaction.type,
-        date: transaction.date,
-        description: transaction.description,
-        icon: transaction.icon,
-      ),
-    );
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Redirect to createTransaction but this is deprecated
+    throw UnimplementedError('Use createTransaction instead');
   }
 
   @override

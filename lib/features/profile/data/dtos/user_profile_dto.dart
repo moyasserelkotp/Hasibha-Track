@@ -1,53 +1,41 @@
 class UserProfileDto {
   final String id;
-  final String name;
-  final String email;
-  final String? phoneNumber;
-  final String? photoUrl;
-  final String? bio;
-  final Map<String, dynamic>? statistics;
-  final Map<String, dynamic>? preferences;
+  final String userId;
+  final String displayName;
+  final String? profilePhoto;
+  final String currency;
   final String createdAt;
   final String updatedAt;
 
   UserProfileDto({
     required this.id,
-    required this.name,
-    required this.email,
-    this.phoneNumber,
-    this.photoUrl,
-    this.bio,
-    this.statistics,
-    this.preferences,
+    required this.userId,
+    required this.displayName,
+    this.profilePhoto,
+    required this.currency,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory UserProfileDto.fromJson(Map<String, dynamic> json) {
     return UserProfileDto(
-      id: json['id'] ?? json['_id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phoneNumber: json['phoneNumber'],
-      photoUrl: json['photoUrl'],
-      bio: json['bio'],
-      statistics: json['statistics'],
-      preferences: json['preferences'],
-      createdAt: json['createdAt'] ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] ?? DateTime.now().toIso8601String(),
+      id: (json['_id'] ?? json['id'] ?? '') as String,
+      userId: (json['userId'] ?? '') as String,
+      displayName: (json['displayName'] ?? json['name'] ?? '') as String,
+      profilePhoto: (json['profilePhoto'] ?? json['photoUrl']) as String?,
+      currency: (json['currency'] ?? 'USD') as String,
+      createdAt: (json['createdAt'] ?? '') as String,
+      updatedAt: (json['updatedAt'] ?? '') as String,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'photoUrl': photoUrl,
-      'bio': bio,
-      'statistics': statistics,
-      'preferences': preferences,
+      '_id': id,
+      'userId': userId,
+      'displayName': displayName,
+      'profilePhoto': profilePhoto,
+      'currency': currency,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -55,24 +43,21 @@ class UserProfileDto {
 }
 
 class UpdateProfileDto {
-  final String? name;
-  final String? phoneNumber;
-  final String? bio;
-  final String? photoUrl;
+  final String? displayName;
+  final String? profilePhoto;
+  final String? currency;
 
   UpdateProfileDto({
-    this.name,
-    this.phoneNumber,
-    this.bio,
-    this.photoUrl,
+    this.displayName,
+    this.profilePhoto,
+    this.currency,
   });
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    if (name != null) map['name'] = name;
-    if (phoneNumber != null) map['phoneNumber'] = phoneNumber;
-    if (bio != null) map['bio'] = bio;
-    if (photoUrl != null) map['photoUrl'] = photoUrl;
+    if (displayName != null) map['displayName'] = displayName;
+    if (profilePhoto != null) map['profilePhoto'] = profilePhoto;
+    if (currency != null) map['currency'] = currency;
     return map;
   }
 }

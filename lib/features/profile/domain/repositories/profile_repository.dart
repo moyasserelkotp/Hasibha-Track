@@ -8,6 +8,8 @@ abstract class ProfileRepository {
     String? phoneNumber,
     String? bio,
     String? photoUrl,
+    String? currency,
+    String? displayName,
   });
   Future<Either<Failure, String>> uploadProfilePhoto(String filePath);
   Future<Either<Failure, void>> deleteAccount();

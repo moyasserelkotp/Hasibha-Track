@@ -14,6 +14,7 @@ class ApiConstants {
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
   static const String authMe = '/auth/me';
+  static const String profile = '/profile';
   
   // SMS Verification Endpoints
   static const String smsSend = '/auth/sms/send';
@@ -50,7 +51,7 @@ class ApiConstants {
 
   // Transaction Endpoints
   static const String transactions = '/transactions';
-  static const String transactionById = '/transactions/{id}';
+  static const String transactionById = '/transactions'; // Base for /:id
   static const String recentTransactions = '/transactions/recent';
   static const String transactionsByCategory = '/transactions/category/{categoryId}';
 
@@ -63,7 +64,8 @@ class ApiConstants {
   static const String expenseStats = '/expenses/stats';
 
   // Dashboard Endpoints
-  static const String dashboardSummary = '/dashboard/summary';
+  static const String dashboard = '/dashboard';
+  static const String dashboardSummary = '/dashboard';
   static const String monthlyReport = '/dashboard/monthly-report';
 
   // Budget Endpoints

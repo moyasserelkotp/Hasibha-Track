@@ -25,34 +25,8 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, DashboardSummary>> getDashboardSummary() async {
     try {
-      // Get local transactions
-      final transactions = await localDataSource.getTransactions();
-
-      double totalIncome = 0;
-      double totalExpense = 0;
-
-      for (final t in transactions) {
-        if (t.type == 'income') {
-          totalIncome += t.amount;
-        } else {
-          totalExpense += t.amount;
-        }
-      }
-
-      final totalBalance = totalIncome - totalExpense;
-
-      final recentTransactions =
-      await localDataSource.getRecentTransactions(limit: 10);
-
-      return Right(
-        DashboardSummary(
-          totalBalance: totalBalance,
-          totalIncome: totalIncome,
-          totalExpense: totalExpense,
-          recentTransactions: recentTransactions,
-          categoryBreakdown: {},
-        ),
-      );
+      final summary = await remoteDataSource.getDashboardSummary();
+      return Right(summary);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
@@ -76,10 +50,121 @@ class HomeRepositoryImpl implements HomeRepository {
     }
   }
 
-  // -----------------------------------------------------------
-  // Add Transaction (Local)
-  // -----------------------------------------------------------
   @override
+  Future<Either<Failure, Map<String, dynamic>>> getTransactions({
+    String? type,
+    String? category,
+    String? startDate,
+    String? endDate,
+    int? limit,
+    int? page,
+  }) async {
+    try {
+      final result = await remoteDataSource.getTransactions(
+        type: type,
+        category: category,
+        startDate: startDate,
+        endDate: endDate,
+        limit: limit,
+        page: page,
+      );
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Transaction>> getTransactionById(String id) async {
+    try {
+      final result = await remoteDataSource.getTransactionById(id);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Transaction>> createTransaction({
+    required String type,
+    required double amount,
+    required String category,
+    String? description,
+    String? date,
+    String? paymentMethod,
+    List<String>? tags,
+    String? notes,
+  }) async {
+    try {
+      final dto = TransactionDto(
+        type: type,
+        amount: amount,
+        category: category,
+        description: description,
+        date: date,
+        paymentMethod: paymentMethod,
+        tags: tags,
+        notes: notes,
+      );
+      final result = await remoteDataSource.createTransaction(dto);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Transaction>> updateTransaction(
+    String id, {
+    String? type,
+    double? amount,
+    String? category,
+    String? description,
+    String? date,
+    String? paymentMethod,
+    List<String>? tags,
+    String? notes,
+  }) async {
+    try {
+      final dto = TransactionDto(
+        type: type ?? '', // If null, backend might use existing
+        amount: amount ?? 0,
+        category: category ?? '',
+        description: description,
+        date: date,
+        paymentMethod: paymentMethod,
+        tags: tags,
+        notes: notes,
+      );
+      final result = await remoteDataSource.updateTransaction(id, dto);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteTransaction(String id) async {
+    try {
+      await remoteDataSource.deleteTransaction(id);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  @Deprecated('Use createTransaction instead')
   Future<Either<Failure, void>> addTransaction(Transaction transaction) async {
     try {
       final model = TransactionModel.fromEntity(transaction);

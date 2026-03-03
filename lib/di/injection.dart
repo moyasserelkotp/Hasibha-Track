@@ -70,6 +70,10 @@ import '../features/home/domain/usecases/get_dashboard_summary_usecase.dart';
 import '../features/home/domain/usecases/get_recent_transactions_usecase.dart';
 import '../features/home/domain/usecases/add_transaction_usecase.dart';
 import '../features/home/domain/usecases/get_analytics_usecase.dart';
+import '../features/home/domain/usecases/get_transactions_usecase.dart';
+import '../features/home/domain/usecases/create_transaction_usecase.dart';
+import '../features/home/domain/usecases/update_transaction_usecase.dart';
+import '../features/home/domain/usecases/delete_transaction_usecase.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
 import '../features/home/presentation/cubit/add_transaction_cubit.dart';
 import '../features/home/presentation/cubit/analytics_cubit.dart';
@@ -156,6 +160,7 @@ import '../shared/cubit/theme_cubit.dart';
 import '../features/profile/data/datasources/profile_remote_datasource.dart';
 import '../features/profile/data/repositories/profile_repository_impl.dart';
 import '../features/profile/domain/repositories/profile_repository.dart';
+import '../features/profile/domain/usecases/update_profile_usecase.dart';
 
 
 
@@ -314,6 +319,7 @@ Future<void> init() async {
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
 
   // --- Home ---
   sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));
@@ -325,12 +331,16 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetDashboardSummaryUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetRecentTransactionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => AddTransactionUseCase(sl()));
+  sl.registerLazySingleton(() => GetTransactionsUseCase(sl()));
+  sl.registerLazySingleton(() => CreateTransactionUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateTransactionUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteTransactionUseCase(sl()));
   sl.registerLazySingleton(() => GetAnalyticsUseCase(sl()));
   sl.registerFactory(() => HomeCubit(
     getDashboardSummaryUseCase: sl(),
     useMockData: USE_MOCK_DATA,
   ));
-  sl.registerFactory(() => AddTransactionCubit(sl()));
+  sl.registerFactory(() => AddTransactionCubit(createTransactionUseCase: sl()));
   sl.registerFactory(() => AnalyticsCubit(sl()));
 
   // --- Expense ---

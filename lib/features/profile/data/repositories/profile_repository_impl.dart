@@ -25,13 +25,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? phoneNumber,
     String? bio,
     String? photoUrl,
+    String? currency,
+    String? displayName,
   }) async {
     try {
       final updateDto = UpdateProfileDto(
-        name: name,
-        phoneNumber: phoneNumber,
-        bio: bio,
-        photoUrl: photoUrl,
+        displayName: displayName ?? name,
+        profilePhoto: photoUrl,
+        currency: currency,
       );
       
       final dto = await remoteDataSource.updateProfile(updateDto);

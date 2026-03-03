@@ -1,12 +1,10 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/transaction.dart';
-import '../../domain/usecases/add_transaction_usecase.dart';
+import '../../domain/usecases/create_transaction_usecase.dart';
 import 'add_transaction_state.dart';
 
 class AddTransactionCubit extends Cubit<AddTransactionState> {
-  final AddTransactionUseCase addTransactionUseCase;
+  final CreateTransactionUseCase createTransactionUseCase;
 
-  AddTransactionCubit(this.addTransactionUseCase) : super(AddTransactionInitial());
+  AddTransactionCubit({required this.createTransactionUseCase}) : super(AddTransactionInitial());
 
   Future<void> addTransaction({
     required String title,
@@ -16,21 +14,22 @@ class AddTransactionCubit extends Cubit<AddTransactionState> {
     required DateTime date,
     String? description,
     String? icon,
+    String? notes,
+    String? paymentMethod,
+    List<String>? tags,
   }) async {
     emit(AddTransactionLoading());
 
-    final transaction = Transaction(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title,
+    final result = await createTransactionUseCase(
+      type: type,
       amount: amount,
       category: category,
-      type: type,
-      date: date,
-      description: description,
-      icon: icon,
+      description: title.isNotEmpty ? title : description,
+      date: date.toIso8601String(),
+      notes: notes,
+      paymentMethod: paymentMethod,
+      tags: tags,
     );
-
-    final result = await addTransactionUseCase(transaction);
 
     result.fold(
       (failure) => emit(AddTransactionError(failure.message)),

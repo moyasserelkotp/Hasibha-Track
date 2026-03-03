@@ -6,6 +6,7 @@ import '../../../../shared/const/colors.dart';
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
 import '../../../../di/injection.dart' as di;
 import '../../domain/repositories/profile_repository.dart';
+import '../../domain/usecases/update_profile_usecase.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -86,9 +87,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _saveChanges() async {
     AppSnackBar.hide(context);
-    final repo = di.sl<ProfileRepository>();
-    final result = await repo.updateProfile(
-      name: _nameController.text.trim(),
+    final useCase = di.sl<UpdateProfileUseCase>();
+    final result = await useCase.call(
+      displayName: _nameController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
     );
 
