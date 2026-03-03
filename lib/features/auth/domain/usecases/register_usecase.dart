@@ -15,6 +15,7 @@ class RegisterUseCase {
     required String password,
     required String confirmPassword,
     String? phone,
+    String? phoneVerificationToken,
   }) async {
     // Validate passwords match
     if (password != confirmPassword) {
@@ -30,6 +31,7 @@ class RegisterUseCase {
       password: password,
       confirmPassword: confirmPassword,
       phone: phone,
+      phoneVerificationToken: phoneVerificationToken,
     );
   }
 }

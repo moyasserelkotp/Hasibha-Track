@@ -7,6 +7,14 @@ import '../../dtos/register_request_dto.dart';
 import '../../models/auth_result_model.dart';
 import '../../models/auth_tokens_model.dart';
 import '../../models/user_model.dart';
+import '../../models/user_model.dart';
+import '../dtos/sms_send_request_dto.dart';
+import '../dtos/sms_verify_request_dto.dart';
+import '../dtos/change_password_request_dto.dart';
+import '../models/remote/sms_verify_response_model.dart';
+import '../models/two_factor_setup_response_model.dart';
+import '../models/two_factor_status_model.dart';
+import '../models/device_model.dart';
 import 'auth_remote_datasource.dart';
 
 /// Implementation of remote data source using Dio
@@ -189,6 +197,170 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await dio.post(
         ApiConstants.logout,
         data: {'refreshToken': refreshToken},
+      );
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  // ========== SMS Verification ==========
+
+  @override
+  Future<bool> sendSmsCode(SmsSendRequestDto dto) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.smsSend,
+        data: dto.toJson(),
+      );
+
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Failed to send SMS code',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return response.data['success'] ?? false;
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<SmsVerifyResponseModel> verifySmsCode(SmsVerifyRequestDto dto) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.smsVerify,
+        data: dto.toJson(),
+      );
+
+      if (response.data['success'] == false) {
+        throw ServerException(
+          message: response.data['message'] ?? 'Failed to verify SMS code',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return SmsVerifyResponseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  // ========== Security & 2FA ==========
+
+  @override
+  Future<void> changePassword(ChangePasswordRequestDto dto) async {
+    try {
+      await dio.post(
+        ApiConstants.changePassword,
+        data: dto.toJson(),
+      );
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TwoFactorSetupResponseModel> setup2fa() async {
+    try {
+      final response = await dio.post(ApiConstants.setup2fa);
+      return TwoFactorSetupResponseModel.fromJson(response.data);
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<List<String>> verify2fa(String token) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.verify2fa,
+        data: {'token': token},
+      );
+      return List<String>.from(response.data['backupCodes'] as List);
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<TwoFactorStatusModel> get2faStatus() async {
+    try {
+      final response = await dio.get(ApiConstants.status2fa);
+      return TwoFactorStatusModel.fromJson(response.data);
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> disable2fa({String? token, required String password}) async {
+    try {
+      await dio.post(
+        ApiConstants.disable2fa,
+        data: {
+          if (token != null) 'token': token,
+          'password': password,
+        },
+      );
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  // ========== Device Management ==========
+
+  @override
+  Future<List<DeviceModel>> getDevices() async {
+    try {
+      final response = await dio.get(ApiConstants.devices);
+      final List devicesJson = response.data['devices'] as List;
+      return devicesJson
+          .map((json) => DeviceModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<DeviceModel> trustDevice(String deviceId) async {
+    try {
+      final response = await dio.put(
+        ApiConstants.deviceTrust.replaceFirst('{deviceId}', deviceId),
+      );
+      return DeviceModel.fromJson(response.data['device'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      _handleDioException(e);
+    } catch (e) {
+      throw ServerException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<void> removeDevice(String deviceId) async {
+    try {
+      await dio.delete(
+        ApiConstants.deviceRemove.replaceFirst('{deviceId}', deviceId),
       );
     } on DioException catch (e) {
       _handleDioException(e);

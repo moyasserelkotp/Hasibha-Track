@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:hasibha/core/network/app_env.dart';
 import '../dtos/user_profile_dto.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -10,15 +11,19 @@ abstract class ProfileRemoteDataSource {
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final Dio dio;
-  static const String baseUrl = '/api/profile';
 
   ProfileRemoteDataSourceImpl({required this.dio});
+
+  String get _profileUrl => '${AppEnv.homeBaseUrl}/api/profile';
 
   @override
   Future<UserProfileDto> getUserProfile() async {
     try {
-      final response = await dio.get(baseUrl);
-      return UserProfileDto.fromJson(response.data['data'] ?? response.data);
+      // GET http://localhost:5001/api/profile
+      final response = await dio.get(_profileUrl);
+      return UserProfileDto.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } catch (e) {
       throw Exception('Failed to fetch profile: $e');
     }
@@ -27,11 +32,16 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<UserProfileDto> updateProfile(UpdateProfileDto dto) async {
     try {
+      // PUT http://localhost:5001/api/profile
+      // Response: { message, profile: { ... } }
       final response = await dio.put(
-        baseUrl,
+        _profileUrl,
         data: dto.toJson(),
       );
-      return UserProfileDto.fromJson(response.data['data'] ?? response.data);
+      final data = response.data as Map<String, dynamic>;
+      final profileJson =
+          (data['profile'] ?? data) as Map<String, dynamic>;
+      return UserProfileDto.fromJson(profileJson);
     } catch (e) {
       throw Exception('Failed to update profile: $e');
     }
@@ -45,11 +55,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       });
       
       final response = await dio.post(
-        '$baseUrl/photo',
+        '$_profileUrl/photo',
         data: formData,
       );
       
-      return response.data['photoUrl'] ?? response.data['data']['photoUrl'];
+      final data = response.data as Map<String, dynamic>;
+      return (data['photoUrl'] ??
+              (data['profile'] != null
+                  ? (data['profile'] as Map<String, dynamic>)['photoUrl']
+                  : null)) as String;
     } catch (e) {
       throw Exception('Failed to upload photo: $e');
     }
@@ -58,7 +72,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> deleteAccount() async {
     try {
-      await dio.delete(baseUrl);
+      await dio.delete(_profileUrl);
     } catch (e) {
       throw Exception('Failed to delete account: $e');
     }

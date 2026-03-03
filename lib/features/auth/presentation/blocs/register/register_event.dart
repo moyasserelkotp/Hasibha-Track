@@ -10,6 +10,7 @@ class RegisterRequested extends RegisterEvent {
   final String password;
   final String confirmPassword;
   final String? phone;
+  final String? phoneVerificationToken;
 
   const RegisterRequested({
     required this.username,
@@ -17,5 +18,6 @@ class RegisterRequested extends RegisterEvent {
     required this.password,
     required this.confirmPassword,
     this.phone,
+    this.phoneVerificationToken,
   });
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/const/colors.dart';
-import '../../../../shared/const/design_tokens.dart';
-import '../../../../shared/data/mock_data_provider.dart';
 import '../../../../shared/utils/routes.dart';
+import '../../../../di/injection.dart' as di;
+import '../../domain/repositories/profile_repository.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,82 +14,131 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late Map<String, dynamic> _userProfile;
+  Map<String, dynamic>? _userProfile;
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _userProfile = MockDataProvider.getMockUserProfile();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final repo = di.sl<ProfileRepository>();
+    final result = await repo.getUserProfile();
+
+    result.fold(
+      (failure) {
+        setState(() {
+          _error = failure.message;
+          _isLoading = false;
+        });
+      },
+      (data) {
+        setState(() {
+          _userProfile = data;
+          _isLoading = false;
+        });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFB),
-      body: SingleChildScrollView(
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Teal Header Section
-            _buildProfileHeader(),
-
-            Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Monthly Overview
-                  _buildMonthlyOverview(),
-
-                  SizedBox(height: 24.h),
-
-                  // Invite Friends Banner
-                  _buildInviteBanner(),
-
-                  SizedBox(height: 32.h),
-
-                  // Account Settings List
-                  Text(
-                    'Account Settings',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1A1C1E),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildSettingsList(),
-
-                  SizedBox(height: 12.h),
-
-                  // Log Out Button
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        // TODO: Log out
-                        context.go(AppRoutes.login);
-                      },
-                      icon: const Icon(Icons.logout_rounded, color: Colors.red),
-                      label: Text(
-                        'Log Out',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 40.h),
-                ],
-              ),
+            Text(
+              _error!,
+              style: TextStyle(color: Colors.red, fontSize: 14.sp),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 12.h),
+            ElevatedButton(
+              onPressed: _loadProfile,
+              child: const Text('Retry'),
             ),
           ],
         ),
+      );
+    }
+
+    final profile = _userProfile ?? {};
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildProfileHeader(profile),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 30.h, 20.w, 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMonthlyOverview(),
+                SizedBox(height: 24.h),
+                _buildInviteBanner(),
+                SizedBox(height: 32.h),
+                Text(
+                  'Account Settings',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF1A1C1E),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                _buildSettingsList(),
+                SizedBox(height: 12.h),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      // Navigate to login; actual logout handled by AuthBloc elsewhere
+                      context.go(AppRoutes.login);
+                    },
+                    icon: const Icon(Icons.logout_rounded, color: Colors.red),
+                    label: Text(
+                      'Log Out',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40.h),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(Map<String, dynamic> profile) {
+    final name = profile['displayName'] ?? profile['name'] ?? 'User';
+    final email = profile['email'] ?? '';
+    final photoUrl =
+        profile['profilePhoto'] ?? profile['photoUrl'] ?? 'https://i.pravatar.cc/300?img=11';
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 60.h, 20.w, 40.h),
@@ -98,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          Stack(
+              Stack(
             children: [
               Container(
                 width: 100.w,
@@ -107,10 +156,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 3),
                 ),
-                child: const ClipOval(
-                  child: Image(
-                    image: NetworkImage('https://i.pravatar.cc/300?img=11'),
+                child: ClipOval(
+                  child: Image.network(
+                    photoUrl,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 60.sp,
+                        color: Colors.teal,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -136,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Mohamed Yaser',
+                name,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24.sp,
@@ -165,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'mohamedyasser.alkotp@gmail.com',
+            email,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14.sp,

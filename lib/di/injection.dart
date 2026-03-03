@@ -42,10 +42,22 @@ import '../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../features/auth/domain/usecases/check_auth_status_usecase.dart';
 import '../features/auth/domain/usecases/get_current_user_usecase.dart';
 import '../features/auth/domain/usecases/logout_usecase.dart';
+import '../features/auth/domain/usecases/send_sms_usecase.dart';
+import '../features/auth/domain/usecases/verify_sms_usecase.dart';
+import '../features/auth/domain/usecases/change_password_usecase.dart';
+import '../features/auth/domain/usecases/setup_2fa_usecase.dart';
+import '../features/auth/domain/usecases/verify_2fa_usecase.dart';
+import '../features/auth/domain/usecases/get_2fa_status_usecase.dart';
+import '../features/auth/domain/usecases/disable_2fa_usecase.dart';
+import '../features/auth/domain/usecases/get_devices_usecase.dart';
+import '../features/auth/domain/usecases/trust_device_usecase.dart';
+import '../features/auth/domain/usecases/remove_device_usecase.dart';
 import '../features/auth/presentation/blocs/auth/auth_bloc.dart';
 import '../features/auth/presentation/blocs/login/login_bloc.dart';
 import '../features/auth/presentation/blocs/register/register_bloc.dart';
 import '../features/auth/presentation/blocs/password/password_bloc.dart';
+import '../features/auth/presentation/blocs/sms/sms_bloc.dart';
+import '../features/auth/presentation/blocs/security/security_bloc.dart';
 
 // Home Feature
 import '../features/home/data/datasources/remote/home_remote_data_source.dart';
@@ -139,6 +151,11 @@ import '../shared/domain/usecases/get_settings_usecase.dart';
 import '../shared/domain/usecases/update_settings_usecase.dart';
 import '../shared/cubit/settings_cubit.dart';
 import '../shared/cubit/theme_cubit.dart';
+
+// Profile Feature
+import '../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../features/profile/data/repositories/profile_repository_impl.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
 
 
 
@@ -240,6 +257,22 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetCurrentUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
 
+  // SMS Verification
+  sl.registerLazySingleton(() => SendSmsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => VerifySmsUseCase(repository: sl()));
+
+  // Security & 2FA
+  sl.registerLazySingleton(() => ChangePasswordUseCase(repository: sl()));
+  sl.registerLazySingleton(() => Setup2FAUseCase(repository: sl()));
+  sl.registerLazySingleton(() => Verify2FAUseCase(repository: sl()));
+  sl.registerLazySingleton(() => Get2FAStatusUseCase(repository: sl()));
+  sl.registerLazySingleton(() => Disable2FAUseCase(repository: sl()));
+
+  // Device Management
+  sl.registerLazySingleton(() => GetDevicesUseCase(repository: sl()));
+  sl.registerLazySingleton(() => TrustDeviceUseCase(repository: sl()));
+  sl.registerLazySingleton(() => RemoveDeviceUseCase(repository: sl()));
+
   // BLoCs
   sl.registerLazySingleton(() => AuthBloc(
     checkAuthStatusUseCase: sl(),
@@ -259,6 +292,28 @@ Future<void> init() async {
     resetPasswordSendEmailUseCase: sl(),
     resetPasswordUseCase: sl(),
   ));
+  sl.registerFactory(() => SmsBloc(
+    sendSmsUseCase: sl(),
+    verifySmsUseCase: sl(),
+  ));
+  sl.registerFactory(() => SecurityBloc(
+    changePasswordUseCase: sl(),
+    setup2FAUseCase: sl(),
+    verify2FAUseCase: sl(),
+    get2FAStatusUseCase: sl(),
+    disable2FAUseCase: sl(),
+    getDevicesUseCase: sl(),
+    trustDeviceUseCase: sl(),
+    removeDeviceUseCase: sl(),
+  ));
+
+  // --- Profile ---
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // --- Home ---
   sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));

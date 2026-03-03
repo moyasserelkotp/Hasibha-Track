@@ -34,6 +34,8 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
   static const String securitySettings = '/security-settings';
+  static const String twoFactorSetup = '/2fa-setup';
+  static const String devices = '/devices';
 
   // AI & Insights
   static const String aiChat = '/ai-chat';

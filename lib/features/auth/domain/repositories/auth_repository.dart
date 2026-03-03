@@ -3,12 +3,15 @@ import '../../../../shared/core/failure.dart';
 import '../entities/auth_result.dart';
 import '../entities/auth_tokens.dart';
 import '../entities/user.dart';
+import '../entities/two_factor_setup_response.dart';
+import '../entities/two_factor_status.dart';
+import '../entities/device.dart';
 
 /// Authentication repository interface
 /// Defines all authentication-related operations
 abstract class AuthRepository {
   // ========== Authentication ==========
-
+  
   /// Login with email, phone, or identifier
   Future<Either<Failure, AuthResult>> login({
     String? email,
@@ -24,6 +27,7 @@ abstract class AuthRepository {
     required String password,
     required String confirmPassword,
     String? phone,
+    String? phoneVerificationToken,
   });
 
   /// Sign in with Google ID token
@@ -54,4 +58,49 @@ abstract class AuthRepository {
 
   /// Logout user and clear tokens
   Future<Either<Failure, void>> logout();
+
+  // ========== SMS Verification ==========
+
+  /// Send SMS code for phone verification
+  Future<Either<Failure, bool>> sendSmsCode(String phone);
+
+  /// Verify SMS code and get phone verification token
+  Future<Either<Failure, String>> verifySmsCode({
+    required String phone,
+    required String code,
+  });
+
+  // ========== Security & 2FA ==========
+
+  /// Change user password
+  Future<Either<Failure, void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Initiate 2FA setup
+  Future<Either<Failure, TwoFactorSetupResponse>> setup2fa();
+
+  /// Verify and enable 2FA
+  Future<Either<Failure, List<String>>> verify2fa(String token);
+
+  /// Get 2FA status
+  Future<Either<Failure, TwoFactorStatus>> get2faStatus();
+
+  /// Disable 2FA
+  Future<Either<Failure, void>> disable2fa({
+    String? token,
+    required String password,
+  });
+
+  // ========== Device Management ==========
+
+  /// List trusted devices
+  Future<Either<Failure, List<Device>>> getDevices();
+
+  /// Trust a device
+  Future<Either<Failure, Device>> trustDevice(String deviceId);
+
+  /// Remove a device
+  Future<Either<Failure, void>> removeDevice(String deviceId);
 }

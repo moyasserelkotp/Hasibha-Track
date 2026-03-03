@@ -35,6 +35,8 @@ import '../../features/savings/presentation/pages/savings_dashboard_screen.dart'
 import '../../features/savings/presentation/pages/create_savings_goal_screen.dart';
 import '../../features/expense/presentation/pages/expense_list_screen.dart';
 import '../../features/debt/presentation/pages/debt_dashboard_screen.dart';
+import '../../features/profile/presentation/pages/two_factor_setup_screen.dart';
+import '../../features/profile/presentation/pages/device_management_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -199,6 +201,14 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.reports,
         builder: (context, state) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.twoFactorSetup,
+        builder: (context, state) => const TwoFactorSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.devices,
+        builder: (context, state) => const DeviceManagementScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../shared/const/colors.dart';
-import '../../../../shared/const/design_tokens.dart';
-import '../../../../shared/data/mock_data_provider.dart';
 import '../../../../shared/widgets/snackbars/app_snackbar.dart';
+import '../../../../di/injection.dart' as di;
+import '../../domain/repositories/profile_repository.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -19,16 +19,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late Map<String, dynamic> _userProfile;
+  Map<String, dynamic>? _userProfile;
+  bool _isLoading = true;
+  String? _error;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _userProfile = MockDataProvider.getMockUserProfile();
-    _nameController = TextEditingController(text: _userProfile['name']);
-    _emailController = TextEditingController(text: _userProfile['email']);
-    _phoneController = TextEditingController(text: _userProfile['phone'] ?? '+1 234 567 8900');
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final repo = di.sl<ProfileRepository>();
+    final result = await repo.getUserProfile();
+
+    result.fold(
+      (failure) {
+        setState(() {
+          _error = failure.message;
+          _isLoading = false;
+        });
+      },
+      (data) {
+        _userProfile = data;
+        _nameController.text =
+            data['displayName'] ?? data['name'] ?? '';
+        _emailController.text = data['email'] ?? '';
+        _phoneController.text =
+            data['phone'] ?? data['phoneNumber'] ?? '';
+        setState(() {
+          _isLoading = false;
+        });
+      },
+    );
   }
 
   @override
@@ -52,9 +84,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _saveChanges() {
-    AppSnackBar.showSuccess(context, message: 'Changes saved successfully!');
-    Navigator.pop(context);
+  Future<void> _saveChanges() async {
+    AppSnackBar.hide(context);
+    final repo = di.sl<ProfileRepository>();
+    final result = await repo.updateProfile(
+      name: _nameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+    );
+
+    result.fold(
+      (failure) =>
+          AppSnackBar.showError(context, message: failure.message),
+      (_) {
+        AppSnackBar.showSuccess(
+          context,
+          message: 'Changes saved successfully!',
+        );
+        Navigator.pop(context, true);
+      },
+    );
   }
 
   @override
@@ -69,171 +117,203 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header with Avatar
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.only(bottom: 30.h),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-              ),
-              child: Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 130.w,
-                      height: 130.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  // Header with Avatar
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(bottom: 30.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                    ),
+                    child: Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 130.w,
+                            height: 130.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(color: Colors.white, width: 4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: _avatarImage != null
+                                  ? Image.file(_avatarImage!,
+                                      fit: BoxFit.cover)
+                                  : Image.network(
+                                      (_userProfile?['profilePhoto'] ??
+                                              _userProfile?['photoUrl'] ??
+                                              'https://i.pravatar.cc/300?img=11')
+                                          as String,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error,
+                                              stackTrace) =>
+                                          Container(
+                                        color: Colors.white,
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 60.sp,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF00BFA5),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: Colors.white, width: 2),
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 20.sp,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: ClipOval(
-                        child: _avatarImage != null
-                            ? Image.file(_avatarImage!, fit: BoxFit.cover)
-                            : Image.network(
-                                'https://i.pravatar.cc/300?img=11',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  color: Colors.white,
-                                  child: Icon(Icons.person, size: 60.sp, color: AppColors.primary),
+                    ),
+                  ),
+
+                  SizedBox(height: 30.h),
+
+                  if (_error != null)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Text(
+                        _error!,
+                        style:
+                            TextStyle(color: Colors.red, fontSize: 14.sp),
+                      ),
+                    ),
+
+                  // Form Content
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(24.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(20.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withValues(alpha: 0.05),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Personal Details',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1A1C1E),
                                 ),
                               ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 5,
-                      right: 5,
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Container(
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00BFA5),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 20.sp,
+                              SizedBox(height: 24.h),
+                              _buildInputField(
+                                label: 'Full Name',
+                                controller: _nameController,
+                                icon: Icons.person_outline,
+                              ),
+                              SizedBox(height: 20.h),
+                              _buildInputField(
+                                label: 'Email Address',
+                                controller: _emailController,
+                                icon: Icons.email_outlined,
+                                enabled: false,
+                              ),
+                              SizedBox(height: 20.h),
+                              _buildInputField(
+                                label: 'Phone Number',
+                                controller: _phoneController,
+                                icon: Icons.phone_outlined,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
 
-            SizedBox(height: 30.h),
+                        SizedBox(height: 40.h),
 
-            // Form Content
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(24.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Personal Details',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1A1C1E),
+                        // Save Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _saveChanges,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color(0xFF00BFA5),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(12.r),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Save Changes',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                        SizedBox(height: 24.h),
-                        _buildInputField(
-                          label: 'Full Name',
-                          controller: _nameController,
-                          icon: Icons.person_outline,
+
+                        SizedBox(height: 16.h),
+
+                        // Delete Account
+                        TextButton(
+                          onPressed: () =>
+                              _showDeleteDialog(context),
+                          child: Text(
+                            'Delete Account',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 20.h),
-                        _buildInputField(
-                          label: 'Email Address',
-                          controller: _emailController,
-                          icon: Icons.email_outlined,
-                          enabled: false,
-                        ),
-                        SizedBox(height: 20.h),
-                        _buildInputField(
-                          label: 'Phone Number',
-                          controller: _phoneController,
-                          icon: Icons.phone_outlined,
-                        ),
+
+                        SizedBox(height: 40.h),
                       ],
                     ),
                   ),
-                  
-                  SizedBox(height: 40.h),
-
-                  // Save Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saveChanges,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00BFA5),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Save Changes',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Delete Account
-                  TextButton(
-                    onPressed: () => _showDeleteDialog(context),
-                    child: Text(
-                      'Delete Account',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  
-                  SizedBox(height: 40.h),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -15,10 +15,19 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
   static const String authMe = '/auth/me';
   
-  // SMS Verification Endpoints (for future use)
-  static const String smsSend = '/sms/send';
-  static const String smsVerify = '/sms/verify';
+  // SMS Verification Endpoints
+  static const String smsSend = '/auth/sms/send';
+  static const String smsVerify = '/auth/sms/verify';
   
+  // Security & 2FA Endpoints
+  static const String setup2fa = '/security/2fa/setup';
+  static const String verify2fa = '/security/2fa/verify';
+  static const String status2fa = '/security/2fa/status';
+  static const String disable2fa = '/security/2fa/disable';
+  static const String devices = '/security/devices';
+  static const String deviceTrust = '/security/devices/{deviceId}/trust';
+  static const String deviceRemove = '/security/devices/{deviceId}';
+
   // Deprecated endpoints - kept for reference, remove after migration
   @Deprecated('Use signup instead')
   static const String register = '/auth/register';
@@ -32,8 +41,9 @@ class ApiConstants {
   static const String resetPasswordVerifyOtp = '/auth/reset-password-verify-otp';
   @Deprecated('No longer used in new API')
   static const String resetPasswordFinish = '/auth/reset-password-finish';
-  @Deprecated('No longer used in new API')
-  static const String changePassword = '/auth/change-password';
+  @Deprecated('Use changePassword instead')
+  static const String oldChangePassword = '/auth/change-password';
+  static const String changePassword = '/security/change-password';
   @Deprecated('Use googleSignIn instead')
   static const String googleAuth = '/auth/google';
 

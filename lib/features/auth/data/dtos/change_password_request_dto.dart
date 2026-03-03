@@ -11,8 +11,8 @@ class ChangePasswordRequestDto {
 
   Map<String, dynamic> toJson() {
     return {
-      'old_password': currentPassword,
-      'new_password': newPassword,
+      'currentPassword': currentPassword,
+      'newPassword': newPassword,
     };
   }
 }

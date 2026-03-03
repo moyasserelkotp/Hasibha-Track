@@ -31,6 +31,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       password: event.password,
       confirmPassword: event.confirmPassword,
       phone: event.phone,
+      phoneVerificationToken: event.phoneVerificationToken,
     );
 
     result.fold(
